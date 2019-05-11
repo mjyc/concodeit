@@ -1,26 +1,45 @@
 import "./styles.css";
 
-import {run} from '@cycle/run';
-import {div, label, input, hr, h1, makeDOMDriver} from '@cycle/dom';
+import Blockly from "node-blockly/browser";
 
-function main(sources) {
-  const vdom$ = sources.DOM
-    .select('.myinput').events('input')
-    .map(ev => ev.target.value)
-    .startWith('')
-    .map(name =>
-      div([
-        label('Name:'),
-        input('.myinput', {attrs: {type: 'text'}}),
-        hr(),
-        h1(`Hello ${name}`)
-      ])
-    );
-  return {
-    DOM: vdom$,
-  };
+var editor;
+var code = document.getElementById("startBlocks");
+
+function render(element, toolbox) {
+  if (editor) {
+    editor.removeChangeListener(updateCode);
+    code = Blockly.Xml.workspaceToDom(editor);
+    editor.dispose();
+  }
+  editor = Blockly.inject(element, {
+    toolbox: document.getElementById(toolbox)
+  });
+
+  Blockly.Xml.domToWorkspace(code, editor);
+
+  editor.addChangeListener(updateCode);
+
+  return editor;
 }
 
-run(main, {
-  DOM: makeDOMDriver('#app')
-});
+function updateCode() {
+  document.getElementById("js").innerText = Blockly.JavaScript.workspaceToCode(
+    editor
+  );
+  document.getElementById("php").innerText = Blockly.PHP.workspaceToCode(
+    editor
+  );
+  document.getElementById("lua").innerText = Blockly.Lua.workspaceToCode(
+    editor
+  );
+  document.getElementById("dart").innerText = Blockly.Dart.workspaceToCode(
+    editor
+  );
+  document.getElementById("python").innerText = Blockly.Python.workspaceToCode(
+    editor
+  );
+}
+
+editor = render("editor", "toolbox");
+
+updateCode();
