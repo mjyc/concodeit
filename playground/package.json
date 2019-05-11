@@ -1,14 +1,12 @@
 {
-  "name": "parcel-sandbox",
-  "version": "1.0.0",
-  "description": "Simple Parcel Sandbox",
+  "private": "true",
   "main": "index.html",
   "scripts": {
     "start": "parcel index.html --open",
     "build": "parcel build index.html"
   },
   "dependencies": {
-    "node-blockly": "^1.0.36"
+    "node-blockly": "1.0.36"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
