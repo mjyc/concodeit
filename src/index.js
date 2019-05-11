@@ -2,6 +2,73 @@ import "./styles.css";
 
 import Blockly from "node-blockly/browser";
 
+Blockly.defineBlocksWithJsonArray([
+  {
+    type: "wait_for_all",
+    message0: "wait for all %1 %2",
+    args0: [
+      {
+        type: "input_statement",
+        name: "DO0"
+      },
+      {
+        type: "input_statement",
+        name: "DO1"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "wait_for_one",
+    message0: "wait for one %1 %2",
+    args0: [
+      {
+        type: "input_statement",
+        name: "DO0"
+      },
+      {
+        type: "input_statement",
+        name: "DO1"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  }
+]);
+
+Blockly.JavaScript["wait_for_all"] = function(block) {
+  return (
+    "Promise.all(" +
+    [0, 1]
+      .map(function(i) {
+        return Blockly.JavaScript.statementToCode(block, "DO" + i);
+      })
+      .join(",")
+      .trim() +
+    "]);\n"
+  );
+};
+
+Blockly.JavaScript["wait_for_one"] = function(block) {
+  return (
+    "Promise.race([" +
+    [0, 1]
+      .map(function(i) {
+        return Blockly.JavaScript.statementToCode(block, "DO" + i);
+      })
+      .join(",")
+      .trim() +
+    "]);\n"
+  );
+};
+
 var editor;
 var code = document.getElementById("startBlocks");
 
@@ -24,18 +91,6 @@ function render(element, toolbox) {
 
 function updateCode() {
   document.getElementById("js").innerText = Blockly.JavaScript.workspaceToCode(
-    editor
-  );
-  document.getElementById("php").innerText = Blockly.PHP.workspaceToCode(
-    editor
-  );
-  document.getElementById("lua").innerText = Blockly.Lua.workspaceToCode(
-    editor
-  );
-  document.getElementById("dart").innerText = Blockly.Dart.workspaceToCode(
-    editor
-  );
-  document.getElementById("python").innerText = Blockly.Python.workspaceToCode(
     editor
   );
 }
