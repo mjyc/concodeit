@@ -1,26 +1,27 @@
 import "./styles.css";
 
-import {run} from '@cycle/run';
-import {div, label, input, hr, h1, makeDOMDriver} from '@cycle/dom';
+import { initialize, makeSendGoal, makeCancelGoal } from "./lib";
+import { promisify } from "util";
 
-function main(sources) {
-  const vdom$ = sources.DOM
-    .select('.myinput').events('input')
-    .map(ev => ev.target.value)
-    .startWith('')
-    .map(name =>
-      div([
-        label('Name:'),
-        input('.myinput', {attrs: {type: 'text'}}),
-        hr(),
-        h1(`Hello ${name}`)
-      ])
-    );
-  return {
-    DOM: vdom$,
-  };
-}
+initialize();
 
-run(main, {
-  DOM: makeDOMDriver('#app')
+const handles = {};
+
+const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
+  handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
+    goal,
+    callback
+  );
 });
+const sendHumanSpeechbubbleActionGoal = promisify(
+  makeSendGoal("HumanSpeechbubbleAction")
+);
+
+(async () => {
+  const outputs = await Promise.race([
+    sendRobotSpeechbubbleActionGoal("Hello"),
+    sendHumanSpeechbubbleActionGoal(["Hi"])
+  ]);
+  makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
+  console.log(outputs);
+})();
