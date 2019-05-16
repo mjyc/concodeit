@@ -1,11 +1,12 @@
 {
-  "name": "parcel-sandbox",
-  "version": "1.0.0",
-  "description": "Simple Parcel Sandbox",
-  "main": "index.html",
+  "name": "cycle-robot-drivers-async",
+  "version": "0.0.0",
+  "description": "cycle-robot-drivers with async callbacks",
+  "main": "dist/index.js",
+  "source": "src/index.js",
   "scripts": {
-    "start": "parcel index.html --open",
-    "build": "parcel build index.html"
+    "build": "microbundle",
+    "dev": "microbundle watch"
   },
   "dependencies": {
     "@cycle-robot-drivers/action": "^1.0.1",
@@ -16,6 +17,6 @@
     "@babel/core": "^7.4.4",
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/runtime": "^7.4.4",
-    "parcel-bundler": "^1.6.1"
+    "microbundle": "^0.11.0"
   }
 }

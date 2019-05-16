@@ -8,8 +8,8 @@ Blockly.defineBlocksWithJsonArray([
     message0: "send robot action with arg %1",
     args0: [
       {
-        "type": "input_value",
-        "name": "ARG"
+        type: "input_value",
+        name: "ARG"
       }
     ],
     previousStatement: null,
