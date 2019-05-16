@@ -16,8 +16,7 @@ Blockly.defineBlocksWithJsonArray([
         name: "GOAL"
       }
     ],
-    previousStatement: null,
-    nextStatement: null,
+    output: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -63,7 +62,7 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["send_action_goal"] = function(block) {
-  return `await sendActionGoal(${Blockly.JavaScript.valueToCode(
+  const code = `await sendActionGoal(${Blockly.JavaScript.valueToCode(
     block,
     "ACTION_NAME",
     Blockly.JavaScript.ORDER_ATOMIC
@@ -71,17 +70,19 @@ Blockly.JavaScript["send_action_goal"] = function(block) {
     block,
     "GOAL",
     Blockly.JavaScript.ORDER_ATOMIC
-  )});\n`;
+  )})`;
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
+  // NOTE: wrap await with another promise
   return (
-    "Promise.all(" +
+    "Promise.all([" +
     [0, 1]
       .map(function(i) {
-        return Blockly.JavaScript.statementToCode(block, "DO" + i);
+        return `(async () => {\n${Blockly.JavaScript.statementToCode(block, "DO" + i)}})()`;
       })
-      .join(",")
+      .join(", ")
       .trim() +
     "]);\n"
   );
@@ -92,16 +93,16 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
     "Promise.race([" +
     [0, 1]
       .map(function(i) {
-        return Blockly.JavaScript.statementToCode(block, "DO" + i);
+        return `(async () => {\n${Blockly.JavaScript.statementToCode(block, "DO" + i)}})()`;
       })
-      .join(",")
+      .join(", ")
       .trim() +
     "]);\n"
   );
 };
 
-var editor;
-var code = document.getElementById("startBlocks");
+let editor;
+let code = document.getElementById("startBlocks");
 
 function render(element, toolbox) {
   if (editor) {
@@ -151,11 +152,22 @@ function sendActionGoal(actionName, goal) {
   })(goal);
 }
 
-// setTimeout(async () => {
-//   console.log("start");
-//   await sendActionGoal("RobotSpeechbubbleAction", ["Hello"]);
-//   console.log("done");
-// }, 1000);
+setTimeout(async () => {
+  // console.log("start");
+  // await sendActionGoal("RobotSpeechbubbleAction", ["Hello"]);
+  // console.log("done");
+  const outputs = await Promise.race([
+    (async () => {
+      var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+      return result;
+    })(),
+    (async () => {
+      var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
+      return result;
+    })(),
+  ]);
+  console.log(outputs);
+}, 1000);
 
 // const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
 //   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
