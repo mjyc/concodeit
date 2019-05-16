@@ -142,8 +142,6 @@ import {
 } from "cycle-robot-drivers-async";
 import { promisify } from "util";
 
-initialize();
-
 const handles = {};
 
 function sendActionGoal(actionName, goal) {
@@ -167,7 +165,7 @@ setTimeout(async () => {
     })(),
   ]);
   console.log(outputs);
-}, 1000);
+}, 2000);
 
 // const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
 //   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
@@ -193,6 +191,19 @@ setTimeout(async () => {
 //------------------------------------------------------------------------------
 
 window.onload = () => {
+  setTimeout(() => {
+    initialize({
+      container: document.getElementById('app'),
+      styles: {
+        speechbubblesOuter: {
+          width
+          margin
+        }
+      }
+    });
+  }, 1000);
+
+
   document.getElementById("run").onclick=() => {
     console.log("run");
     var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`

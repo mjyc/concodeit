@@ -1,32 +1,5 @@
-// import "./styles.css";
-
-// import { initialize, makeSendGoal, makeCancelGoal } from "./lib";
-// import { promisify } from "util";
-
-// initialize();
-
-// const handles = {};
-
-// const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
-//   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
-//     goal,
-//     callback
-//   );
-// });
-// const sendHumanSpeechbubbleActionGoal = promisify(
-//   makeSendGoal("HumanSpeechbubbleAction")
-// );
-
-// (async () => {
-//   const outputs = await Promise.race([
-//     sendRobotSpeechbubbleActionGoal("Hello"),
-//     sendHumanSpeechbubbleActionGoal(["Hi"])
-//   ]);
-//   makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-//   console.log(outputs);
-// })();
-
 import xs from "xstream";
+import { makeDOMDriver } from '@cycle/dom';
 import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
 import {
   GoalID,
@@ -100,11 +73,16 @@ function main(sources) {
 
 let sources;
 
-export function initialize() {
+export function initialize(options = {}) {
+  if (typeof options.container === "undefined") {
+    options.container = document.body.getElementsByTagName('div')[0];
+  }
   runTabletRobotFaceApp(s => {
     sources = s;
     return main();
-  });
+  }, {
+    DOM: makeDOMDriver(options.container),
+  }, options);
 }
 
 export function makeSendGoal(actionName) {
