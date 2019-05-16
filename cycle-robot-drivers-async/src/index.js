@@ -1,5 +1,6 @@
 import xs from "xstream";
 import { makeDOMDriver } from '@cycle/dom';
+import { makeTabletFaceDriver } from '@cycle-robot-drivers/screen';
 import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
 import {
   GoalID,
@@ -82,6 +83,7 @@ export function initialize(options = {}) {
     return main();
   }, {
     DOM: makeDOMDriver(options.container),
+    TabletFace: makeTabletFaceDriver(options.TabletFace)
   }, options);
 }
 

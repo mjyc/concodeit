@@ -196,13 +196,30 @@ window.onload = () => {
       container: document.getElementById('app'),
       styles: {
         speechbubblesOuter: {
-          width
-          margin
+          width: "590px",
+        },
+        robotSpeechbubble: {
+          styles: {
+            message: {fontSize: '60px'},
+            button: {fontSize: '48px'},
+          }
+        },
+        humanSpeechbubble: {
+          styles: {
+            message: {fontSize: '60px'},
+            button: {fontSize: '48px'},
+          }
+        },
+      },
+      TabletFace: {
+        styles: {
+          faceHeight: "480px",
+          faceWidth: "640px",
+          eyeSize: "160px",
         }
       }
     });
   }, 1000);
-
 
   document.getElementById("run").onclick=() => {
     console.log("run");

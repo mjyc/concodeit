@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@cycle-robot-drivers/action": "^1.0.1",
-    "@cycle-robot-drivers/run": "^1.0.6",
+    "@cycle-robot-drivers/run": "^1.0.7",
+    "@cycle-robot-drivers/screen": "^1.0.3",
     "xstream": "^11.11.0"
   },
   "devDependencies": {
