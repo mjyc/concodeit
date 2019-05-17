@@ -9,7 +9,8 @@ Blockly.defineBlocksWithJsonArray([
     args0: [
       {
         type: "input_value",
-        name: "ACTION_NAME"
+        name: "ACTION_NAME",
+        check: "String"
       },
       {
         type: "input_value",
