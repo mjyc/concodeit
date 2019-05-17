@@ -150,22 +150,22 @@ function sendActionGoal(actionName, goal) {
   })(goal);
 }
 
-setTimeout(async () => {
-  // console.log("start");
-  // await sendActionGoal("RobotSpeechbubbleAction", ["Hello"]);
-  // console.log("done");
-  const outputs = await Promise.race([
-    (async () => {
-      var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-      return result;
-    })(),
-    (async () => {
-      var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
-      return result;
-    })(),
-  ]);
-  console.log(outputs);
-}, 2000);
+// setTimeout(async () => {
+//   // console.log("start");
+//   // await sendActionGoal("RobotSpeechbubbleAction", ["Hello"]);
+//   // console.log("done");
+//   const outputs = await Promise.race([
+//     (async () => {
+//       var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+//       return result;
+//     })(),
+//     (async () => {
+//       var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
+//       return result;
+//     })(),
+//   ]);
+//   console.log(outputs);
+// }, 2000);
 
 // const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
 //   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
@@ -196,7 +196,7 @@ window.onload = () => {
       container: document.getElementById('app'),
       styles: {
         speechbubblesOuter: {
-          width: "590px",
+          width: "585px",
         },
         robotSpeechbubble: {
           styles: {
