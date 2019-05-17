@@ -13,16 +13,15 @@
     <block type="variables_set" inline="false">
       <field name="VAR">result</field>
       <value name="VALUE">
-        <block type="send_action_goal">
-          <value name="ACTION_NAME">
+        <block type="display_message">
+          <value name="MESSAGE">
             <block type="text">
-              <field name="TEXT">RobotSpeechbubbleAction</field>
+              <field name="TEXT">Hello</field>
             </block>
-          </value>
-          <value name="GOAL">
           </value>
         </block>
       </value>
+    </block>
   </xml>
 
   <div class="demo">
@@ -289,17 +288,35 @@
         </category>
         <sep></sep>
         <category name="Primitives" colour="230">
-          <block type="send_action_goal">
-            <value name="ACTION_NAME">
+          <block type="display_message">
+            <value name="MESSAGE">
               <shadow type="text">
-                <field name="TEXT">RobotSpeechbubbleAction</field>
+                <field name="TEXT">Hello there!</field>
               </shadow>
+            </value>
+          </block>
+          <block type="ask_multiple_choice">
+            <value name="CHOICES">
+              <block type="lists_create_with">
+                <mutation items="2"></mutation>
+               <value name="ADD0">
+                  <shadow type="text">
+                    <field name="TEXT">Choice1</field>
+                  </shadow>
+                </value>
+                <value name="ADD1">
+                  <shadow type="text">
+                    <field name="TEXT">Choice2</field>
+                  </shadow>
+                </value>
+              </block>
             </value>
           </block>
         </category>
         <category name="Conccurent" colour="290">
           <block type="wait_for_all"></block>
           <block type="wait_for_one"></block>
+          <block type="return"></block>
         </category>
       </xml>
 
