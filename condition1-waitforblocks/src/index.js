@@ -201,6 +201,8 @@ editor = render("editor", "toolbox");
 
 updateCode();
 
+
+
 //------------------------------------------------------------------------------
 import {
   initialize,
@@ -260,44 +262,44 @@ window.onload = () => {
   };
 };
 
-setTimeout(async () => {
-  // const outputs = await Promise.race([
-  //   (async () => {
-  //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-  //     return result;
-  //   })(),
-  //   (async () => {
-  //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
-  //     return result;
-  //   })(),
-  // ]);
-  // console.log(outputs);
-  // const outputs = await Promise.race([
-  //   (async () => {
-  //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
-  //   (async () => {
-  //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
-  // ]);
-  // console.log(outputs);
-  // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
-  var result;
-  result = await Promise.all([
-    (async () => {
-      return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-    })(),
-    (async () => {
-      result = await sendActionGoal("HumanSpeechbubbleAction", [
-        "Hello",
-        "Hello"
-      ]);
-      makeCancelGoal("RobotSpeechbubbleAction")(
-        handles["RobotSpeechbubbleAction"]
-      );
-      return result;
-    })()
-  ]);
-  return await sendActionGoal("RobotSpeechbubbleAction", result);
-}, 2000);
+// setTimeout(async () => {
+//   // const outputs = await Promise.race([
+//   //   (async () => {
+//   //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+//   //     return result;
+//   //   })(),
+//   //   (async () => {
+//   //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
+//   //     return result;
+//   //   })(),
+//   // ]);
+//   // console.log(outputs);
+//   // const outputs = await Promise.race([
+//   //   (async () => {
+//   //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
+//   //   (async () => {
+//   //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
+//   // ]);
+//   // console.log(outputs);
+//   // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
+//   var result;
+//   result = await Promise.all([
+//     (async () => {
+//       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+//     })(),
+//     (async () => {
+//       result = await sendActionGoal("HumanSpeechbubbleAction", [
+//         "Hello",
+//         "Hello"
+//       ]);
+//       makeCancelGoal("RobotSpeechbubbleAction")(
+//         handles["RobotSpeechbubbleAction"]
+//       );
+//       return result;
+//     })()
+//   ]);
+//   return await sendActionGoal("RobotSpeechbubbleAction", result);
+// }, 2000);
 
 // setTimeout(async () => {
 //   sendActionGoal("RobotSpeechbubbleAction", ' ');
