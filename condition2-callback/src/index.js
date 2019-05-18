@@ -11,7 +11,7 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "MESSAGE",
         check: "String"
-      },
+      }
       // {
       //   type: "input_value",
       //   name: "CALLBACK"
@@ -31,7 +31,7 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "CHOICES"
-      },
+      }
       // {
       //   type: "input_value",
       //   name: "CALLBACK"
@@ -121,8 +121,6 @@ function updateCode() {
 editor = render("editor", "toolbox");
 
 updateCode();
-
-
 
 //------------------------------------------------------------------------------
 import {

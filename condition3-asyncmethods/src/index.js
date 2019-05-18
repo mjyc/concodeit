@@ -92,7 +92,7 @@ Blockly.defineBlocksWithJsonArray([
     colour: 230,
     tooltip: "",
     helpUrl: ""
-  },
+  }
 ]);
 
 Blockly.JavaScript["display_message"] = function(block) {
@@ -192,8 +192,6 @@ function updateCode() {
 editor = render("editor", "toolbox");
 
 updateCode();
-
-
 
 //------------------------------------------------------------------------------
 import {
