@@ -5,37 +5,41 @@ import Blockly from "node-blockly/browser";
 Blockly.defineBlocksWithJsonArray([
   {
     type: "display_message",
-    message0: "display message %1 %2",
+    message0: "display message %1",
     args0: [
       {
         type: "input_value",
         name: "MESSAGE",
         check: "String"
       },
-      {
-        type: "input_value",
-        name: "CALLBACK"
-      }
+      // {
+      //   type: "input_value",
+      //   name: "CALLBACK"
+      // }
     ],
-    output: null,
+    // output: null,
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
   },
   {
     type: "ask_multiple_choice",
-    message0: "ask multiple choice %1 %2",
+    message0: "ask multiple choice %1",
     args0: [
       {
         type: "input_value",
         name: "CHOICES"
       },
-      {
-        type: "input_value",
-        name: "CALLBACK"
-      }
+      // {
+      //   type: "input_value",
+      //   name: "CALLBACK"
+      // }
     ],
-    output: null,
+    // output: null,
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -65,12 +69,9 @@ Blockly.JavaScript["display_message"] = function(block) {
     block,
     "MESSAGE",
     Blockly.JavaScript.ORDER_ATOMIC
-  )}, ${Blockly.JavaScript.valueToCode(
-    block,
-    "CALLBACK",
-    Blockly.JavaScript.ORDER_ATOMIC
   )})`;
-  return [code, Blockly.JavaScript.ORDER_NONE];
+  // return [code, Blockly.JavaScript.ORDER_NONE];
+  return code;
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
@@ -78,12 +79,9 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
     block,
     "CHOICES",
     Blockly.JavaScript.ORDER_ATOMIC
-  )}, ${Blockly.JavaScript.valueToCode(
-    block,
-    "CALLBACK",
-    Blockly.JavaScript.ORDER_ATOMIC
   )})`;
-  return [code, Blockly.JavaScript.ORDER_NONE];
+  // return [code, Blockly.JavaScript.ORDER_NONE];
+  return code;
 };
 
 Blockly.JavaScript["cancel_display_message"] = function(block) {
