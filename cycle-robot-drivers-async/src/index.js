@@ -1,6 +1,6 @@
 import xs from "xstream";
-import { makeDOMDriver } from '@cycle/dom';
-import { makeTabletFaceDriver } from '@cycle-robot-drivers/screen';
+import { makeDOMDriver } from "@cycle/dom";
+import { makeTabletFaceDriver } from "@cycle-robot-drivers/screen";
 import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
 import {
   GoalID,
@@ -76,15 +76,19 @@ let sources;
 
 export function initialize(options = {}) {
   if (typeof options.container === "undefined") {
-    options.container = document.body.getElementsByTagName('div')[0];
+    options.container = document.body.getElementsByTagName("div")[0];
   }
-  runTabletRobotFaceApp(s => {
-    sources = s;
-    return main();
-  }, {
-    DOM: makeDOMDriver(options.container),
-    TabletFace: makeTabletFaceDriver(options.TabletFace)
-  }, options);
+  runTabletRobotFaceApp(
+    s => {
+      sources = s;
+      return main();
+    },
+    {
+      DOM: makeDOMDriver(options.container),
+      TabletFace: makeTabletFaceDriver(options.TabletFace)
+    },
+    options
+  );
 }
 
 export function makeSendGoal(actionName) {
