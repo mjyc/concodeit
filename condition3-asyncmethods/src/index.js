@@ -19,6 +19,48 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "getResult",
+    message0: "get result %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "GOALID"
+      }
+    ],
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "getStatus",
+    message0: "get status %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "GOALID"
+      }
+    ],
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel",
+    message0: "cancel %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "GOALID"
+      }
+    ],
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "ask_multiple_choice",
     message0: "ask multiple choice %1",
     args0: [
@@ -51,56 +93,6 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  {
-    type: "wait_for_all",
-    message0: "wait for all %1 %2",
-    args0: [
-      {
-        type: "input_statement",
-        name: "DO0"
-      },
-      {
-        type: "input_statement",
-        name: "DO1"
-      }
-    ],
-    output: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_for_one",
-    message0: "wait for one %1 %2",
-    args0: [
-      {
-        type: "input_statement",
-        name: "DO0"
-      },
-      {
-        type: "input_statement",
-        name: "DO1"
-      }
-    ],
-    output: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "return",
-    message0: "return %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "VALUE"
-      }
-    ],
-    previousStatement: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  }
 ]);
 
 Blockly.JavaScript["display_message"] = function(block) {
@@ -201,6 +193,8 @@ editor = render("editor", "toolbox");
 
 updateCode();
 
+
+
 //------------------------------------------------------------------------------
 import {
   initialize,
@@ -260,44 +254,44 @@ window.onload = () => {
   };
 };
 
-setTimeout(async () => {
-  // const outputs = await Promise.race([
-  //   (async () => {
-  //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-  //     return result;
-  //   })(),
-  //   (async () => {
-  //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
-  //     return result;
-  //   })(),
-  // ]);
-  // console.log(outputs);
-  // const outputs = await Promise.race([
-  //   (async () => {
-  //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
-  //   (async () => {
-  //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
-  // ]);
-  // console.log(outputs);
-  // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
-  var result;
-  result = await Promise.all([
-    (async () => {
-      return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-    })(),
-    (async () => {
-      result = await sendActionGoal("HumanSpeechbubbleAction", [
-        "Hello",
-        "Hello"
-      ]);
-      makeCancelGoal("RobotSpeechbubbleAction")(
-        handles["RobotSpeechbubbleAction"]
-      );
-      return result;
-    })()
-  ]);
-  return await sendActionGoal("RobotSpeechbubbleAction", result);
-}, 2000);
+// setTimeout(async () => {
+//   // const outputs = await Promise.race([
+//   //   (async () => {
+//   //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+//   //     return result;
+//   //   })(),
+//   //   (async () => {
+//   //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
+//   //     return result;
+//   //   })(),
+//   // ]);
+//   // console.log(outputs);
+//   // const outputs = await Promise.race([
+//   //   (async () => {
+//   //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
+//   //   (async () => {
+//   //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
+//   // ]);
+//   // console.log(outputs);
+//   // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
+//   var result;
+//   result = await Promise.all([
+//     (async () => {
+//       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+//     })(),
+//     (async () => {
+//       result = await sendActionGoal("HumanSpeechbubbleAction", [
+//         "Hello",
+//         "Hello"
+//       ]);
+//       makeCancelGoal("RobotSpeechbubbleAction")(
+//         handles["RobotSpeechbubbleAction"]
+//       );
+//       return result;
+//     })()
+//   ]);
+//   return await sendActionGoal("RobotSpeechbubbleAction", result);
+// }, 2000);
 
 // setTimeout(async () => {
 //   sendActionGoal("RobotSpeechbubbleAction", ' ');

@@ -10,7 +10,7 @@
   <button id="run">Run</button>
 
   <xml id="startBlocks" style="display:none">
-    <block type="variables_set" inline="false">
+    <!-- <block type="variables_set" inline="false">
       <field name="VAR">result</field>
       <value name="VALUE">
         <block type="display_message">
@@ -21,7 +21,7 @@
           </value>
         </block>
       </value>
-    </block>
+    </block> -->
   </xml>
 
   <div class="demo">
@@ -312,13 +312,9 @@
               </block>
             </value>
           </block>
-          <block type="cancel_display_message"></block>
-          <block type="cancel_ask_multiple_choice"></block>
-        </category>
-        <category name="Conccurent" colour="290">
-          <block type="wait_for_all"></block>
-          <block type="wait_for_one"></block>
-          <block type="return"></block>
+          <block type="getStatus"></block>
+          <block type="getResult"></block>
+          <block type="cancel"></block>
         </category>
       </xml>
 
