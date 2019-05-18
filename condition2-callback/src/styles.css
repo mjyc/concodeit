@@ -1,0 +1,24 @@
+pre {
+  font-size: 10px;
+  border: 1px solid #aaa;
+  margin: 0 0 20px 0;
+  padding: 10px
+}
+
+p.label {
+  margin: 5px 0
+}
+
+.demo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between
+}
+
+.demo > div {
+  flex: 1 1
+}
+
+select {
+  margin-bottom: 10px
+}
