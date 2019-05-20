@@ -144,41 +144,39 @@ function sendActionGoalCallback(actionName, goal, callback) {
   })(goal, callback);
 }
 
-window.onload = () => {
-  initialize({
-    container: document.getElementById("app"),
-    styles: {
-      speechbubblesOuter: {
-        width: "585px"
-      },
-      robotSpeechbubble: {
-        styles: {
-          message: { fontSize: "60px" },
-          button: { fontSize: "48px" }
-        }
-      },
-      humanSpeechbubble: {
-        styles: {
-          message: { fontSize: "60px" },
-          button: { fontSize: "48px" }
-        }
+initialize({
+  container: document.getElementById("app"),
+  styles: {
+    speechbubblesOuter: {
+      width: "585px"
+    },
+    robotSpeechbubble: {
+      styles: {
+        message: { fontSize: "60px" },
+        button: { fontSize: "48px" }
       }
     },
-    TabletFace: {
+    humanSpeechbubble: {
       styles: {
-        faceHeight: "480px",
-        faceWidth: "640px",
-        eyeSize: "160px"
+        message: { fontSize: "60px" },
+        button: { fontSize: "48px" }
       }
     }
-  });
+  },
+  TabletFace: {
+    styles: {
+      faceHeight: "480px",
+      faceWidth: "640px",
+      eyeSize: "160px"
+    }
+  }
+});
 
-  document.getElementById("run").onclick = () => {
-    var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
-      editor
-    )}})();`;
-    eval(curCode);
-  };
+document.getElementById("run").onclick = () => {
+  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
+    editor
+  )}})();`;
+  eval(curCode);
 };
 
 // setTimeout(async () => {
