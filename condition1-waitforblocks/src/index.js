@@ -1,6 +1,68 @@
 import "./styles.css";
 
-import Blockly from "node-blockly/browser";
+import { promisify } from "util";
+import {
+  initialize,
+  makeSendGoal,
+  makeCancelGoal,
+  createStreamEventListener
+} from "cycle-robot-drivers-async";
+
+//------------------------------------------------------------------------------
+// Helper Function Definitions
+
+const handles = {};
+
+function sendActionGoal(actionName, goal) {
+  return promisify((g, callback) => {
+    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
+      if (val.status.status === "SUCCEEDED") {
+        callback(null, val.result);
+      } else {
+        callback(null, null);
+      }
+    });
+  })(goal);
+}
+
+function waitUntilFaceEvent() {
+  const stream = sources.PoseDetection.events("poses");
+  let listener;
+  return {
+    start: promisify((predicate, cb) => {
+      const pred = poses => {
+        if (poses.length === 0) {
+          return predicate(null, null);
+        } else {
+          const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
+          return predicate(
+            !nosePoint
+              ? null
+              : nosePoint.position.x === 0
+              ? 0
+              : nosePoint.position.x / 640,
+            !nosePoint
+              ? null
+              : nosePoint.position.y === 0
+              ? 0
+              : (480 - nosePoint.position.y) / 480
+          );
+        }
+      };
+      listener = createStreamEventListener(pred, (err, val) => {
+        stream.removeListener(listener);
+        cb(err, val);
+      });
+      stream.addListener(listener);
+    }),
+    stop: () => {
+      stream.removeListener(listener);
+    }
+  };
+}
+
+//------------------------------------------------------------------------------
+// Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
   {
@@ -152,15 +214,18 @@ Blockly.JavaScript["listen"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
+  const actionNames = [];
   return [
     "await Promise.all([" +
       [0, 1]
         .map(function(i) {
-          return `(async () => {\n${Blockly.JavaScript.valueToCode(
+          const code = Blockly.JavaScript.valueToCode(
             block,
             "DO" + i,
             Blockly.JavaScript.ORDER_ATOMIC
-          )}})()`;
+          );
+          // actionNames.push(code.match(/"(?:[^"\\]|\\.)*"/));
+          return `(async () => {\n${code}})()`;
         })
         .join(", ")
         .trim() +
@@ -170,6 +235,13 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
+  const a = Blockly.JavaScript.valueToCode(
+    block,
+    "DO0",
+    Blockly.JavaScript.ORDER_ATOMIC
+  );
+  console.log(a.match(/start[0-9]{8},/)[0]);
+
   return [
     "await Promise.race([" +
       [0, 1]
@@ -188,18 +260,22 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
 };
 
 Blockly.JavaScript["wait_until"] = function(block) {
-  // https://gist.github.com/gordonbrander/2230317
-  const id = Math.random()
-    .toString(36)
-    .substr(2, 9);
+  const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
   return [
     `(async () => {
   const {start${id}, stop${id}} = waitUntilFaceEvent();
-  return await start${id}(${Blockly.JavaScript.valueToCode(block, "WU0", Blockly.JavaScript.ORDER_ATOMIC)});
+  return await start${id}(${Blockly.JavaScript.valueToCode(
+      block,
+      "WU0",
+      Blockly.JavaScript.ORDER_ATOMIC
+    )});
 })()`,
     Blockly.JavaScript.ORDER_NONE
   ];
 };
+
+//------------------------------------------------------------------------------
+// Main Setup
 
 let editor;
 let code = document.getElementById("startBlocks");
@@ -232,27 +308,7 @@ editor = render("editor", "toolbox");
 updateCode();
 
 //------------------------------------------------------------------------------
-import {
-  initialize,
-  makeSendGoal,
-  makeCancelGoal,
-  createStreamEventListener
-} from "cycle-robot-drivers-async";
-import { promisify } from "util";
-
-const handles = {};
-
-function sendActionGoal(actionName, goal) {
-  return promisify((g, callback) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (val.status.status === "SUCCEEDED") {
-        callback(null, val.result);
-      } else {
-        callback(null, null);
-      }
-    });
-  })(goal);
-}
+// Scratch
 
 const sources = initialize({
   container: document.getElementById("app"),
@@ -281,42 +337,6 @@ const sources = initialize({
     }
   }
 });
-
-function waitUntilFaceEvent() {
-  const stream = sources.PoseDetection.events("poses");
-  let listener;
-  return {
-    start: promisify((predicate, cb) => {
-      const pred = poses => {
-        if (poses.length === 0) {
-          return predicate(null, null);
-        } else {
-          const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
-          return predicate(
-            !nosePoint
-              ? null
-              : nosePoint.position.x === 0
-              ? 0
-              : nosePoint.position.x / 640,
-            !nosePoint
-              ? null
-              : nosePoint.position.y === 0
-              ? 0
-              : (480 - nosePoint.position.y) / 480
-          );
-        }
-      };
-      listener = createStreamEventListener(pred, (err, val) => {
-        stream.removeListener(listener);
-        cb(err, val);
-      });
-      stream.addListener(listener);
-    }),
-    stop: () => {
-      stream.removeListener(listener);
-    }
-  };
-}
 
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(

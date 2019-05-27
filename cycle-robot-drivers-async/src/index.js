@@ -19,6 +19,15 @@ import {
 const goals$ = xs.create();
 const cancels$ = xs.create();
 
+export let actionNames = [
+  "FacialExpressionAction",
+  "RobotSpeechbubbleAction",
+  "HumanSpeechbubbleAction",
+  "AudioPlayerAction",
+  "SpeechSynthesisAction",
+  "SpeechRecognitionAction"
+];
+
 function main(sources) {
   return {
     FacialExpressionAction: {
