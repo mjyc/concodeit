@@ -245,4 +245,3 @@ setTimeout(async () => {
   // that's it
   return await sendActionGoal("RobotSpeechbubbleAction", result);
 }, 1000);
-
