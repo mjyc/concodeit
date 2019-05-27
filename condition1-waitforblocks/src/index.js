@@ -194,8 +194,8 @@ Blockly.JavaScript["wait_until"] = function(block) {
     .substr(2, 9);
   return [
     `(async () => {
-  const {start${id}, stop${id}} = waitUntilFaceEvent();  // 1. stop at callback, 2. stop after
-  return await start${id}();
+  const {start${id}, stop${id}} = waitUntilFaceEvent();
+  return await start${id}(${Blockly.JavaScript.valueToCode(block, "WU0", Blockly.JavaScript.ORDER_ATOMIC)});
 })()`,
     Blockly.JavaScript.ORDER_NONE
   ];
@@ -282,11 +282,11 @@ const sources = initialize({
   }
 });
 
-function waitUntilFaceEvent(predicate, callback) {
+function waitUntilFaceEvent() {
   const stream = sources.PoseDetection.events("poses");
   let listener;
   return {
-    start: promisify(cb => {
+    start: promisify((predicate, cb) => {
       const pred = poses => {
         if (poses.length === 0) {
           return predicate(null, null);
