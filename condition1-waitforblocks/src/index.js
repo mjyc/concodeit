@@ -188,7 +188,17 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
 };
 
 Blockly.JavaScript["wait_until"] = function(block) {
-  return ["true", Blockly.JavaScript.ORDER_NONE];
+  // https://gist.github.com/gordonbrander/2230317
+  const id = Math.random()
+    .toString(36)
+    .substr(2, 9);
+  return [
+    `(async () => {
+  const {start${id}, stop${id}} = waitUntilFaceEvent();  // 1. stop at callback, 2. stop after
+  return await start${id}();
+})()`,
+    Blockly.JavaScript.ORDER_NONE
+  ];
 };
 
 let editor;
@@ -283,12 +293,23 @@ function waitUntilFaceEvent(predicate, callback) {
         } else {
           const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
           return predicate(
-            !nosePoint ? null : nosePoint.position.x === 0 ? 0 : nosePoint.position.x / 640,
-            !nosePoint ? null : nosePoint.position.y === 0 ? 0 : (480 - nosePoint.position.y) / 480
+            !nosePoint
+              ? null
+              : nosePoint.position.x === 0
+              ? 0
+              : nosePoint.position.x / 640,
+            !nosePoint
+              ? null
+              : nosePoint.position.y === 0
+              ? 0
+              : (480 - nosePoint.position.y) / 480
           );
         }
       };
-      listener = createStreamEventListener(pred, (err, val) => {console.error(err, val); cb(err, val);});
+      listener = createStreamEventListener(pred, (err, val) => {
+        stream.removeListener(listener);
+        cb(err, val);
+      });
       stream.addListener(listener);
     }),
     stop: () => {
@@ -296,19 +317,6 @@ function waitUntilFaceEvent(predicate, callback) {
     }
   };
 }
-
-const {start, stop} = waitUntilFaceEvent((posX, posY) => {
-  console.log(posX, posY);
-  return posX === null;
-});
-
-(async () => {
-  console.log('ready');
-  await start();
-  console.error('done!');
-  stop();
-})()
-
 
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
@@ -340,15 +348,14 @@ setTimeout(async () => {
   return await sendActionGoal("RobotSpeechbubbleAction", result);
 }, 1000);
 
-// p(poses => {
-//   // 1. finish error check
-//   if (poses.length === 0) return null;
-//   // ||
-//   //   (!poses[0].keypoints.find(function(kpt) {
-//   //     return kpt.part === "nose";
-//   //   })
-//   // poses.keypoints
-//   // conver to array
+const { start, stop } = waitUntilFaceEvent((posX, posY) => {
+  console.log(posX, posY);
+  return posX === null;
+});
 
-//   // 2.
-// });
+(async () => {
+  console.log("ready");
+  await start();
+  console.error("done!");
+  // stop();
+})();
