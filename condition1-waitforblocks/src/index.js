@@ -348,14 +348,14 @@ setTimeout(async () => {
   return await sendActionGoal("RobotSpeechbubbleAction", result);
 }, 1000);
 
-const { start, stop } = waitUntilFaceEvent((posX, posY) => {
-  console.log(posX, posY);
-  return posX === null;
-});
+const { start, stop } = waitUntilFaceEvent();
 
 (async () => {
   console.log("ready");
-  await start();
+  await start((posX, posY) => {
+    console.log(posX, posY);
+    return posX === null;
+  });
   console.error("done!");
   // stop();
 })();
