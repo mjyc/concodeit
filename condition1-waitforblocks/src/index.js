@@ -2,6 +2,7 @@ import "./styles.css";
 
 import { promisify } from "util";
 import {
+  actionNames,
   initialize,
   makeSendGoal,
   makeCancelGoal,
@@ -214,38 +215,29 @@ Blockly.JavaScript["listen"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
-  const actionNames = [];
   return [
     "await Promise.all([" +
       [0, 1]
-        .map(function(i) {
-          const code = Blockly.JavaScript.valueToCode(
-            block,
-            "DO" + i,
-            Blockly.JavaScript.ORDER_ATOMIC
-          );
-          // actionNames.push(code.match(/"(?:[^"\\]|\\.)*"/));
-          return `(async () => {\n${code}})()`;
-        })
+        .map(
+          i =>
+            `(async () => {\n${Blockly.JavaScript.valueToCode(
+              block,
+              "DO" + i,
+              Blockly.JavaScript.ORDER_ATOMIC
+            )}})()`
+        )
         .join(", ")
         .trim() +
-      "])",
+      "]);",
     Blockly.JavaScript.ORDER_NONE
   ];
 };
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
-  const a = Blockly.JavaScript.valueToCode(
-    block,
-    "DO0",
-    Blockly.JavaScript.ORDER_ATOMIC
-  );
-  console.log(a.match(/start[0-9]{8},/)[0]);
-
   return [
     "await Promise.race([" +
       [0, 1]
-        .map(function(i) {
+        .map(i => {
           return `(async () => {\n${Blockly.JavaScript.valueToCode(
             block,
             "DO" + i,
