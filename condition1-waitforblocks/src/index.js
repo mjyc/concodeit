@@ -13,7 +13,7 @@ Blockly.defineBlocksWithJsonArray([
         check: "String"
       }
     ],
-    output: null,
+    output: ["Action"],
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -28,22 +28,48 @@ Blockly.defineBlocksWithJsonArray([
         check: "Array"
       }
     ],
-    output: null,
+    output: ["Action", "String"],
     colour: 230,
     tooltip: "",
     helpUrl: ""
   },
   {
+    type: "speak",
+    message0: "speak %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: "String"
+      }
+    ],
+    output: ["Action"],
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "listen",
+    message0: "listen",
+    output: ["Action", "String"],
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  //----------------------------------------------------------------------------
+  {
     type: "wait_for_all",
     message0: "wait for all %1 %2",
     args0: [
       {
-        type: "input_statement",
-        name: "DO0"
+        type: "input_value",
+        name: "DO0",
+        check: "Action"
       },
       {
-        type: "input_statement",
-        name: "DO1"
+        type: "input_value",
+        name: "DO1",
+        check: "Action"
       }
     ],
     output: null,
@@ -56,12 +82,14 @@ Blockly.defineBlocksWithJsonArray([
     message0: "wait for one %1 %2",
     args0: [
       {
-        type: "input_statement",
-        name: "DO0"
+        type: "input_value",
+        name: "DO0",
+        check: "Action"
       },
       {
-        type: "input_statement",
-        name: "DO1"
+        type: "input_value",
+        name: "DO1",
+        check: "Action"
       }
     ],
     output: null,
@@ -69,20 +97,7 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  {
-    type: "return",
-    message0: "return %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "VALUE"
-      }
-    ],
-    previousStatement: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  }
+  //----------------------------------------------------------------------------
 ]);
 
 Blockly.JavaScript["display_message"] = function(block) {
@@ -103,14 +118,33 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+Blockly.JavaScript["speak"] = function(block) {
+  const code = `await sendActionGoal("SpeechSynthesisAction", ${Blockly.JavaScript.valueToCode(
+    block,
+    "MESSAGE",
+    Blockly.JavaScript.ORDER_ATOMIC
+  )})`;
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["listen"] = function(block) {
+  const code = `await sendActionGoal("SpeechRecognitionAction", ${Blockly.JavaScript.valueToCode(
+    block,
+    "MESSAGE",
+    Blockly.JavaScript.ORDER_ATOMIC
+  )})`;
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 Blockly.JavaScript["wait_for_all"] = function(block) {
   return [
     "await Promise.all([" +
       [0, 1]
         .map(function(i) {
-          return `(async () => {\n${Blockly.JavaScript.statementToCode(
+          return `(async () => {\n${Blockly.JavaScript.valueToCode(
             block,
-            "DO" + i
+            "DO" + i,
+            Blockly.JavaScript.ORDER_ATOMIC,
           )}})()`;
         })
         .join(", ")
@@ -125,9 +159,10 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
     "await Promise.race([" +
       [0, 1]
         .map(function(i) {
-          return `(async () => {\n${Blockly.JavaScript.statementToCode(
+          return `(async () => {\n${Blockly.JavaScript.valueToCode(
             block,
-            "DO" + i
+            "DO" + i,
+            Blockly.JavaScript.ORDER_ATOMIC
           )}})()`;
         })
         .join(", ")
