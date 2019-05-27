@@ -224,64 +224,25 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
-// setTimeout(async () => {
-//   // const outputs = await Promise.race([
-//   //   (async () => {
-//   //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-//   //     return result;
-//   //   })(),
-//   //   (async () => {
-//   //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
-//   //     return result;
-//   //   })(),
-//   // ]);
-//   // console.log(outputs);
-//   // const outputs = await Promise.race([
-//   //   (async () => {
-//   //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
-//   //   (async () => {
-//   //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
-//   // ]);
-//   // console.log(outputs);
-//   // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
-//   var result;
-//   result = await Promise.all([
-//     (async () => {
-//       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-//     })(),
-//     (async () => {
-//       result = await sendActionGoal("HumanSpeechbubbleAction", [
-//         "Hello",
-//         "Hello"
-//       ]);
-//       makeCancelGoal("RobotSpeechbubbleAction")(
-//         handles["RobotSpeechbubbleAction"]
-//       );
-//       return result;
-//     })()
-//   ]);
-//   return await sendActionGoal("RobotSpeechbubbleAction", result);
-// }, 2000);
+//------------------------------------------------------------------------------
+setTimeout(async () => {
+  var result;
+  // 1. extract action names in array
+  result = await Promise.race([  // update to return index
+    (async () => {
+      return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+    })(),
+    (async () => {
+      result = await sendActionGoal("HumanSpeechbubbleAction", [
+        "Choice1",
+        "Choice2"
+      ]);
+      return result;
+    })()
+  ]);
+  // 2. cancel all the ones that are not index using "map"
+  makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
+  // that's it
+  return await sendActionGoal("RobotSpeechbubbleAction", result);
+}, 1000);
 
-// setTimeout(async () => {
-//   sendActionGoal("RobotSpeechbubbleAction", ' ');
-// }, 3000);
-
-// const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
-//   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
-//     goal,
-//     callback
-//   );
-// });
-// const sendHumanSpeechbubbleActionGoal = promisify(
-//   makeSendGoal("HumanSpeechbubbleAction")
-// );
-
-// (async () => {
-//   const outputs = await Promise.race([
-//     sendRobotSpeechbubbleActionGoal("Hello"),
-//     sendHumanSpeechbubbleActionGoal(["Hi"])
-//   ]);
-//   makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-//   console.log(outputs);
-// })();
