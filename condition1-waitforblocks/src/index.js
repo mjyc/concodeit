@@ -34,24 +34,6 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "cancel_display_message",
-    message0: "cancel display message",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_ask_multiple_choice",
-    message0: "cancel ask multiple choice",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
     type: "wait_for_all",
     message0: "wait for all %1 %2",
     args0: [
@@ -121,14 +103,6 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return `makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);\n`;
-};
-
-Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return `makeCancelGoal("HumanSpeechbubbleAction")(handles["HumanSpeechbubbleAction"]);\n`;
-};
-
 Blockly.JavaScript["wait_for_all"] = function(block) {
   return [
     "await Promise.all([" +
@@ -161,14 +135,6 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
       "])",
     Blockly.JavaScript.ORDER_NONE
   ];
-};
-
-Blockly.JavaScript["return"] = function(block) {
-  return `return ${Blockly.JavaScript.valueToCode(
-    block,
-    "VALUE",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )};`;
 };
 
 let editor;
