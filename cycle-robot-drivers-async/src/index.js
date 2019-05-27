@@ -123,6 +123,6 @@ export function makeCancelGoal(actionName) {
 
 export function createStreamEventListener(predicate, callback) {
   return {next: val => {
-    if (predicate(sources)) callback(val);
+    if (predicate(val)) callback(val);
   }};
 }
