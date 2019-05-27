@@ -97,6 +97,21 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
+  {
+    type: "wait_until",
+    message0: "wait until %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "WU0",
+        check: "Boolean"
+      },
+    ],
+    output: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
   //----------------------------------------------------------------------------
 ]);
 
@@ -168,6 +183,13 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
         .join(", ")
         .trim() +
       "])",
+    Blockly.JavaScript.ORDER_NONE
+  ];
+};
+
+Blockly.JavaScript["wait_until"] = function(block) {
+  return [
+    "true",
     Blockly.JavaScript.ORDER_NONE
   ];
 };
