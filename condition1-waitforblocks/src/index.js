@@ -99,19 +99,19 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "wait_until",
-    message0: "wait until %1",
+    message0: "wait until face posX, posY become %1",
     args0: [
       {
         type: "input_value",
         name: "WU0",
         check: "Boolean"
-      },
+      }
     ],
     output: null,
     colour: 290,
     tooltip: "",
     helpUrl: ""
-  },
+  }
   //----------------------------------------------------------------------------
 ]);
 
@@ -159,7 +159,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
           return `(async () => {\n${Blockly.JavaScript.valueToCode(
             block,
             "DO" + i,
-            Blockly.JavaScript.ORDER_ATOMIC,
+            Blockly.JavaScript.ORDER_ATOMIC
           )}})()`;
         })
         .join(", ")
@@ -188,10 +188,7 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
 };
 
 Blockly.JavaScript["wait_until"] = function(block) {
-  return [
-    "true",
-    Blockly.JavaScript.ORDER_NONE
-  ];
+  return ["true", Blockly.JavaScript.ORDER_NONE];
 };
 
 let editor;
@@ -228,7 +225,8 @@ updateCode();
 import {
   initialize,
   makeSendGoal,
-  makeCancelGoal
+  makeCancelGoal,
+  createStreamEventListener
 } from "cycle-robot-drivers-async";
 import { promisify } from "util";
 
@@ -246,7 +244,7 @@ function sendActionGoal(actionName, goal) {
   })(goal);
 }
 
-initialize({
+const sources = initialize({
   container: document.getElementById("app"),
   styles: {
     speechbubblesOuter: {
@@ -274,6 +272,44 @@ initialize({
   }
 });
 
+function waitUntilFaceEvent(predicate, callback) {
+  const stream = sources.PoseDetection.events("poses");
+  let listener;
+  return {
+    start: promisify(cb => {
+      const pred = poses => {
+        if (poses.length === 0) {
+          return predicate(null, null);
+        } else {
+          const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
+          return predicate(
+            !nosePoint ? null : nosePoint.position.x === 0 ? 0 : nosePoint.position.x / 640,
+            !nosePoint ? null : nosePoint.position.y === 0 ? 0 : (480 - nosePoint.position.y) / 480
+          );
+        }
+      };
+      listener = createStreamEventListener(pred, (err, val) => {console.error(err, val); cb(err, val);});
+      stream.addListener(listener);
+    }),
+    stop: () => {
+      stream.removeListener(listener);
+    }
+  };
+}
+
+const {start, stop} = waitUntilFaceEvent((posX, posY) => {
+  console.log(posX, posY);
+  return posX === null;
+});
+
+(async () => {
+  console.log('ready');
+  await start();
+  console.error('done!');
+  stop();
+})()
+
+
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
     editor
@@ -285,7 +321,8 @@ document.getElementById("run").onclick = () => {
 setTimeout(async () => {
   var result;
   // 1. extract action names in array
-  result = await Promise.race([  // update to return index
+  result = await Promise.race([
+    // update to return index
     (async () => {
       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
     })(),
@@ -302,3 +339,16 @@ setTimeout(async () => {
   // that's it
   return await sendActionGoal("RobotSpeechbubbleAction", result);
 }, 1000);
+
+// p(poses => {
+//   // 1. finish error check
+//   if (poses.length === 0) return null;
+//   // ||
+//   //   (!poses[0].keypoints.find(function(kpt) {
+//   //     return kpt.part === "nose";
+//   //   })
+//   // poses.keypoints
+//   // conver to array
+
+//   // 2.
+// });
