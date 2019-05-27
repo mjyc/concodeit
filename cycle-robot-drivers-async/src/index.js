@@ -89,6 +89,7 @@ export function initialize(options = {}) {
     },
     options
   );
+  return sources;
 }
 
 export function makeSendGoal(actionName) {
@@ -118,4 +119,10 @@ export function makeCancelGoal(actionName) {
       value: goal_id
     });
   };
+}
+
+export function createStreamEventListener(predicate, callback) {
+  return {next: val => {
+    if (predicate(sources)) callback(val);
+  }};
 }
