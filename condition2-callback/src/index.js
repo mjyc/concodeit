@@ -31,6 +31,10 @@ function cancelActionGoal(actionName) {
   makeCancelGoal(actionName)(handles[actionName]);
 }
 
+function sleep(second = 0, callback = () => {}) {
+  setTimeout(callback, second * 1000);
+}
+
 const eventHandles = {};
 
 function detectFace(id, callback) {
@@ -100,6 +104,26 @@ Blockly.defineBlocksWithJsonArray([
     previousStatement: null,
     nextStatement: null,
     colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "sleep",
+    message0: "sleep for %1 then %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "SE",
+        check: "Number"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
     tooltip: "",
     helpUrl: ""
   },
@@ -179,6 +203,14 @@ Blockly.JavaScript["stop_detect_face"] = function(block) {
     "ID",
     Blockly.JavaScript.ORDER_ATOMIC
   )});`;
+};
+
+Blockly.JavaScript["sleep"] = function(block) {
+  return `sleep(${Blockly.JavaScript.valueToCode(
+    block,
+    "SE",
+    Blockly.JavaScript.ORDER_ATOMIC
+  )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});`;
 };
 
 Blockly.JavaScript["display_message"] = function(block) {
