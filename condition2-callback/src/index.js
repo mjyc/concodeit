@@ -5,8 +5,7 @@ import {
   actionNames,
   initialize,
   makeSendGoal,
-  makeCancelGoal,
-  createStreamEventListener
+  makeCancelGoal
 } from "cycle-robot-drivers-async";
 import { promisify } from "util";
 
