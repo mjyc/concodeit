@@ -1,6 +1,32 @@
 import "./styles.css";
 
 import Blockly from "node-blockly/browser";
+import {
+  actionNames,
+  initialize,
+  makeSendGoal,
+  makeCancelGoal
+} from "cycle-robot-drivers-async";
+
+//------------------------------------------------------------------------------
+// Helper Function Definitions
+
+const handles = {};
+
+function sendActionGoal(actionName, goal) {
+  return promisify((g, callback) => {
+    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
+      if (val.status.status === "SUCCEEDED") {
+        callback(null, val.result);
+      } else {
+        callback(null, null);
+      }
+    });
+  })(goal);
+}
+
+//------------------------------------------------------------------------------
+// Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
   {
@@ -163,6 +189,9 @@ Blockly.JavaScript["return"] = function(block) {
   )};`;
 };
 
+//------------------------------------------------------------------------------
+// Main Setup
+
 let editor;
 let code = document.getElementById("startBlocks");
 
@@ -194,28 +223,7 @@ editor = render("editor", "toolbox");
 updateCode();
 
 //------------------------------------------------------------------------------
-import {
-  initialize,
-  makeSendGoal,
-  makeCancelGoal
-} from "cycle-robot-drivers-async";
-import { promisify } from "util";
-
-const handles = {};
-
-function sendActionGoal(actionName, goal) {
-  return promisify((g, callback) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (val.status.status === "SUCCEEDED") {
-        callback(null, val.result);
-      } else {
-        callback(null, null);
-      }
-    });
-  })(goal);
-}
-
-initialize({
+const sources = initialize({
   container: document.getElementById("app"),
   styles: {
     speechbubblesOuter: {
@@ -250,64 +258,9 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
-// setTimeout(async () => {
-//   // const outputs = await Promise.race([
-//   //   (async () => {
-//   //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-//   //     return result;
-//   //   })(),
-//   //   (async () => {
-//   //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
-//   //     return result;
-//   //   })(),
-//   // ]);
-//   // console.log(outputs);
-//   // const outputs = await Promise.race([
-//   //   (async () => {
-//   //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
-//   //   (async () => {
-//   //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
-//   // ]);
-//   // console.log(outputs);
-//   // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
-//   var result;
-//   result = await Promise.all([
-//     (async () => {
-//       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-//     })(),
-//     (async () => {
-//       result = await sendActionGoal("HumanSpeechbubbleAction", [
-//         "Hello",
-//         "Hello"
-//       ]);
-//       makeCancelGoal("RobotSpeechbubbleAction")(
-//         handles["RobotSpeechbubbleAction"]
-//       );
-//       return result;
-//     })()
-//   ]);
-//   return await sendActionGoal("RobotSpeechbubbleAction", result);
-// }, 2000);
-
-// setTimeout(async () => {
-//   sendActionGoal("RobotSpeechbubbleAction", ' ');
-// }, 3000);
-
-// const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
-//   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
-//     goal,
-//     callback
-//   );
-// });
-// const sendHumanSpeechbubbleActionGoal = promisify(
-//   makeSendGoal("HumanSpeechbubbleAction")
-// );
-
-// (async () => {
-//   const outputs = await Promise.race([
-//     sendRobotSpeechbubbleActionGoal("Hello"),
-//     sendHumanSpeechbubbleActionGoal(["Hi"])
-//   ]);
-//   makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-//   console.log(outputs);
-// })();
+//------------------------------------------------------------------------------
+// Scratch
+(async () => {
+  console.log("test");
+  console.log("done");
+})();
