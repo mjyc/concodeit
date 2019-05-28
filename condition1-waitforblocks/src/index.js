@@ -18,7 +18,7 @@ const handles = {};
 function sendActionGoal(actionName, goal) {
   return promisify((g, callback) => {
     handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (val.status.status === "SUCCEEDED") {
+      if (!err && val.status.status === "SUCCEEDED") {
         callback(null, val.result);
       } else {
         callback(null, null);
@@ -121,7 +121,7 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "MESSAGE",
-        check: "String"
+        check: ["String", "Number"]
       }
     ],
     output: "Action",
@@ -151,7 +151,7 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "MESSAGE",
-        check: "String"
+        check: ["String", "Number"]
       }
     ],
     output: "Action",
@@ -227,11 +227,11 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["display_message"] = function(block) {
-  const code = `await sendActionGoal("RobotSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+  const code = `await sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
     block,
     "MESSAGE",
     Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  )}))`;
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
@@ -245,20 +245,16 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
 };
 
 Blockly.JavaScript["speak"] = function(block) {
-  const code = `await sendActionGoal("SpeechSynthesisAction", ${Blockly.JavaScript.valueToCode(
+  const code = `await sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
     block,
     "MESSAGE",
     Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  )}))`;
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["listen"] = function(block) {
-  const code = `await sendActionGoal("SpeechRecognitionAction", ${Blockly.JavaScript.valueToCode(
-    block,
-    "MESSAGE",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  const code = `await sendActionGoal("SpeechRecognitionAction", {})`;
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
@@ -369,8 +365,6 @@ editor = render("editor", "toolbox");
 updateCode();
 
 //------------------------------------------------------------------------------
-// Scratch
-
 const sources = initialize({
   container: document.getElementById("app"),
   styles: {
@@ -409,6 +403,7 @@ document.getElementById("run").onclick = () => {
 };
 
 //------------------------------------------------------------------------------
+// Scratch
 (async () => {
   console.log("test");
 })();

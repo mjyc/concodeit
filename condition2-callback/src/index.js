@@ -1,23 +1,123 @@
 import "./styles.css";
 
 import Blockly from "node-blockly/browser";
+import {
+  actionNames,
+  initialize,
+  makeSendGoal,
+  makeCancelGoal,
+  createStreamEventListener
+} from "cycle-robot-drivers-async";
+import { promisify } from "util";
+
+//------------------------------------------------------------------------------
+// Helper Function Definitions
+
+const handles = {};
+
+function sendActionGoalCallback(actionName, goal, callback = () => {}) {
+  ((g, cb) => {
+    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
+      if (!err && val.status.status === "SUCCEEDED") {
+        cb(val.result);
+      } else {
+        cb(null);
+      }
+    });
+  })(goal, callback);
+}
+
+function cancelActionGoal(actionName) {
+  makeCancelGoal(actionName)(handles[actionName]);
+}
+
+const eventHandles = {};
+
+function detectFace(id, callback) {
+  eventHandles[id] = {
+    stream: sources.PoseDetection.events("poses"),
+    listener: {
+      next: poses => {
+        if (poses.length === 0) {
+          return callback(null, null);
+        } else {
+          const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
+          return callback(
+            !nosePoint
+              ? null
+              : nosePoint.position.x === 0
+              ? 0
+              : nosePoint.position.x / 640,
+            !nosePoint
+              ? null
+              : nosePoint.position.y === 0
+              ? 0
+              : (480 - nosePoint.position.y) / 480
+          );
+        }
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
+function stopDetectFace(id) {
+  eventHandles[id].stream.removeListener(eventHandles[id].listener);
+}
+
+//------------------------------------------------------------------------------
+// Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
   {
+    type: "detect_face",
+    message0: "detect face; when detected %1 do %2",
+    args0: [
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "stop_detect_face",
+    message0: "stop detecting face %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "ID",
+        check: "String"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "display_message",
-    message0: "display message %1",
+    message0: "display message %1 %2",
     args0: [
       {
         type: "input_value",
         name: "MESSAGE",
-        check: "String"
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_value",
+        name: "CALLBACK",
+        check: "Callback"
       }
-      // {
-      //   type: "input_value",
-      //   name: "CALLBACK"
-      // }
     ],
-    // output: null,
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -26,18 +126,18 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "ask_multiple_choice",
-    message0: "ask multiple choice %1",
+    message0: "ask multiple choice %1 %2",
     args0: [
       {
         type: "input_value",
         name: "CHOICES"
+      },
+      {
+        type: "input_value",
+        name: "CALLBACK",
+        check: "Callback"
       }
-      // {
-      //   type: "input_value",
-      //   name: "CALLBACK"
-      // }
     ],
-    // output: null,
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -64,33 +164,61 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
+Blockly.JavaScript["detect_face"] = function(block) {
+  const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
+  return [
+    `detectFace(${id}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
+      block,
+      "DO"
+    )}})`,
+    Blockly.JavaScript.ORDER_NONE
+  ];
+};
+
+Blockly.JavaScript["stop_detect_face"] = function(block) {
+  return `stopDetectFace(${Blockly.JavaScript.valueToCode(
+    block,
+    "ID",
+    Blockly.JavaScript.ORDER_ATOMIC
+  )});`;
+};
+
 Blockly.JavaScript["display_message"] = function(block) {
-  const code = `await sendActionGoal("RobotSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+  const code = `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
     block,
     "MESSAGE",
     Blockly.JavaScript.ORDER_ATOMIC
+  )}), ${Blockly.JavaScript.valueToCode(
+    block,
+    "CALLBACK",
+    Blockly.JavaScript.ORDER_ATOMIC
   )})`;
-  // return [code, Blockly.JavaScript.ORDER_NONE];
   return code;
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  const code = `await sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+  const code = `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
     block,
     "CHOICES",
     Blockly.JavaScript.ORDER_ATOMIC
+  )}, ${Blockly.JavaScript.valueToCode(
+    block,
+    "CALLBACK",
+    Blockly.JavaScript.ORDER_ATOMIC
   )})`;
-  // return [code, Blockly.JavaScript.ORDER_NONE];
   return code;
 };
 
 Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return `makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);\n`;
+  return `cancelActionGoal("RobotSpeechbubbleAction");\n`;
 };
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return `makeCancelGoal("HumanSpeechbubbleAction")(handles["HumanSpeechbubbleAction"]);\n`;
+  return `cancelActionGoal("HumanSpeechbubbleAction");\n`;
 };
+
+//------------------------------------------------------------------------------
+// Main Setup
 
 let editor;
 let code = document.getElementById("startBlocks");
@@ -123,28 +251,7 @@ editor = render("editor", "toolbox");
 updateCode();
 
 //------------------------------------------------------------------------------
-import {
-  initialize,
-  makeSendGoal,
-  makeCancelGoal
-} from "cycle-robot-drivers-async";
-import { promisify } from "util";
-
-const handles = {};
-
-function sendActionGoalCallback(actionName, goal, callback) {
-  ((g, cb) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (val.status.status === "SUCCEEDED") {
-        cb(val.result);
-      } else {
-        cb(null);
-      }
-    });
-  })(goal, callback);
-}
-
-initialize({
+const sources = initialize({
   container: document.getElementById("app"),
   styles: {
     speechbubblesOuter: {
@@ -172,6 +279,8 @@ initialize({
   }
 });
 
+sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
     editor
@@ -179,54 +288,23 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
-// setTimeout(async () => {
-//   // const outputs = await Promise.race([
-//   //   (async () => {
-//   //     var result = await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-//   //     return result;
-//   //   })(),
-//   //   (async () => {
-//   //     var result = await sendActionGoal("HumanSpeechbubbleAction", ["Hi"])
-//   //     return result;
-//   //   })(),
-//   // ]);
-//   // console.log(outputs);
-//   // const outputs = await Promise.race([
-//   //   (async () => {
-//   //     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(),
-//   //   (async () => {
-//   //     return (await sendActionGoal("HumanSpeechbubbleAction", ['31', '2']));})()
-//   // ]);
-//   // console.log(outputs);
-//   // return (await sendActionGoal("RobotSpeechbubbleAction", '3'));
-//   var result;
-//   result = (await Promise.all([(async () => {
-//     return (await sendActionGoal("RobotSpeechbubbleAction", 'Hello'));})(), (async () => {
-//     result = (await sendActionGoal("HumanSpeechbubbleAction", ['Hello', 'Hello']));
-//     makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-//     return result;})()]));
-//   return (await sendActionGoal("RobotSpeechbubbleAction", result));
-// }, 2000);
+//------------------------------------------------------------------------------
+// Scratch
+(async () => {
+  console.log("test");
+  // var id, posX, posY;
 
-// setTimeout(async () => {
-//   sendActionGoal("RobotSpeechbubbleAction", ' ');
-// }, 3000);
+  // await promisify(cb => setTimeout(cb, 1000))();
+  // /**
+  //  * Describe this function...
+  //  */
+  // function handle_face_event(posX, posY) {
+  //   sendActionGoalCallback("RobotSpeechbubbleAction", String(posX));
+  // }
 
-// const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
-//   handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
-//     goal,
-//     callback
-//   );
-// });
-// const sendHumanSpeechbubbleActionGoal = promisify(
-//   makeSendGoal("HumanSpeechbubbleAction")
-// );
+  // id = detectFace(59395985, (posX, posY) => {
+  //   if (posX !== null) handle_face_event(posX, posY);
+  // });
 
-// (async () => {
-//   const outputs = await Promise.race([
-//     sendRobotSpeechbubbleActionGoal("Hello"),
-//     sendHumanSpeechbubbleActionGoal(["Hi"])
-//   ]);
-//   makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-//   console.log(outputs);
-// })();
+  // console.log("done");
+})();
