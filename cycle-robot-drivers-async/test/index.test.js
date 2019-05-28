@@ -7,7 +7,7 @@ const xs = require("xstream").default;
 const { mockTimeSource } = require("@cycle/time");
 const { createStreamEventListener } = require("../");
 
-// console.debug = jest.fn(); // when debugging, comment this line out
+console.debug = jest.fn(); // when debugging, comment this line out
 
 test("createStreamEventListener", async () => {
   const Time = mockTimeSource();

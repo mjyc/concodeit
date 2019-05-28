@@ -1,6 +1,7 @@
 import "./styles.css";
 
 import { promisify } from "util";
+import Blockly from "node-blockly/browser";
 import {
   actionNames,
   initialize,
@@ -24,6 +25,25 @@ function sendActionGoal(actionName, goal) {
       }
     });
   })(goal);
+}
+
+function cancelActionGoal(actionName) {
+  makeCancelGoal(actionName)(handles[actionName]);
+}
+
+async function race(sendActionGoalFncs, cancelFncs) {
+  const out = await Promise.race(
+    sendActionGoalFncs.map(async (sendActionGoalFnc, i) => ({
+      i: i,
+      o: await sendActionGoalFnc()
+    }))
+  );
+  cancelFncs.map((cancelFnc, i) => {
+    if (i !== out.i) {
+      cancelFnc();
+    }
+  });
+  return out.o;
 }
 
 function waitUntilFaceEvent() {
@@ -234,19 +254,30 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
+  const aNames = [];
   return [
-    "await Promise.race([" +
-      [0, 1]
-        .map(i => {
-          return `(async () => {\n${Blockly.JavaScript.valueToCode(
-            block,
-            "DO" + i,
-            Blockly.JavaScript.ORDER_ATOMIC
-          )}})()`;
-        })
-        .join(", ")
-        .trim() +
-      "])",
+    `race([${[0, 1]
+      .map(i => {
+        const code = Blockly.JavaScript.valueToCode(
+          block,
+          "DO" + i,
+          Blockly.JavaScript.ORDER_ATOMIC
+        );
+        // TODO: update here for waitForX
+        let name = !code.match(/\("([a-zA-Z]+)",/)
+          ? ""
+          : code.match(/\("([a-zA-Z]+)",/)[1];
+        aNames.push(name);
+        return `(async () => {\nreturn ${Blockly.JavaScript.valueToCode(
+          block,
+          "DO" + i,
+          Blockly.JavaScript.ORDER_ATOMIC
+        )}})`;
+      })
+      .join(",\n")
+      .trim()}], [${[0, 1]
+      .map(i => `cancelActionGoal.bind(null, "${aNames[i]}")`)
+      .join(", ")}]);`,
     Blockly.JavaScript.ORDER_NONE
   ];
 };
@@ -257,6 +288,7 @@ Blockly.JavaScript["wait_until"] = function(block) {
     `(async () => {
   const {start${id}, stop${id}} = waitUntilFaceEvent();
   return await start${id}(${Blockly.JavaScript.valueToCode(
+      // TODO: update this into a function
       block,
       "WU0",
       Blockly.JavaScript.ORDER_ATOMIC
@@ -338,36 +370,87 @@ document.getElementById("run").onclick = () => {
 };
 
 //------------------------------------------------------------------------------
-setTimeout(async () => {
-  var result;
-  // 1. extract action names in array
-  result = await Promise.race([
-    // update to return index
-    (async () => {
-      return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-    })(),
-    (async () => {
-      result = await sendActionGoal("HumanSpeechbubbleAction", [
-        "Choice1",
-        "Choice2"
-      ]);
-      return result;
-    })()
-  ]);
-  // 2. cancel all the ones that are not index using "map"
-  makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-  // that's it
-  return await sendActionGoal("RobotSpeechbubbleAction", result);
-}, 1000);
-
-const { start, stop } = waitUntilFaceEvent();
-
 (async () => {
-  console.log("ready");
-  await start((posX, posY) => {
-    console.log(posX, posY);
-    return posX === null;
-  });
-  console.error("done!");
-  // stop();
+  await race(
+    [
+      async () => {
+        return await sendActionGoal("RobotSpeechbubbleAction", "Hello there!");
+      },
+      async () => {
+        return await sendActionGoal("HumanSpeechbubbleAction", [
+          "Choice1",
+          "Choice2"
+        ]);
+      }
+    ],
+    [
+      cancelActionGoal.bind(null, "RobotSpeechbubbleAction"),
+      cancelActionGoal.bind(null, "HumanSpeechbubbleAction")
+    ]
+  );
+
+  await race(
+    [
+      async () => {
+        return await sendActionGoal("RobotSpeechbubbleAction", "Hello there?");
+      },
+      async () => {
+        return await sendActionGoal("HumanSpeechbubbleAction", [
+          "Choice1x",
+          "Choice2x"
+        ]);
+      }
+    ],
+    [
+      cancelActionGoal.bind(null, "RobotSpeechbubbleAction"),
+      cancelActionGoal.bind(null, "HumanSpeechbubbleAction")
+    ]
+  );
+
+  //   // race2(sendActionGoals, cancels) {
+  //   //   out = sendActionGoals.map((sendActionGoal, i) => {
+  //   //     return {
+  //   //       i: i,
+  //   //       out: sendActionGoals()
+  //   //     };
+  //   //   });
+  //   //   // run promise
+  //   //   sendActionGoals.map(_, i) => {
+  //   //     if (i !== out.i) {
+  //   //       cancels[i]()
+  //   //     }
+  //   //   }
+  //   // }
+
+  //   var result;
+  //   // 1. extract action names in array
+  //   result = await Promise.race([
+  //     // update to return index
+  //     (async () => {
+  //       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
+  //     })(),
+  //     (async () => {
+  //       result = await sendActionGoal("HumanSpeechbubbleAction", [
+  //         "Choice1",
+  //         "Choice2"
+  //       ]);
+  //       return result;
+  //     })()
+  //   ]);
+  //   // 2. cancel all the ones that are not index using "map"
+  //   makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
+  //   // that's it
+  //   return await sendActionGoal("RobotSpeechbubbleAction", result);
+  // }, 1000);
+
+  // const { start, stop } = waitUntilFaceEvent();
+
+  // (async () => {
+  //   console.log("ready");
+  //   await start((posX, posY) => {
+  //     console.log(posX, posY);
+  //     return posX === null;
+  //   });
+  //   console.error("done!");
+  //   // stop();
 })();
