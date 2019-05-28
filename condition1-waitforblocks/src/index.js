@@ -31,6 +31,10 @@ function cancelActionGoal(actionName) {
   makeCancelGoal(actionName)(handles[actionName]);
 }
 
+async function sleep(sec) {
+  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
+}
+
 async function race(sendActionGoalFncs, cancelFncs) {
   const out = await Promise.race(
     sendActionGoalFncs.map(async (sendActionGoalFnc, i) => ({
@@ -95,6 +99,22 @@ function stopWaitUntilFaceEvent(id) {
 
 Blockly.defineBlocksWithJsonArray([
   {
+    type: "wait_until_face_event",
+    message0: "wait until face event: posX, posY %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "WU0",
+        check: "Boolean"
+      }
+    ],
+    output: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  //----------------------------------------------------------------------------
+  {
     type: "display_message",
     message0: "display message %1",
     args0: [
@@ -104,7 +124,7 @@ Blockly.defineBlocksWithJsonArray([
         check: "String"
       }
     ],
-    output: ["Action"],
+    output: "Action",
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -134,7 +154,7 @@ Blockly.defineBlocksWithJsonArray([
         check: "String"
       }
     ],
-    output: ["Action"],
+    output: "Action",
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -148,6 +168,21 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   //----------------------------------------------------------------------------
+  {
+    type: "sleep",
+    message0: "sleep for %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "ARG0",
+        check: "Number"
+      }
+    ],
+    output: "Action",
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "wait_for_all",
     message0: "wait for all %1 %2",
@@ -181,21 +216,6 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "DO1",
         check: "Action"
-      }
-    ],
-    output: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_until",
-    message0: "wait until face posX, posY become %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "WU0",
-        check: "Boolean"
       }
     ],
     output: null,
@@ -242,6 +262,17 @@ Blockly.JavaScript["listen"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+Blockly.JavaScript["sleep"] = function(block) {
+  return [
+    `await sleep(${Blockly.JavaScript.valueToCode(
+      block,
+      "ARG0",
+      Blockly.JavaScript.ORDER_ATOMIC
+    )})`,
+    Blockly.JavaScript.ORDER_NONE
+  ];
+};
+
 Blockly.JavaScript["wait_for_all"] = function(block) {
   return [
     "await Promise.all([" +
@@ -271,7 +302,6 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
           "DO" + i,
           Blockly.JavaScript.ORDER_ATOMIC
         );
-        // TODO: update here for waitForX
         const m = code.match(/\("([a-zA-Z]+)",/);
         const name = !!m ? m[1] : "";
         cancelFncsCode.push(
@@ -279,7 +309,7 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
             ? `cancelActionGoal.bind(null, "${name}")`
             : name !== ""
             ? `stopWaitUntilFaceEvent.bind(null, "${name}")`
-            : name
+            : `() => {}`
         );
         return `(async () => {\nreturn ${Blockly.JavaScript.valueToCode(
           block,
@@ -293,18 +323,14 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
   ];
 };
 
-Blockly.JavaScript["wait_until"] = function(block) {
-  // TODO: update this into a function
+Blockly.JavaScript["wait_until_face_event"] = function(block) {
   const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
   return [
-    `(async () => {
-  const {start${id}, stop${id}} = waitUntilFaceEvent();
-  return await start${id}(${Blockly.JavaScript.valueToCode(
+    `await waitUntilFaceEvent("${id}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
       block,
       "WU0",
       Blockly.JavaScript.ORDER_ATOMIC
-    )});
-})()`,
+    )})`,
     Blockly.JavaScript.ORDER_NONE
   ];
 };
@@ -373,6 +399,8 @@ const sources = initialize({
   }
 });
 
+sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
     editor
@@ -382,34 +410,5 @@ document.getElementById("run").onclick = () => {
 
 //------------------------------------------------------------------------------
 (async () => {
-  // race(
-  //   [
-  //     async () => {
-  //       return await sendActionGoal("RobotSpeechbubbleAction", "Hello there!");
-  //     },
-  //     async () => {
-  //       return await sendActionGoal("HumanSpeechbubbleAction", [
-  //         "Choice1",
-  //         "Choice2"
-  //       ]);
-  //     }
-  //   ],
-  //   [
-  //     cancelActionGoal.bind(
-  //       null,
-  //       cancelActionGoal.bind(null, "RobotSpeechbubbleAction")
-  //     ),
-  //     cancelActionGoal.bind(
-  //       null,
-  //       cancelActionGoal.bind(null, "HumanSpeechbubbleAction")
-  //     )
-  //   ]
-  // );
-  // console.log("ready");
-  // await waitUntilFaceEvent("xyx", (posX, posY) => {
-  //   console.log(posX, posY);
-  //   return posX === null;
-  // });
-  // console.error("done!");
-  // stopWaitUntilFaceEvent("xyx");
+  console.log("test");
 })();
