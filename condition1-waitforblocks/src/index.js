@@ -46,17 +46,24 @@ async function race(sendActionGoalFncs, cancelFncs) {
   return out.o;
 }
 
-function waitUntilFaceEvent() {
-  const stream = sources.PoseDetection.events("poses");
-  let listener;
-  return {
-    start: promisify((predicate, cb) => {
-      const pred = poses => {
+const waitHandles = {};
+
+function waitUntilFaceEvent(id, predicate) {
+  waitHandles[id] = {
+    listener: null,
+    stream: sources.PoseDetection.events("poses"),
+    stop: () => {
+      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+    }
+  };
+  return promisify((pred, cb) => {
+    waitHandles[id].listener = createStreamEventListener(
+      poses => {
         if (poses.length === 0) {
-          return predicate(null, null);
+          return pred(null, null);
         } else {
           const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
-          return predicate(
+          return pred(
             !nosePoint
               ? null
               : nosePoint.position.x === 0
@@ -69,17 +76,18 @@ function waitUntilFaceEvent() {
               : (480 - nosePoint.position.y) / 480
           );
         }
-      };
-      listener = createStreamEventListener(pred, (err, val) => {
-        stream.removeListener(listener);
+      },
+      (err, val) => {
+        waitHandles[id].stream.removeListener(waitHandles[id].listener);
         cb(err, val);
-      });
-      stream.addListener(listener);
-    }),
-    stop: () => {
-      stream.removeListener(listener);
-    }
-  };
+      }
+    );
+    waitHandles[id].stream.addListener(waitHandles[id].listener);
+  })(predicate);
+}
+
+function stopWaitUntilFaceEvent(id) {
+  waitHandles[id].stop();
 }
 
 //------------------------------------------------------------------------------
@@ -254,7 +262,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
-  const aNames = [];
+  const cancelFncsCode = [];
   return [
     `race([${[0, 1]
       .map(i => {
@@ -264,10 +272,15 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
           Blockly.JavaScript.ORDER_ATOMIC
         );
         // TODO: update here for waitForX
-        let name = !code.match(/\("([a-zA-Z]+)",/)
-          ? ""
-          : code.match(/\("([a-zA-Z]+)",/)[1];
-        aNames.push(name);
+        const m = code.match(/\("([a-zA-Z]+)",/);
+        const name = !!m ? m[1] : "";
+        cancelFncsCode.push(
+          actionNames.indexOf(name) !== -1
+            ? `cancelActionGoal.bind(null, "${name}")`
+            : name !== ""
+            ? `stopWaitUntilFaceEvent.bind(null, "${name}")`
+            : name
+        );
         return `(async () => {\nreturn ${Blockly.JavaScript.valueToCode(
           block,
           "DO" + i,
@@ -275,20 +288,18 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
         )}})`;
       })
       .join(",\n")
-      .trim()}], [${[0, 1]
-      .map(i => `cancelActionGoal.bind(null, "${aNames[i]}")`)
-      .join(", ")}]);`,
+      .trim()}], [${[0, 1].map(i => `${cancelFncsCode[i]}`).join(", ")}]);`,
     Blockly.JavaScript.ORDER_NONE
   ];
 };
 
 Blockly.JavaScript["wait_until"] = function(block) {
+  // TODO: update this into a function
   const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
   return [
     `(async () => {
   const {start${id}, stop${id}} = waitUntilFaceEvent();
   return await start${id}(${Blockly.JavaScript.valueToCode(
-      // TODO: update this into a function
       block,
       "WU0",
       Blockly.JavaScript.ORDER_ATOMIC
@@ -371,86 +382,34 @@ document.getElementById("run").onclick = () => {
 
 //------------------------------------------------------------------------------
 (async () => {
-  await race(
-    [
-      async () => {
-        return await sendActionGoal("RobotSpeechbubbleAction", "Hello there!");
-      },
-      async () => {
-        return await sendActionGoal("HumanSpeechbubbleAction", [
-          "Choice1",
-          "Choice2"
-        ]);
-      }
-    ],
-    [
-      cancelActionGoal.bind(null, "RobotSpeechbubbleAction"),
-      cancelActionGoal.bind(null, "HumanSpeechbubbleAction")
-    ]
-  );
-
-  await race(
-    [
-      async () => {
-        return await sendActionGoal("RobotSpeechbubbleAction", "Hello there?");
-      },
-      async () => {
-        return await sendActionGoal("HumanSpeechbubbleAction", [
-          "Choice1x",
-          "Choice2x"
-        ]);
-      }
-    ],
-    [
-      cancelActionGoal.bind(null, "RobotSpeechbubbleAction"),
-      cancelActionGoal.bind(null, "HumanSpeechbubbleAction")
-    ]
-  );
-
-  //   // race2(sendActionGoals, cancels) {
-  //   //   out = sendActionGoals.map((sendActionGoal, i) => {
-  //   //     return {
-  //   //       i: i,
-  //   //       out: sendActionGoals()
-  //   //     };
-  //   //   });
-  //   //   // run promise
-  //   //   sendActionGoals.map(_, i) => {
-  //   //     if (i !== out.i) {
-  //   //       cancels[i]()
-  //   //     }
-  //   //   }
-  //   // }
-
-  //   var result;
-  //   // 1. extract action names in array
-  //   result = await Promise.race([
-  //     // update to return index
-  //     (async () => {
-  //       return await sendActionGoal("RobotSpeechbubbleAction", "Hello");
-  //     })(),
-  //     (async () => {
-  //       result = await sendActionGoal("HumanSpeechbubbleAction", [
+  // race(
+  //   [
+  //     async () => {
+  //       return await sendActionGoal("RobotSpeechbubbleAction", "Hello there!");
+  //     },
+  //     async () => {
+  //       return await sendActionGoal("HumanSpeechbubbleAction", [
   //         "Choice1",
   //         "Choice2"
   //       ]);
-  //       return result;
-  //     })()
-  //   ]);
-  //   // 2. cancel all the ones that are not index using "map"
-  //   makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-  //   // that's it
-  //   return await sendActionGoal("RobotSpeechbubbleAction", result);
-  // }, 1000);
-
-  // const { start, stop } = waitUntilFaceEvent();
-
-  // (async () => {
-  //   console.log("ready");
-  //   await start((posX, posY) => {
-  //     console.log(posX, posY);
-  //     return posX === null;
-  //   });
-  //   console.error("done!");
-  //   // stop();
+  //     }
+  //   ],
+  //   [
+  //     cancelActionGoal.bind(
+  //       null,
+  //       cancelActionGoal.bind(null, "RobotSpeechbubbleAction")
+  //     ),
+  //     cancelActionGoal.bind(
+  //       null,
+  //       cancelActionGoal.bind(null, "HumanSpeechbubbleAction")
+  //     )
+  //   ]
+  // );
+  // console.log("ready");
+  // await waitUntilFaceEvent("xyx", (posX, posY) => {
+  //   console.log(posX, posY);
+  //   return posX === null;
+  // });
+  // console.error("done!");
+  // stopWaitUntilFaceEvent("xyx");
 })();
