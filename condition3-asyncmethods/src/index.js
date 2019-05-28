@@ -7,6 +7,7 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
+import { promisify } from "util";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -36,52 +37,11 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "MESSAGE",
-        check: "String"
+        check: ["String", "Number"]
       }
     ],
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "getResult",
-    message0: "get result %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "GOALID"
-      }
-    ],
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "getStatus",
-    message0: "get status %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "GOALID"
-      }
-    ],
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel",
-    message0: "cancel %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "GOALID"
-      }
-    ],
-    output: null,
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -96,25 +56,50 @@ Blockly.defineBlocksWithJsonArray([
         check: "Array"
       }
     ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_result",
+    message0: "get result %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "NAME"
+      }
+    ],
     output: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
   },
   {
-    type: "cancel_display_message",
-    message0: "cancel display message",
-    previousStatement: null,
-    nextStatement: null,
+    type: "get_status",
+    message0: "get status %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "NAME"
+      }
+    ],
+    output: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
   },
   {
-    type: "cancel_ask_multiple_choice",
-    message0: "cancel ask multiple choice",
-    previousStatement: null,
-    nextStatement: null,
+    type: "cancel",
+    message0: "cancel %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "NAME"
+      }
+    ],
+    output: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -127,7 +112,7 @@ Blockly.JavaScript["display_message"] = function(block) {
     "MESSAGE",
     Blockly.JavaScript.ORDER_ATOMIC
   )})`;
-  return [code, Blockly.JavaScript.ORDER_NONE];
+  return code;
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
@@ -136,57 +121,13 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
     "CHOICES",
     Blockly.JavaScript.ORDER_ATOMIC
   )})`;
-  return [code, Blockly.JavaScript.ORDER_NONE];
+  return code;
 };
 
-Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return `makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);\n`;
-};
-
-Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return `makeCancelGoal("HumanSpeechbubbleAction")(handles["HumanSpeechbubbleAction"]);\n`;
-};
-
-Blockly.JavaScript["wait_for_all"] = function(block) {
-  return [
-    "await Promise.all([" +
-      [0, 1]
-        .map(function(i) {
-          return `(async () => {\n${Blockly.JavaScript.statementToCode(
-            block,
-            "DO" + i
-          )}})()`;
-        })
-        .join(", ")
-        .trim() +
-      "])",
-    Blockly.JavaScript.ORDER_NONE
-  ];
-};
-
-Blockly.JavaScript["wait_for_one"] = function(block) {
-  return [
-    "await Promise.race([" +
-      [0, 1]
-        .map(function(i) {
-          return `(async () => {\n${Blockly.JavaScript.statementToCode(
-            block,
-            "DO" + i
-          )}})()`;
-        })
-        .join(", ")
-        .trim() +
-      "])",
-    Blockly.JavaScript.ORDER_NONE
-  ];
-};
-
-Blockly.JavaScript["return"] = function(block) {
-  return `return ${Blockly.JavaScript.valueToCode(
-    block,
-    "VALUE",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )};`;
+Blockly.JavaScript["get_result"] = function(block) {
+  console.log(result$._v);
+  // return `makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);\n`;
+  return "";
 };
 
 //------------------------------------------------------------------------------
@@ -250,6 +191,10 @@ const sources = initialize({
     }
   }
 });
+
+const result$ = sources.HumanSpeechbubbleAction.result.remember();
+result$.addListener({ next: _ => {} });
+// sources.HumanSpeechbubbleAction.status.addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
