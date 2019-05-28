@@ -113,9 +113,8 @@ Blockly.defineBlocksWithJsonArray([
         check: ["String", "Number"]
       },
       {
-        type: "input_value",
-        name: "CALLBACK",
-        check: "Callback"
+        type: "input_statement",
+        name: "DO"
       }
     ],
     previousStatement: null,
@@ -133,9 +132,8 @@ Blockly.defineBlocksWithJsonArray([
         name: "CHOICES"
       },
       {
-        type: "input_value",
-        name: "CALLBACK",
-        check: "Callback"
+        type: "input_statement",
+        name: "DO"
       }
     ],
     previousStatement: null,
@@ -188,11 +186,7 @@ Blockly.JavaScript["display_message"] = function(block) {
     block,
     "MESSAGE",
     Blockly.JavaScript.ORDER_ATOMIC
-  )}), ${Blockly.JavaScript.valueToCode(
-    block,
-    "CALLBACK",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`;
   return code;
 };
 
@@ -201,11 +195,7 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
     block,
     "CHOICES",
     Blockly.JavaScript.ORDER_ATOMIC
-  )}, ${Blockly.JavaScript.valueToCode(
-    block,
-    "CALLBACK",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  )}, (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`;
   return code;
 };
 
