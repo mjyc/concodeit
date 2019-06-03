@@ -31,23 +31,8 @@ function cancelActionGoal(actionName) {
   makeCancelGoal(actionName)(handles[actionName]);
 }
 
-async function sleep(sec) {
+function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
-}
-
-async function race(sendActionGoalFncs, cancelFncs) {
-  const out = await Promise.race(
-    sendActionGoalFncs.map(async (sendActionGoalFnc, i) => ({
-      i: i,
-      o: await sendActionGoalFnc()
-    }))
-  );
-  cancelFncs.map((cancelFnc, i) => {
-    if (i !== out.i) {
-      cancelFnc();
-    }
-  });
-  return out.o;
 }
 
 const waitHandles = {};
@@ -100,7 +85,7 @@ function stopWaitUntilFaceEvent(id) {
 Blockly.defineBlocksWithJsonArray([
   {
     type: "wait_until_face_event",
-    message0: "wait until face event: faceYaw, faceRoll %1",
+    message0: "wait until face event: posX, posY %1",
     args0: [
       {
         type: "input_value",
@@ -273,71 +258,40 @@ Blockly.JavaScript["sleep"] = function(block) {
     block,
     "ARG0",
     Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  )});\n`;
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
-  return "";
-  // return [
-  //   "await Promise.all([" +
-  //     [0, 1]
-  //       .map(
-  //         i =>
-  //           `(async () => {\n${Blockly.JavaScript.valueToCode(
-  //             block,
-  //             "DO" + i,
-  //             Blockly.JavaScript.ORDER_ATOMIC
-  //           )}})()`
-  //       )
-  //       .join(", ")
-  //       .trim() +
-  //     "]);",
-  //   Blockly.JavaScript.ORDER_NONE
-  // ];
+  return `await Promise.all([${[0, 1]
+    .map(
+      i =>
+        `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+          block,
+          `DO${i}`
+        )}  cb(null, null);\n})()`
+    )
+    .join(", ")}]);\n`;
 };
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
-  const cancelFncsCode = [];
-  return "";
-  // return [
-  //   `race([${[0, 1]
-  //     .map(i => {
-  //       const code = Blockly.JavaScript.valueToCode(
-  //         block,
-  //         "DO" + i,
-  //         Blockly.JavaScript.ORDER_ATOMIC
-  //       );
-  //       const m = code.match(/\("([a-zA-Z]+)",/);
-  //       const name = !!m ? m[1] : "";
-  //       cancelFncsCode.push(
-  //         actionNames.indexOf(name) !== -1
-  //           ? `cancelActionGoal.bind(null, "${name}")`
-  //           : name !== ""
-  //           ? `stopWaitUntilFaceEvent.bind(null, "${name}")`
-  //           : `() => {}`
-  //       );
-  //       return `(async () => {\nreturn ${Blockly.JavaScript.valueToCode(
-  //         block,
-  //         "DO" + i,
-  //         Blockly.JavaScript.ORDER_ATOMIC
-  //       )}})`;
-  //     })
-  //     .join(",\n")
-  //     .trim()}], [${[0, 1].map(i => `${cancelFncsCode[i]}`).join(", ")}]);`,
-  //   Blockly.JavaScript.ORDER_NONE
-  // ];
+  return `await Promise.race([${[0, 1]
+    .map(
+      i =>
+        `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+          block,
+          `DO${i}`
+        )}  cb(null, null);\n})()`
+    )
+    .join(", ")}]);\n`;
 };
 
 Blockly.JavaScript["wait_until_face_event"] = function(block) {
   const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
-  return [
-    `await waitUntilFaceEvent("${id}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
-      block,
-      "WU0",
-      Blockly.JavaScript.ORDER_ATOMIC
-    )})`,
-    Blockly.JavaScript.ORDER_NONE
-  ];
+  return `waitUntilFaceEvent("${id}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
+    block,
+    "WU0",
+    Blockly.JavaScript.ORDER_ATOMIC
+  )})`;
 };
 
 //------------------------------------------------------------------------------
@@ -402,7 +356,7 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+// sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
@@ -415,4 +369,20 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("test");
+  // var result;
+
+  // await Promise.all([
+  //   promisify(async cb => {
+  //     await sleep(1);
+  //     cb(null, null);
+  //   })(),
+  //   promisify(async cb => {
+  //     result = await sendActionGoal("HumanSpeechbubbleAction", [
+  //       "Choice1",
+  //       "Choice2"
+  //     ]);
+  //     cb(null, null);
+  //   })()
+  // ]);
+  // result = await sendActionGoal("RobotSpeechbubbleAction", String(result));
 })();
