@@ -28,7 +28,7 @@ function sendActionGoal(actionName, goal) {
 }
 
 function cancelActionGoal(actionName) {
-  makeCancelGoal(actionName)(handles[actionName]);
+  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
 
 function sleep(sec) {
@@ -42,6 +42,7 @@ function promisify2(f) {
 
 const waitHandles = {};
 
+// IDEA: provide faceYaw, faceRoll, faceSize in addition
 function waitUntilFaceEvent(id, predicate) {
   waitHandles[id] = {
     listener: null,
@@ -82,6 +83,10 @@ function waitUntilFaceEvent(id, predicate) {
 
 function stopWaitUntilFaceEvent(id) {
   waitHandles[id].stop();
+}
+
+function endProgram() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
 //------------------------------------------------------------------------------
@@ -222,6 +227,15 @@ Blockly.defineBlocksWithJsonArray([
     colour: 290,
     tooltip: "",
     helpUrl: ""
+  },
+  //----------------------------------------------------------------------------
+  {
+    type: "end_program",
+    message0: "end program",
+    previousStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
   }
   //----------------------------------------------------------------------------
 ]);
@@ -278,6 +292,9 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
     .join(", ")}]);\n`;
 };
 
+// IDEA: stop unfinished sub-programs by adding "if (is{id}Done) return" after
+//   every statement in sub-programs; in addition, running sendActionGoal and
+//   waitUntilFaceEvent functions should be stopped
 Blockly.JavaScript["wait_for_one"] = function(block) {
   return `await Promise.race([${[0, 1]
     .map(
@@ -297,6 +314,10 @@ Blockly.JavaScript["wait_until_face_event"] = function(block) {
     "WU0",
     Blockly.JavaScript.ORDER_ATOMIC
   )})`;
+};
+
+Blockly.JavaScript["end_program"] = function(block) {
+  return !!block.getPreviousBlock() ? "endProgram();\n" : "";
 };
 
 //------------------------------------------------------------------------------
@@ -364,10 +385,8 @@ const sources = initialize({
 // sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
-  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
-    editor
-  )}})();`;
-  eval(curCode);
+  var code = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`;
+  eval(code);
 };
 
 //------------------------------------------------------------------------------
