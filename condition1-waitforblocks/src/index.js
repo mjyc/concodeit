@@ -100,7 +100,7 @@ function stopWaitUntilFaceEvent(id) {
 Blockly.defineBlocksWithJsonArray([
   {
     type: "wait_until_face_event",
-    message0: "wait until face event: posX, posY %1",
+    message0: "wait until face event: faceYaw, faceRoll %1",
     args0: [
       {
         type: "input_value",
@@ -108,7 +108,8 @@ Blockly.defineBlocksWithJsonArray([
         check: "Boolean"
       }
     ],
-    output: null,
+    previousStatement: null,
+    nextStatement: null,
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -178,47 +179,56 @@ Blockly.defineBlocksWithJsonArray([
         check: "Number"
       }
     ],
-    output: "Action",
+    previousStatement: null,
+    nextStatement: null,
     colour: 290,
     tooltip: "",
     helpUrl: ""
   },
   {
     type: "wait_for_all",
-    message0: "wait for all %1 %2",
+    message0: "wait for all %1 %2 %3",
     args0: [
       {
-        type: "input_value",
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
         name: "DO0",
         check: "Action"
       },
       {
-        type: "input_value",
+        type: "input_statement",
         name: "DO1",
         check: "Action"
       }
     ],
-    output: null,
+    previousStatement: null,
+    nextStatement: null,
     colour: 290,
     tooltip: "",
     helpUrl: ""
   },
   {
     type: "wait_for_one",
-    message0: "wait for one %1 %2",
+    message0: "wait for one %1 %2 %3",
     args0: [
       {
-        type: "input_value",
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
         name: "DO0",
         check: "Action"
       },
       {
-        type: "input_value",
+        type: "input_statement",
         name: "DO1",
         check: "Action"
       }
     ],
-    output: null,
+    previousStatement: null,
+    nextStatement: null,
     colour: 290,
     tooltip: "",
     helpUrl: ""
@@ -259,64 +269,63 @@ Blockly.JavaScript["listen"] = function(block) {
 };
 
 Blockly.JavaScript["sleep"] = function(block) {
-  return [
-    `await sleep(${Blockly.JavaScript.valueToCode(
-      block,
-      "ARG0",
-      Blockly.JavaScript.ORDER_ATOMIC
-    )})`,
-    Blockly.JavaScript.ORDER_NONE
-  ];
+  return `await sleep(${Blockly.JavaScript.valueToCode(
+    block,
+    "ARG0",
+    Blockly.JavaScript.ORDER_ATOMIC
+  )})`;
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
-  return [
-    "await Promise.all([" +
-      [0, 1]
-        .map(
-          i =>
-            `(async () => {\n${Blockly.JavaScript.valueToCode(
-              block,
-              "DO" + i,
-              Blockly.JavaScript.ORDER_ATOMIC
-            )}})()`
-        )
-        .join(", ")
-        .trim() +
-      "]);",
-    Blockly.JavaScript.ORDER_NONE
-  ];
+  return "";
+  // return [
+  //   "await Promise.all([" +
+  //     [0, 1]
+  //       .map(
+  //         i =>
+  //           `(async () => {\n${Blockly.JavaScript.valueToCode(
+  //             block,
+  //             "DO" + i,
+  //             Blockly.JavaScript.ORDER_ATOMIC
+  //           )}})()`
+  //       )
+  //       .join(", ")
+  //       .trim() +
+  //     "]);",
+  //   Blockly.JavaScript.ORDER_NONE
+  // ];
 };
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
   const cancelFncsCode = [];
-  return [
-    `race([${[0, 1]
-      .map(i => {
-        const code = Blockly.JavaScript.valueToCode(
-          block,
-          "DO" + i,
-          Blockly.JavaScript.ORDER_ATOMIC
-        );
-        const m = code.match(/\("([a-zA-Z]+)",/);
-        const name = !!m ? m[1] : "";
-        cancelFncsCode.push(
-          actionNames.indexOf(name) !== -1
-            ? `cancelActionGoal.bind(null, "${name}")`
-            : name !== ""
-            ? `stopWaitUntilFaceEvent.bind(null, "${name}")`
-            : `() => {}`
-        );
-        return `(async () => {\nreturn ${Blockly.JavaScript.valueToCode(
-          block,
-          "DO" + i,
-          Blockly.JavaScript.ORDER_ATOMIC
-        )}})`;
-      })
-      .join(",\n")
-      .trim()}], [${[0, 1].map(i => `${cancelFncsCode[i]}`).join(", ")}]);`,
-    Blockly.JavaScript.ORDER_NONE
-  ];
+  return "";
+  // return [
+  //   `race([${[0, 1]
+  //     .map(i => {
+  //       const code = Blockly.JavaScript.valueToCode(
+  //         block,
+  //         "DO" + i,
+  //         Blockly.JavaScript.ORDER_ATOMIC
+  //       );
+  //       const m = code.match(/\("([a-zA-Z]+)",/);
+  //       const name = !!m ? m[1] : "";
+  //       cancelFncsCode.push(
+  //         actionNames.indexOf(name) !== -1
+  //           ? `cancelActionGoal.bind(null, "${name}")`
+  //           : name !== ""
+  //           ? `stopWaitUntilFaceEvent.bind(null, "${name}")`
+  //           : `() => {}`
+  //       );
+  //       return `(async () => {\nreturn ${Blockly.JavaScript.valueToCode(
+  //         block,
+  //         "DO" + i,
+  //         Blockly.JavaScript.ORDER_ATOMIC
+  //       )}})`;
+  //     })
+  //     .join(",\n")
+  //     .trim()}], [${[0, 1].map(i => `${cancelFncsCode[i]}`).join(", ")}]);`,
+  //   Blockly.JavaScript.ORDER_NONE
+  // ];
 };
 
 Blockly.JavaScript["wait_until_face_event"] = function(block) {

@@ -20,12 +20,12 @@
                 <block type="logic_compare">
                   <value name="A">
                     <block type="variables_get">
-                      <field name="VAR">posX</field>
+                      <field name="VAR">faceYaw</field>
                     </block>
                   </value>
                   <value name="B">
                     <block type="variables_get">
-                      <field name="VAR">posY</field>
+                      <field name="VAR">faceRoll</field>
                     </block>
                   </value>
                 </block>
@@ -33,38 +33,58 @@
             </block>
           </category>
           <category name="Action" colour="230">
-            <block type="display_message">
-              <value name="MESSAGE">
-                <block type="text">
-                  <field name="TEXT">Hello there!</field>
-                </block>
-              </value>
-            </block>
-            <block type="ask_multiple_choice">
-              <value name="CHOICES">
-                <block type="lists_create_with">
-                  <mutation items="2"></mutation>
-                  <value name="ADD0">
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="display_message">
+                  <value name="MESSAGE">
                     <block type="text">
-                      <field name="TEXT">Choice1</field>
-                    </block>
-                  </value>
-                  <value name="ADD1">
-                    <block type="text">
-                      <field name="TEXT">Choice2</field>
+                      <field name="TEXT">Hello there!</field>
                     </block>
                   </value>
                 </block>
               </value>
             </block>
-            <block type="speak">
-              <value name="MESSAGE">
-                <block type="text">
-                  <field name="TEXT">Hello</field>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="ask_multiple_choice">
+                  <value name="CHOICES">
+                    <block type="lists_create_with">
+                      <mutation items="2"></mutation>
+                      <value name="ADD0">
+                        <block type="text">
+                          <field name="TEXT">Choice1</field>
+                        </block>
+                      </value>
+                      <value name="ADD1">
+                        <block type="text">
+                          <field name="TEXT">Choice2</field>
+                        </block>
+                      </value>
+                    </block>
+                  </value>
                 </block>
               </value>
             </block>
-            <block type="listen"> </block>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="speak">
+                  <value name="MESSAGE">
+                    <block type="text">
+                      <field name="TEXT">Hello</field>
+                    </block>
+                  </value>
+                </block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="listen"> </block>
+              </value>
+            </block>
           </category>
           <category name="Conccurent" colour="290">
             <block type="sleep">
