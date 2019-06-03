@@ -382,7 +382,7 @@ const sources = initialize({
   }
 });
 
-// sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var code = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`;

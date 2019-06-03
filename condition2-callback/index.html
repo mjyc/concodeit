@@ -8,7 +8,9 @@
   <body>
     <button id="run">Run</button>
 
-    <xml id="startBlocks" style="display:none"></xml>
+    <xml id="startBlocks" style="display:none">
+      <block type="end_program"> </block>
+    </xml>
 
     <div class="demo">
       <div>
@@ -119,6 +121,9 @@
             </block>
             <block type="cancel_display_message"></block>
             <block type="cancel_ask_multiple_choice"></block>
+          </category>
+          <category name="Program control " colour="290">
+            <block type="end_program"></block>
           </category>
           <sep></sep>
           <category name="Logic" colour="%{BKY_LOGIC_HUE}">

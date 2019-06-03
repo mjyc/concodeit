@@ -36,6 +36,7 @@ function sleep(second = 0, callback = () => {}) {
 
 const eventHandles = {};
 
+// IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
 function detectFace(id, callback) {
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
@@ -71,6 +72,8 @@ function stopDetectFace(id) {
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
+
+// IDEA: add "speak" and "listen"
 
 Blockly.defineBlocksWithJsonArray([
   {
@@ -182,8 +185,19 @@ Blockly.defineBlocksWithJsonArray([
     colour: 230,
     tooltip: "",
     helpUrl: ""
+  },
+  {
+    type: "end_program",
+    message0: "end program",
+    previousStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
   }
 ]);
+
+// IMPORTANT!! callbacks are introduces local variables, which blockly does not
+//   usually allow; it might bring confusion in future
 
 Blockly.JavaScript["detect_face"] = function(block) {
   const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
@@ -236,6 +250,10 @@ Blockly.JavaScript["cancel_display_message"] = function(block) {
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
   return `cancelActionGoal("HumanSpeechbubbleAction");\n`;
+};
+
+Blockly.JavaScript["end_program"] = function(block) {
+  return !!block.getPreviousBlock() ? "endProgram();\n" : "";
 };
 
 //------------------------------------------------------------------------------
@@ -313,19 +331,4 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("test");
-  // var id, posX, posY;
-
-  // await promisify(cb => setTimeout(cb, 1000))();
-  // /**
-  //  * Describe this function...
-  //  */
-  // function handle_face_event(posX, posY) {
-  //   sendActionGoalCallback("RobotSpeechbubbleAction", String(posX));
-  // }
-
-  // id = detectFace(59395985, (posX, posY) => {
-  //   if (posX !== null) handle_face_event(posX, posY);
-  // });
-
-  // console.log("done");
 })();
