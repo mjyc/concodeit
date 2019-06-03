@@ -35,6 +35,11 @@ function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
+// HACK to make promisify in eval; used by wait_for_all and wait_for_one
+function promisify2(f) {
+  return promisify(f);
+}
+
 const waitHandles = {};
 
 function waitUntilFaceEvent(id, predicate) {
@@ -265,7 +270,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
   return `await Promise.all([${[0, 1]
     .map(
       i =>
-        `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+        `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
           block,
           `DO${i}`
         )}  cb(null, null);\n})()`
@@ -277,7 +282,7 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
   return `await Promise.race([${[0, 1]
     .map(
       i =>
-        `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+        `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
           block,
           `DO${i}`
         )}  cb(null, null);\n})()`
@@ -368,21 +373,5 @@ document.getElementById("run").onclick = () => {
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
-  console.log("test");
-  // var result;
-
-  // await Promise.all([
-  //   promisify(async cb => {
-  //     await sleep(1);
-  //     cb(null, null);
-  //   })(),
-  //   promisify(async cb => {
-  //     result = await sendActionGoal("HumanSpeechbubbleAction", [
-  //       "Choice1",
-  //       "Choice2"
-  //     ]);
-  //     cb(null, null);
-  //   })()
-  // ]);
-  // result = await sendActionGoal("RobotSpeechbubbleAction", String(result));
+  console.log("started");
 })();
