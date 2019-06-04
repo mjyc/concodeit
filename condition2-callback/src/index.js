@@ -181,6 +181,41 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "speak",
+    message0: "speak %1 %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "listen",
+    message0: "listen %1",
+    args0: [
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "cancel_display_message",
     message0: "cancel display message",
     previousStatement: null,
@@ -192,6 +227,24 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: "cancel_ask_multiple_choice",
     message0: "cancel ask multiple choice",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_speak",
+    message0: "cancel speak",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_listen",
+    message0: "cancel listen",
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -256,6 +309,25 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["speak"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `sendActionGoalCallback("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+    : "";
+};
+
+Blockly.JavaScript["listen"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}})`
+    : "";
+};
+
 Blockly.JavaScript["cancel_display_message"] = function(block) {
   return block.getRootBlock().type === "start_program"
     ? `cancelActionGoal("RobotSpeechbubbleAction");\n`
@@ -265,6 +337,18 @@ Blockly.JavaScript["cancel_display_message"] = function(block) {
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
   return block.getRootBlock().type === "start_program"
     ? `cancelActionGoal("HumanSpeechbubbleAction");\n`
+    : "";
+};
+
+Blockly.JavaScript["cancel_speak"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `cancelActionGoal("SpeechSynthesisAction");\n`
+    : "";
+};
+
+Blockly.JavaScript["cancel_listen"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `cancelActionGoal("SpeechRecognitionAction");\n`
     : "";
 };
 

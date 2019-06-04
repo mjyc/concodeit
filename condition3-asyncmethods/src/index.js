@@ -125,6 +125,31 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "speak",
+    message0: "speak %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "listen",
+    message0: "listen",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "get_display_message_result",
     message0: "get display message result",
     output: null,
@@ -135,6 +160,22 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: "get_ask_multiple_choice_result",
     message0: "get multiple choice result",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_speak_result",
+    message0: "get speak result",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_listen_result",
+    message0: "get listen result",
     output: null,
     colour: 230,
     tooltip: "",
@@ -157,6 +198,22 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "get_speak_status",
+    message0: "get speak status",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_listen_status",
+    message0: "get listen status",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "cancel_display_message",
     message0: "cancel display message",
     previousStatement: null,
@@ -168,6 +225,24 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: "cancel_ask_multiple_choice",
     message0: "cancel ask multiple choice",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_speak",
+    message0: "cancel speak",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_listen",
+    message0: "cancel listen",
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -230,6 +305,22 @@ Blockly.JavaScript["get_ask_multiple_choice_result"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+Blockly.JavaScript["get_speak_result"] = function(block) {
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("SpeechSynthesisAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["get_listen_result"] = function(block) {
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("SpeechRecognitionAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 Blockly.JavaScript["get_display_message_status"] = function(block) {
   const code =
     block.getRootBlock().type === "start_program"
@@ -246,12 +337,36 @@ Blockly.JavaScript["get_ask_multiple_choice_status"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+Blockly.JavaScript["get_speak_status"] = function(block) {
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("SpeechSynthesisAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["get_listen_status"] = function(block) {
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("SpeechRecognitionAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 Blockly.JavaScript["cancel_display_message"] = function(block) {
   return `cancelActionGoal("RobotSpeechbubbleAction");\n`;
 };
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
   return `cancelActionGoal("HumanSpeechbubbleAction");\n`;
+};
+
+Blockly.JavaScript["cancel_speak"] = function(block) {
+  return `cancelActionGoal("SpeechSynthesisAction");\n`;
+};
+
+Blockly.JavaScript["cancel_listen"] = function(block) {
+  return `cancelActionGoal("SpeechRecognitionAction");\n`;
 };
 
 Blockly.JavaScript["start_program"] = function(block) {

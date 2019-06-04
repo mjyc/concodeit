@@ -163,6 +163,43 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
+  ,
+  {
+    type: "cancel_display_message",
+    message0: "cancel display message",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_ask_multiple_choice",
+    message0: "cancel ask multiple choice",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_speak",
+    message0: "cancel speak",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_listen",
+    message0: "cancel listen",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
   //----------------------------------------------------------------------------
   {
     type: "sleep",
@@ -291,6 +328,30 @@ Blockly.JavaScript["listen"] = function(block) {
       ? `await sendActionGoal("SpeechRecognitionAction", {})`
       : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["cancel_display_message"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `cancelActionGoal("RobotSpeechbubbleAction");\n`
+    : "";
+};
+
+Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `cancelActionGoal("HumanSpeechbubbleAction");\n`
+    : "";
+};
+
+Blockly.JavaScript["cancel_speak"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `cancelActionGoal("SpeechSynthesisAction");\n`
+    : "";
+};
+
+Blockly.JavaScript["cancel_listen"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `cancelActionGoal("SpeechRecognitionAction");\n`
+    : "";
 };
 
 Blockly.JavaScript["sleep"] = function(block) {

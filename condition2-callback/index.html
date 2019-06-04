@@ -42,19 +42,19 @@
                 </block>
               </value>
             </block>
-            <block type="stop_detect_face">
-              <value name="ID">
-                <block type="variables_get">
-                  <field name="VAR">id</field>
-                </block>
-              </value>
-            </block>
             <block type="procedures_defnoreturn">
               <mutation>
                 <arg name="posX"></arg>
                 <arg name="posY"></arg>
               </mutation>
               <field name="NAME">handle face event</field>
+            </block>
+            <block type="stop_detect_face">
+              <value name="ID">
+                <block type="variables_get">
+                  <field name="VAR">id</field>
+                </block>
+              </value>
             </block>
           </category>
           <category name="Action" colour="230">
@@ -73,7 +73,7 @@
               </value>
               <value name="DO">
                 <block type="procedures_callnoreturn">
-                  <mutation name="handle done action">
+                  <mutation name="handle display message done">
                     <arg name="result"></arg>
                   </mutation>
                   <value name="ARG0">
@@ -83,6 +83,12 @@
                   </value>
                 </block>
               </value>
+            </block>
+            <block type="procedures_defnoreturn">
+              <mutation>
+                <arg name="result"></arg>
+              </mutation>
+              <field name="NAME">handle ask multiple choice done</field>
             </block>
             <block type="ask_multiple_choice">
               <value name="CHOICES">
@@ -102,7 +108,7 @@
               </value>
               <value name="DO">
                 <block type="procedures_callnoreturn">
-                  <mutation name="handle done action">
+                  <mutation name="handle ask multiple choice done">
                     <arg name="result"></arg>
                   </mutation>
                   <value name="ARG0">
@@ -117,10 +123,58 @@
               <mutation>
                 <arg name="result"></arg>
               </mutation>
-              <field name="NAME">handle done action</field>
+              <field name="NAME">handle ask multiple choice done</field>
+            </block>
+            <block type="speak">
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT">Hi!</field>
+                </block>
+              </value>
+              <value name="DO">
+                <block type="procedures_callnoreturn">
+                  <mutation name="handle speak done">
+                    <arg name="result"></arg>
+                  </mutation>
+                  <value name="ARG0">
+                    <block type="variables_get">
+                      <field name="VAR">result</field>
+                    </block>
+                  </value>
+                </block>
+              </value>
+            </block>
+            <block type="procedures_defnoreturn">
+              <mutation>
+                <arg name="result"></arg>
+              </mutation>
+              <field name="NAME">handle speak done</field>
+            </block>
+
+            <block type="listen">
+              <value name="DO">
+                <block type="procedures_callnoreturn">
+                  <mutation name="handle listen done">
+                    <arg name="result"></arg>
+                  </mutation>
+                  <value name="ARG0">
+                    <block type="variables_get">
+                      <field name="VAR">result</field>
+                    </block>
+                  </value>
+                </block>
+              </value>
+            </block>
+            <block type="procedures_defnoreturn">
+              <mutation>
+                <arg name="result"></arg>
+              </mutation>
+              <field name="NAME">handle listen done</field>
             </block>
             <block type="cancel_display_message"></block>
             <block type="cancel_ask_multiple_choice"></block>
+            <block type="cancel_speak"></block>
+            <block type="cancel_listen"></block>
           </category>
           <category name="Program control " colour="290">
             <block type="start_program"></block>

@@ -43,7 +43,6 @@
                 <block type="get_display_message_result"></block>
               </value>
             </block>
-            <block type="cancel_display_message"></block>
             <block type="ask_multiple_choice">
               <value name="CHOICES">
                 <block type="lists_create_with">
@@ -73,7 +72,42 @@
                 <block type="get_ask_multiple_choice_result"></block>
               </value>
             </block>
+            <block type="speak">
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT">Hi!</field>
+                </block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">status</field>
+              <value name="VALUE">
+                <block type="get_speak_status"></block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="get_speak_result"></block>
+              </value>
+            </block>
+            <block type="listen"></block>
+            <block type="variables_set">
+              <field name="VAR">status</field>
+              <value name="VALUE">
+                <block type="get_listen_status"></block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="get_listen_result"></block>
+              </value>
+            </block>
+            <block type="cancel_display_message"></block>
             <block type="cancel_ask_multiple_choice"></block>
+            <block type="cancel_speak"></block>
+            <block type="cancel_listen"></block>
           </category>
           <category name="Program control" colour="290">
             <block type="start_program"></block>
