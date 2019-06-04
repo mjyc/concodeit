@@ -269,7 +269,9 @@ Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
-  return !!block.getNextBlock() ? "cancelActions();\n" : "";
+  return !!block.getNextBlock()
+    ? `// beg start_program\ncancelActions();\n// end start_program\n`
+    : "";
 };
 
 //------------------------------------------------------------------------------
