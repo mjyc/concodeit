@@ -27,7 +27,7 @@ function sendActionGoalCallback(actionName, goal, callback = () => {}) {
 }
 
 function cancelActionGoal(actionName) {
-  makeCancelGoal(actionName)(handles[actionName]);
+  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
 
 function sleep(second = 0, callback = () => {}) {
