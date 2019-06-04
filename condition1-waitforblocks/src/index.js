@@ -31,6 +31,10 @@ function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
 
+function cancelActionGoals() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
+}
+
 function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
@@ -83,10 +87,6 @@ function waitUntilFaceEvent(id, predicate) {
 
 function stopWaitUntilFaceEvent(id) {
   waitHandles[id].stop();
-}
-
-function cancelActions() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
 //------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ Blockly.JavaScript["wait_until_face_event"] = function(block) {
 
 Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
-    ? `// beg start_program\ncancelActions();\n// end start_program\n`
+    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
     : "";
 };
 

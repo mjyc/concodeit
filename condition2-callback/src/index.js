@@ -30,6 +30,10 @@ function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
 
+function cancelActionGoals() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
+}
+
 function sleep(second = 0, callback = () => {}) {
   setTimeout(callback, second * 1000);
 }
@@ -68,10 +72,6 @@ function detectFace(id, callback) {
 
 function stopDetectFace(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
-}
-
-function cancelActions() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
 //------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
 
 Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
-    ? `// beg start_program\ncancelActions();\n// end start_program\n`
+    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
     : "";
 };
 
