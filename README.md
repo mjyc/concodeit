@@ -1,6 +1,6 @@
 # ConCodeIt
 
-A Blockly wrapper for robotics programs. For now, it is integrated with [cycle-robot-drivers](https://github.com/mjyc/cycle-robot-drivers) but we hope to integrate with other robot frameworks such as [ROS](http://wiki.ros.org).
+A [Blockly](https://developers.google.com/blockly/) wrapper for robotics programs. For now, it is integrated with [cycle-robot-drivers](https://github.com/mjyc/cycle-robot-drivers) but we hope to integrate with other robot frameworks such as [ROS](http://wiki.ros.org).
 
 ConCodeIt stands for "concurrent" [CodeIt](https://github.com/hcrlab/code_it) and is built to help novice programmers with creating reactive, interactive robot programs easy for novice users.
 
