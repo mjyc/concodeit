@@ -35,6 +35,13 @@
             </block>
           </category>
           <category name="Action" colour="230">
+            <block type="sleep">
+              <value name="ARG0">
+                <block type="math_number">
+                  <field name="NUM">1</field>
+                </block>
+              </value>
+            </block>
             <block type="variables_set">
               <field name="VAR">result</field>
               <value name="VALUE">
@@ -89,13 +96,6 @@
             </block>
           </category>
           <category name="Conccurent" colour="290">
-            <block type="sleep">
-              <value name="ARG0">
-                <block type="math_number">
-                  <field name="NUM">1</field>
-                </block>
-              </value>
-            </block>
             <block type="wait_for_all"></block>
             <block type="wait_for_one"></block>
             <block type="done"></block>

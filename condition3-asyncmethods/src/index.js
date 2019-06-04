@@ -88,7 +88,7 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 290,
+    colour: 230,
     tooltip: "",
     helpUrl: ""
   },
