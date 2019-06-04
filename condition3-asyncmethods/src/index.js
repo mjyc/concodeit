@@ -63,70 +63,98 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "get_result",
-    message0: "get result %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "NAME"
-      }
-    ],
+    type: "get_display_message_result",
+    message0: "get display message result",
     output: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
   },
   {
-    type: "get_status",
-    message0: "get status %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "NAME"
-      }
-    ],
+    type: "get_ask_multiple_choice_result",
+    message0: "get multiple choice result",
     output: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
   },
   {
-    type: "cancel",
-    message0: "cancel %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "NAME"
-      }
-    ],
+    type: "get_display_message_status",
+    message0: "get display message status",
     output: null,
     colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_ask_multiple_choice_status",
+    message0: "get multiple choice status",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_display_message",
+    message0: "cancel display message",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "cancel_ask_multiple_choice",
+    message0: "cancel ask multiple choice",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_program",
+    message0: "start program",
+    nextStatement: null,
+    colour: 290,
     tooltip: "",
     helpUrl: ""
   }
 ]);
 
 Blockly.JavaScript["display_message"] = function(block) {
-  const code = `await sendActionGoal("RobotSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-    block,
-    "MESSAGE",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
-  return code;
+  return "";
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  const code = `await sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-    block,
-    "CHOICES",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
-  return code;
+  return "";
 };
 
-Blockly.JavaScript["get_result"] = function(block) {
-  console.log(result$._v);
-  // return `makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);\n`;
+Blockly.JavaScript["get_display_message_result"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["get_display_message_status"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["get_ask_multiple_choice_result"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["get_ask_multiple_choice_status"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["cancel_display_message"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["start_program"] = function(block) {
   return "";
 };
 
@@ -192,9 +220,7 @@ const sources = initialize({
   }
 });
 
-const result$ = sources.HumanSpeechbubbleAction.result.remember();
-result$.addListener({ next: _ => {} });
-// sources.HumanSpeechbubbleAction.status.addListener({ next: _ => {} });
+sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
@@ -206,6 +232,5 @@ document.getElementById("run").onclick = () => {
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
-  console.log("test");
-  console.log("done");
+  console.log("started");
 })();

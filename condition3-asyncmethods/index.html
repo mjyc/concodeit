@@ -8,7 +8,9 @@
   <body>
     <button id="run">Run</button>
 
-    <xml id="startBlocks" style="display:none"> </xml>
+    <xml id="startBlocks" style="display:none">
+      <block type="start_program"> </block>
+    </xml>
 
     <div class="demo">
       <div>
@@ -22,6 +24,19 @@
                 </shadow>
               </value>
             </block>
+            <block type="variables_set">
+              <field name="VAR">status</field>
+              <value name="VALUE">
+                <block type="get_display_message_status"></block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="get_display_message_result"></block>
+              </value>
+            </block>
+            <block type="cancel_display_message"></block>
             <block type="ask_multiple_choice">
               <value name="CHOICES">
                 <block type="lists_create_with">
@@ -39,9 +54,22 @@
                 </block>
               </value>
             </block>
-            <block type="get_status"></block>
-            <block type="get_result"></block>
-            <block type="cancel"></block>
+            <block type="variables_set">
+              <field name="VAR">status</field>
+              <value name="VALUE">
+                <block type="get_ask_multiple_choice_status"></block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="get_ask_multiple_choice_result"></block>
+              </value>
+            </block>
+            <block type="cancel_ask_multiple_choice"></block>
+          </category>
+          <category name="Program control" colour="290">
+            <block type="start_program"></block>
           </category>
           <sep></sep>
           <category name="Logic" colour="%{BKY_LOGIC_HUE}">

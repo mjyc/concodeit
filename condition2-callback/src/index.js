@@ -346,5 +346,5 @@ document.getElementById("run").onclick = () => {
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
-  console.log("test");
+  console.log("started");
 })();
