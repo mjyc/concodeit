@@ -26,10 +26,38 @@ function sendActionGoal(actionName, goal) {
   })(goal);
 }
 
+function cancelActionGoal(actionName) {
+  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
+}
+
+function cancelActionGoals() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
+}
+
+function sleep(sec) {
+  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
+}
+
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "sleep",
+    message0: "sleep for %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "ARG0",
+        check: "Number"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "display_message",
     message0: "display message %1",
@@ -122,6 +150,16 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
+Blockly.JavaScript["sleep"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? `await sleep(${Blockly.JavaScript.valueToCode(
+        block,
+        "ARG0",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
+
 Blockly.JavaScript["display_message"] = function(block) {
   return "";
 };
@@ -155,7 +193,9 @@ Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
-  return "";
+  return !!block.getNextBlock()
+    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
+    : "";
 };
 
 //------------------------------------------------------------------------------
