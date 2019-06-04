@@ -195,35 +195,63 @@ Blockly.JavaScript["sleep"] = function(block) {
 };
 
 Blockly.JavaScript["display_message"] = function(block) {
-  return "";
+  return block.getRootBlock().type === "start_program"
+    ? `sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return "";
+  return block.getRootBlock().type === "start_program"
+    ? `sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+        block,
+        "CHOICES",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
 };
 
 Blockly.JavaScript["get_display_message_result"] = function(block) {
-  return "";
-};
-
-Blockly.JavaScript["get_display_message_status"] = function(block) {
-  return "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("RobotSpeechbubbleAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_ask_multiple_choice_result"] = function(block) {
-  return "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("HumanSpeechbubbleAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["get_display_message_status"] = function(block) {
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("RobotSpeechbubbleAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_ask_multiple_choice_status"] = function(block) {
-  return "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("HumanSpeechbubbleAction")`
+      : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return "";
+  return `cancelActionGoal("RobotSpeechbubbleAction");\n`;
 };
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return "";
+  return `cancelActionGoal("HumanSpeechbubbleAction");\n`;
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
@@ -322,12 +350,4 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
-  console.log("sendActionGoal");
-  sendActionGoal("RobotSpeechbubbleAction", "hello");
-  console.log("sleep(1);");
-  sleep(2);
-  console.log("getStatus");
-  console.log(await getActionStatus("RobotSpeechbubbleAction"));
-  console.log("getResult");
-  console.log(await getActionResult("RobotSpeechbubbleAction"));
 })();
