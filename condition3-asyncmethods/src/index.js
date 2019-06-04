@@ -26,6 +26,40 @@ function sendActionGoal(actionName, goal) {
   })(goal);
 }
 
+function getActionStatus(actionName) {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        sources[actionName].status.removeListener(listener);
+        console.debug(actionName, "status", val);
+        if (val.status === "SUCCEEDED") {
+          callback(null, val.status);
+        } else {
+          callback(null, null);
+        }
+      }
+    };
+    sources[actionName].status.addListener(listener);
+  })();
+}
+
+function getActionResult(actionName) {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        sources[actionName].result.removeListener(listener);
+        console.debug(actionName, "result", val);
+        if (val.status.status === "SUCCEEDED") {
+          callback(null, val.result);
+        } else {
+          callback(null, null);
+        }
+      }
+    };
+    sources[actionName].result.addListener(listener);
+  })();
+}
+
 function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
@@ -262,6 +296,21 @@ const sources = initialize({
 
 sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 
+actionNames.map(actionName => {
+  // HACK to give an initial value for result streams
+  sources[actionName].result = sources[actionName].result.startWith({
+    status: { status: null }
+  });
+  sources[actionName].result.addListener({ next: _ => {} });
+});
+actionNames.map(actionName => {
+  // HACK to give an initial value for status streams
+  sources[actionName].status = sources[actionName].status.startWith({
+    status: null
+  });
+  sources[actionName].status.addListener({ next: _ => {} });
+});
+
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
     editor
@@ -273,4 +322,12 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
+  console.log("sendActionGoal");
+  sendActionGoal("RobotSpeechbubbleAction", "hello");
+  console.log("sleep(1);");
+  sleep(2);
+  console.log("getStatus");
+  console.log(await getActionStatus("RobotSpeechbubbleAction"));
+  console.log("getResult");
+  console.log(await getActionResult("RobotSpeechbubbleAction"));
 })();
