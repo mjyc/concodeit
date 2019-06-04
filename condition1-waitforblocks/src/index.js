@@ -85,7 +85,7 @@ function stopWaitUntilFaceEvent(id) {
   waitHandles[id].stop();
 }
 
-function endProgram() {
+function cancelActions() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
@@ -230,9 +230,9 @@ Blockly.defineBlocksWithJsonArray([
   },
   //----------------------------------------------------------------------------
   {
-    type: "end_program",
-    message0: "end program",
-    previousStatement: null,
+    type: "start_program",
+    message0: "start program",
+    nextStatement: null,
     colour: 290,
     tooltip: "",
     helpUrl: ""
@@ -241,83 +241,104 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["display_message"] = function(block) {
-  const code = `await sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
-    block,
-    "MESSAGE",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )}))`;
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+          block,
+          "MESSAGE",
+          Blockly.JavaScript.ORDER_ATOMIC
+        )}))`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  const code = `await sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-    block,
-    "CHOICES",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+          block,
+          "CHOICES",
+          Blockly.JavaScript.ORDER_ATOMIC
+        )})`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["speak"] = function(block) {
-  const code = `await sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
-    block,
-    "MESSAGE",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )}))`;
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+          block,
+          "MESSAGE",
+          Blockly.JavaScript.ORDER_ATOMIC
+        )}))`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["listen"] = function(block) {
-  const code = `await sendActionGoal("SpeechRecognitionAction", {})`;
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await sendActionGoal("SpeechRecognitionAction", {})`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["sleep"] = function(block) {
-  return `await sleep(${Blockly.JavaScript.valueToCode(
-    block,
-    "ARG0",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )});\n`;
+  return block.getRootBlock().type === "start_program"
+    ? `await sleep(${Blockly.JavaScript.valueToCode(
+        block,
+        "ARG0",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
-  return `await Promise.all([${[0, 1]
-    .map(
-      i =>
-        `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
-          block,
-          `DO${i}`
-        )}  cb(null, null);\n})()`
-    )
-    .join(", ")}]);\n`;
+  return block.getRootBlock().type === "start_program"
+    ? `await Promise.all([${[0, 1]
+        .map(
+          i =>
+            `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
+              block,
+              `DO${i}`
+            )}  cb(null, null);\n})()`
+        )
+        .join(", ")}]);\n`
+    : "";
 };
 
 // IDEA: stop unfinished sub-programs by adding "if (is{id}Done) return" after
 //   every statement in sub-programs; in addition, running sendActionGoal and
 //   waitUntilFaceEvent functions should be stopped
 Blockly.JavaScript["wait_for_one"] = function(block) {
-  return `await Promise.race([${[0, 1]
-    .map(
-      i =>
-        `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
-          block,
-          `DO${i}`
-        )}  cb(null, null);\n})()`
-    )
-    .join(", ")}]);\n`;
+  return block.getRootBlock().type === "start_program"
+    ? `await Promise.race([${[0, 1]
+        .map(
+          i =>
+            `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
+              block,
+              `DO${i}`
+            )}  cb(null, null);\n})()`
+        )
+        .join(", ")}]);\n`
+    : "";
 };
 
 Blockly.JavaScript["wait_until_face_event"] = function(block) {
-  const id = `${Math.floor(Math.random() * Math.pow(10, 8))}`;
-  return `waitUntilFaceEvent("${id}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
-    block,
-    "WU0",
-    Blockly.JavaScript.ORDER_ATOMIC
-  )})`;
+  return block.getRootBlock().type === "start_program"
+    ? `waitUntilFaceEvent("${Math.floor(
+        Math.random() * Math.pow(10, 8)
+      )}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
+        block,
+        "WU0",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )})`
+    : "";
 };
 
-Blockly.JavaScript["end_program"] = function(block) {
-  return !!block.getPreviousBlock() ? "endProgram();\n" : "";
+Blockly.JavaScript["start_program"] = function(block) {
+  return !!block.getNextBlock() ? "cancelActions();\n" : "";
 };
 
 //------------------------------------------------------------------------------
