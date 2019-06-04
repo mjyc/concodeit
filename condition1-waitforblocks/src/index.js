@@ -228,6 +228,15 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
+  {
+    type: "done",
+    message0: "done",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
   //----------------------------------------------------------------------------
   {
     type: "start_program",
@@ -322,6 +331,23 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
             )}  cb(null, null);\n})()`
         )
         .join(", ")}]);\n`
+    : "";
+};
+
+function hasParentBlock(block, type) {
+  return block === null
+    ? false
+    : block.type === type
+    ? true
+    : hasParentBlock(block.getParent(), type);
+}
+
+Blockly.JavaScript["done"] = function(block) {
+  return block.getRootBlock().type === "start_program"
+    ? hasParentBlock(block, "wait_for_all") ||
+      hasParentBlock(block, "wait_for_one")
+      ? `cb(null, null); // done\n`
+      : `// done not surrounded by wait_for_all or wait_for_one\n`
     : "";
 };
 
