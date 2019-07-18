@@ -295,7 +295,10 @@ Blockly.JavaScript["display_message"] = function(block) {
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
     : "";
 };
 
@@ -305,7 +308,10 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
         block,
         "CHOICES",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}, (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+      )}, (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
     : "";
 };
 
@@ -315,7 +321,10 @@ Blockly.JavaScript["speak"] = function(block) {
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
     : "";
 };
 
@@ -324,7 +333,7 @@ Blockly.JavaScript["listen"] = function(block) {
     ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
-      )}})`
+      )}});\n`
     : "";
 };
 
