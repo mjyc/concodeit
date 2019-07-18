@@ -286,76 +286,71 @@ Blockly.defineBlocksWithJsonArray([
   //----------------------------------------------------------------------------
 ]);
 
+function check(block) {
+  return (
+    block.getRootBlock().type === "start_program" ||
+    block.getRootBlock().type === "procedures_defnoreturn"
+  );
+}
+
 Blockly.JavaScript["display_message"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
-          block,
-          "MESSAGE",
-          Blockly.JavaScript.ORDER_ATOMIC
-        )}))`
-      : "";
+  const code = check(block)
+    ? `await sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}))`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-          block,
-          "CHOICES",
-          Blockly.JavaScript.ORDER_ATOMIC
-        )})`
-      : "";
+  const code = check(block)
+    ? `await sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+        block,
+        "CHOICES",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )})`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["speak"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
-          block,
-          "MESSAGE",
-          Blockly.JavaScript.ORDER_ATOMIC
-        )}))`
-      : "";
+  const code = check(block)
+    ? `await sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}))`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["listen"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await sendActionGoal("SpeechRecognitionAction", {})`
-      : "";
+  const code = check(block)
+    ? `await sendActionGoal("SpeechRecognitionAction", {})`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("RobotSpeechbubbleAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("RobotSpeechbubbleAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("HumanSpeechbubbleAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("HumanSpeechbubbleAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_speak"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("SpeechSynthesisAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("SpeechSynthesisAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_listen"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("SpeechRecognitionAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("SpeechRecognitionAction");\n` : "";
 };
 
 Blockly.JavaScript["sleep"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `await sleep(${Blockly.JavaScript.valueToCode(
         block,
         "ARG0",
@@ -365,7 +360,7 @@ Blockly.JavaScript["sleep"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `await Promise.all([${[0, 1]
         .map(
           i =>
@@ -382,7 +377,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
 //   every statement in sub-programs; in addition, running sendActionGoal and
 //   waitUntilFaceEvent functions should be stopped
 Blockly.JavaScript["wait_for_one"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `await Promise.race([${[0, 1]
         .map(
           i =>
@@ -404,7 +399,7 @@ function hasParentBlock(block, type) {
 }
 
 Blockly.JavaScript["done"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? hasParentBlock(block, "wait_for_all") ||
       hasParentBlock(block, "wait_for_one")
       ? `cb(null, null); // done\n`
@@ -413,7 +408,7 @@ Blockly.JavaScript["done"] = function(block) {
 };
 
 Blockly.JavaScript["wait_until_face_event"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `waitUntilFaceEvent("${Math.floor(
         Math.random() * Math.pow(10, 8)
       )}", (posX, posY) => ${Blockly.JavaScript.valueToCode(

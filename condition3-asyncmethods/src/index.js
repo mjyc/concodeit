@@ -259,8 +259,15 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
+function check(block) {
+  return (
+    block.getRootBlock().type === "start_program" ||
+    block.getRootBlock().type === "procedures_defnoreturn"
+  );
+}
+
 Blockly.JavaScript["sleep"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `await sleep(${Blockly.JavaScript.valueToCode(
         block,
         "ARG0",
@@ -270,7 +277,7 @@ Blockly.JavaScript["sleep"] = function(block) {
 };
 
 Blockly.JavaScript["display_message"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
@@ -280,7 +287,7 @@ Blockly.JavaScript["display_message"] = function(block) {
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
         block,
         "CHOICES",
@@ -290,66 +297,58 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
 };
 
 Blockly.JavaScript["get_display_message_result"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionResult("RobotSpeechbubbleAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionResult("RobotSpeechbubbleAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_ask_multiple_choice_result"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionResult("HumanSpeechbubbleAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionResult("HumanSpeechbubbleAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_speak_result"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionResult("SpeechSynthesisAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionResult("SpeechSynthesisAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_listen_result"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionResult("SpeechRecognitionAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionResult("SpeechRecognitionAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_display_message_status"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionStatus("RobotSpeechbubbleAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionStatus("RobotSpeechbubbleAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_ask_multiple_choice_status"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionStatus("HumanSpeechbubbleAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionStatus("HumanSpeechbubbleAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_speak_status"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionStatus("SpeechSynthesisAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionStatus("SpeechSynthesisAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_listen_status"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `await getActionStatus("SpeechRecognitionAction")`
-      : "";
+  const code = check(block)
+    ? `await getActionStatus("SpeechRecognitionAction")`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
