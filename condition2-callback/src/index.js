@@ -256,21 +256,27 @@ Blockly.defineBlocksWithJsonArray([
 // IMPORTANT!! callbacks are introduces local variables, which blockly does not
 //   usually allow; it might bring confusion in future
 
+function check(block) {
+  return (
+    block.getRootBlock().type === "start_program" ||
+    block.getRootBlock().type === "procedures_defnoreturn"
+  );
+}
+
 Blockly.JavaScript["detect_face"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `detectFace(${Math.floor(
-          Math.random() * Math.pow(10, 8)
-        )}}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
-          block,
-          "DO"
-        )}})`
-      : "";
+  const code = check(block)
+    ? `detectFace(${Math.floor(
+        Math.random() * Math.pow(10, 8)
+      )}}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}})`
+    : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["stop_detect_face"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `stopDetectFace(${Blockly.JavaScript.valueToCode(
         block,
         "ID",
@@ -280,7 +286,7 @@ Blockly.JavaScript["stop_detect_face"] = function(block) {
 };
 
 Blockly.JavaScript["sleep"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sleep(${Blockly.JavaScript.valueToCode(
         block,
         "SE",
@@ -290,66 +296,67 @@ Blockly.JavaScript["sleep"] = function(block) {
 };
 
 Blockly.JavaScript["display_message"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
     : "";
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
         block,
         "CHOICES",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}, (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+      )}, (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
     : "";
 };
 
 Blockly.JavaScript["speak"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sendActionGoalCallback("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
     : "";
 };
 
 Blockly.JavaScript["listen"] = function(block) {
-  return block.getRootBlock().type === "start_program"
+  return check(block)
     ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
-      )}})`
+      )}});\n`
     : "";
 };
 
 Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("RobotSpeechbubbleAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("RobotSpeechbubbleAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("HumanSpeechbubbleAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("HumanSpeechbubbleAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_speak"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("SpeechSynthesisAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("SpeechSynthesisAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_listen"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("SpeechRecognitionAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("SpeechRecognitionAction");\n` : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
