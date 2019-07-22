@@ -267,7 +267,7 @@ Blockly.JavaScript["detect_face"] = function(block) {
   const code = check(block)
     ? `detectFace(${Math.floor(
         Math.random() * Math.pow(10, 8)
-      )}}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
+      )}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
       )}})`
@@ -281,7 +281,7 @@ Blockly.JavaScript["stop_detect_face"] = function(block) {
         block,
         "ID",
         Blockly.JavaScript.ORDER_ATOMIC
-      )});`
+      )});\n`
     : "";
 };
 
@@ -291,7 +291,7 @@ Blockly.JavaScript["sleep"] = function(block) {
         block,
         "SE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});`
+      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 };
 
