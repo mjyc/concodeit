@@ -16,6 +16,14 @@
       <div>
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
+          <category name="Sensing" colour="210">
+            <block type="variables_set">
+              <field name="VAR">numFaces</field>
+              <value name="VALUE">
+                <block type="get_num_detected_faces"></block>
+              </value>
+            </block>
+          </category>
           <category name="Action" colour="230">
             <block type="sleep">
               <value name="ARG0">

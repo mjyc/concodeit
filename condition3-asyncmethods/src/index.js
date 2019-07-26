@@ -60,6 +60,19 @@ function getActionResult(actionName) {
   })();
 }
 
+let poses$;
+function getNumDetectedFaces() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        callback(null, val.length);
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
 function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
@@ -76,6 +89,14 @@ function sleep(sec) {
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "get_num_detected_faces",
+    message0: "get number of detected faces",
+    output: "Number",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "sleep",
     message0: "sleep for %1",
@@ -266,6 +287,11 @@ function check(block) {
   );
 }
 
+Blockly.JavaScript["get_num_detected_faces"] = function(block) {
+  const code = check(block) ? "await getNumDetectedFaces()" : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
     ? `await sleep(${Blockly.JavaScript.valueToCode(
@@ -436,7 +462,8 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+poses$ = sources.PoseDetection.events("poses").startWith([]);
+poses$.addListener({ next: _ => {} });
 
 actionNames.map(actionName => {
   // HACK to give an initial value for result streams
