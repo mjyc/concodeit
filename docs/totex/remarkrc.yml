@@ -11,8 +11,3 @@ settings:
     templatesDir: templates
     imageConfigs:
       width: 0.9\linewidth
-
-    documentInfo:
-      title: Markademic
-      author:
-        - Mike Chung

@@ -2,7 +2,7 @@
   "private": "true",
   "scripts": {
     "build": "npx remark -r config/remarkrc.yml",
-    "demo": "npx mkdirp tex && npx remark -r config/remarkrc.yml src/outline.md -o tex/outline.tex"
+    "demo": "npx mkdirp tex && npx remark -r remarkrc.yml src/outline.md -o tex/outline.tex"
   },
   "devDependencies": {
     "@paperist/remark-latex": "2.0.0"
