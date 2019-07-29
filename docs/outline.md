@@ -1,33 +1,35 @@
-# Title
+# Outline
+
+## Title
 
 ConCodeIt
 
-# Contributions
+## Contributions
 
 - presents 3 versions of block-based visual robot programming interfaces
 - presents a user study investigating the user's mental models of concurrency using each interface
 - demonstrates using the system for programming realistic tasks
 
-# Introduction
+## Introduction
 
-# Related work
+## Related work
 
-# System Overview
+## System Overview
 
-## Robot Platform
+### Robot Platform
 
-## ConCodeIt Versions
+### ConCodeIt Versions
 
-### V1: Async Method
+#### V1: Async
 
-### V2: Callback
+#### V2: Callback
 
-### V3: waitForBlocks
+#### V3: WaitFors
 
-# Evaluation
+## Evaluation
 
-## Systemic Evaluation
+### Systemic Evaluation
 
-## User Study
+### User Study
 
-# Discussion & Conclusion
+## Discussion & Conclusion

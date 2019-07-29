@@ -1,5 +1,5 @@
 <% if (depth == 1) {
-  -%>\subsection{<%= value -%>}<%
+  -%>\section{<%= value -%>}<%
 } else if (depth == 2) {
   -%>\subsection{<%= value -%>}<%
 } else if (depth == 3) {
@@ -9,5 +9,6 @@
 } else {
   -%>\subparagraph{<%= value -%>}<%
 } -%>
+
 <%= label %>
 <%# Line Break %>
