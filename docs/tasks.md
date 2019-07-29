@@ -10,16 +10,18 @@
 
 ## Example Social Robot Task Descriptions
 
-### Storytelling
+### Monologue
 
-- greeting
-  - The robot should wait until a face is detected and the human is not speaking (EE + WA)
-- storytelling
-  - The robot should read a line and make a gesture (AA + WA)
-- departure handling
-  - The robot should stop reading if the person leaves the robot (AE + WO)
+1. The robot should read a line and make a gesture (AA + WA)
+2. ...
 
-<!-- Consider splitting this task into the two tasks: (i) greeting/goodbye using (AE + WO) pattern and (ii) reading using (AA + WA) pattern -->
+### Handling arrival and departure
+
+1. The robot should display "hello there" and sleep for 10 seconds and wait until a face appears (AE + WO)
+   - If timed out, the robot should repeat 1.
+   - If a face is detected the robot should do 2.
+2. The robot should introduce itself and wait until the face disappears (AE + WO)
+   - If the robot successfully finished introducing itself or the face disappeared, it should repeat 1.
 
 ### Instruction
 
