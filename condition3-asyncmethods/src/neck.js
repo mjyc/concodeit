@@ -7,7 +7,12 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
+
+import {
+  extractFaceFeatures
+} from "tabletrobotface-userstudy";
 import { promisify } from "util";
+
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -61,18 +66,103 @@ function getActionResult(actionName) {
 }
 
 let poses$;
+
+
+// correct implementation of getNumDetectedFaces()
+/*
 function getNumDetectedFaces() {
   return promisify(callback => {
     const listener = {
       next: val => {
         poses$.removeListener(listener);
-        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
-        console.log(val[0].keypoints.find(kpt => kpt.part === "nose"));
-        if (nosePoint == NULL) {
-          console.log("null");
-        }
+        // console.log(val);
+        // console.log(val[0].keypoints);
+        callback(null, val.length);
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+*/
+
+// fake getNumDetectedFaces() for my testing purposes
+function getNumDetectedFaces() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+
+        const features = extractFaceFeatures(val);
+        console.log(features.noseAngle);
 
         callback(null, val.length);
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
+//------------------------------------------------------------------------------
+// Face Detection Function 
+
+function getNosePositionX() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
+        callback(null, nosePoint.position.x);
+      }
+    };
+    poses$.addListener(listener); 
+  })();
+}
+
+function getNosePositionY() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
+        callback(null, nosePoint.position.y);
+      }
+    };
+    poses$.addListener(listener); 
+  })();
+}
+
+function getFaceFeatures() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+
+        const features = extractFaceFeatures(val);
+        // features.noseAngle
+        callback(null, features);
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
+function getHumanFaceDirection() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        const features = extractFaceFeatures(val);
+        if (features.isVisible) {
+          if (features.noseAngle < -5) {
+            callback(null, "Right");
+          } else if (features.noseAngle > 5) {
+            callback(null, "Left");
+          } else {
+            callback(null, "Center");
+          }
+        } else {
+          callback(null, "face not found");
+        }
       }
     };
     poses$.addListener(listener);
@@ -95,6 +185,30 @@ function sleep(sec) {
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "get_face_direction",
+    message0: "get direction of face",
+    output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_y_pos_of_nose",
+    message: "get Y position of nose",
+    output: "Number",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_x_pos_of_nose",
+    message: "get X position of nose",
+    output: "Number",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "get_num_detected_faces",
     message0: "get number of detected faces",
@@ -292,6 +406,12 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
+
+Blockly.JavaScript["get_face_direction"] = function(block) {
+  const code = check(block) ? "await getHumanFaceDirection()" : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 
 Blockly.JavaScript["get_num_detected_faces"] = function(block) {
   const code = check(block) ? "await getNumDetectedFaces()" : "";
@@ -493,8 +613,71 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
+
+async function neckExercise() {
+  var action_list, ready, cont, i;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  action_list = ['Move your left shoulder as far down as possible', 'hold a bit longer!', 'Bring your right ear to your right shoulder', 'Now lets bring it back to our original position', 'Move your right shoulder as far down as possible!', 'Keep that position for a few more seconds', 'Now bring your left ear to your left shoulder!'];
+  sendActionGoal("RobotSpeechbubbleAction", String('Get ready for a neck exercise! Look forward and keep your neck straight!'));
+  await sleep(2);
+  sendActionGoal("RobotSpeechbubbleAction", String('Let\'s get started!'));
+  for (var i_index in action_list) {
+    i = action_list[i_index];
+    sendActionGoal("RobotSpeechbubbleAction", String(i));
+    await sleep(1);
+    cont = null;
+    while (cont != "continue") {
+      sendActionGoal("HumanSpeechbubbleAction", ['continue']);
+      await sleep(1);
+      cont = (await getActionResult("HumanSpeechbubbleAction"));
+    }
+  }
+  sendActionGoal("RobotSpeechbubbleAction", String('You did it!'));
+}
+
+async function exercise() {
+  var result;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready?'));
+  result = null;
+  while (result != 'yes') {
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  cancelActionGoal("RobotSpeechbubbleAction");
+  await neckExercise();
+}
+
+// doesn't work -- ignore for now
+async function cont() {
+  var result;
+  sendActionGoal("RobotSpeechbubbleAction", String('Continue?'));
+  result = null;
+  while (result == null) {
+    neckExercise();
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+}
+  
+document.getElementById("run").onclick = () => {
+  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
+    editor
+  )}})();`;
+  eval(curCode);
+};
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
   console.log("started");
+  //exercise();
+  //getFacePoses();
+  //getNumDetectedFaces();
 })();

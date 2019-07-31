@@ -10,6 +10,52 @@ import {
 import { promisify } from "util";
 
 //------------------------------------------------------------------------------
+// Face Detection Function 
+
+//import * as posenet from '@tensorflow-models/posenet';
+function getFacePoses() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        console.log("poses", val);  // should have the output format of PoseNet https://github.com/tensorflow/tfjs-models/tree/master/posenet#via-npm
+        poses$.removeListener(listener);
+        if (val.status === "SUCCEEDED") {
+          // process val to have a format you want
+          console.log(val);
+          /*
+          const net = await posenet.load();
+          const pose = await net.estimateSinglePose(val, {
+            flipHorizontal: false
+          });
+          */
+          //console.log(pose);
+          callback(null, val);
+        } else {
+          callback(null, null);
+        }
+      }
+    };
+    poses$.addListener(listener); 
+  })();
+}
+
+let poses$;
+function getNumDetectedFaces() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        callback(null, val.length);
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
+
+
+
+//------------------------------------------------------------------------------
 // Helper Function Definitions
 
 const handles = {};
@@ -57,25 +103,6 @@ function getActionResult(actionName) {
       }
     };
     sources[actionName].result.addListener(listener);
-  })();
-}
-
-let poses$;
-function getNumDetectedFaces() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
-        console.log(val[0].keypoints.find(kpt => kpt.part === "nose"));
-        if (nosePoint == NULL) {
-          console.log("null");
-        }
-
-        callback(null, val.length);
-      }
-    };
-    poses$.addListener(listener);
   })();
 }
 
@@ -286,20 +313,8 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
-function check(block) {
-  return (
-    block.getRootBlock().type === "start_program" ||
-    block.getRootBlock().type === "procedures_defnoreturn"
-  );
-}
-
-Blockly.JavaScript["get_num_detected_faces"] = function(block) {
-  const code = check(block) ? "await getNumDetectedFaces()" : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
 Blockly.JavaScript["sleep"] = function(block) {
-  return check(block)
+  return block.getRootBlock().type === "start_program"
     ? `await sleep(${Blockly.JavaScript.valueToCode(
         block,
         "ARG0",
@@ -309,7 +324,7 @@ Blockly.JavaScript["sleep"] = function(block) {
 };
 
 Blockly.JavaScript["display_message"] = function(block) {
-  return check(block)
+  return block.getRootBlock().type === "start_program"
     ? `sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
@@ -319,7 +334,7 @@ Blockly.JavaScript["display_message"] = function(block) {
 };
 
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return check(block)
+  return block.getRootBlock().type === "start_program"
     ? `sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
         block,
         "CHOICES",
@@ -329,58 +344,66 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
 };
 
 Blockly.JavaScript["get_display_message_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("RobotSpeechbubbleAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("RobotSpeechbubbleAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_ask_multiple_choice_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("HumanSpeechbubbleAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("HumanSpeechbubbleAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_speak_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("SpeechSynthesisAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("SpeechSynthesisAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_listen_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("SpeechRecognitionAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionResult("SpeechRecognitionAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_display_message_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("RobotSpeechbubbleAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("RobotSpeechbubbleAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_ask_multiple_choice_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("HumanSpeechbubbleAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("HumanSpeechbubbleAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_speak_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("SpeechSynthesisAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("SpeechSynthesisAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["get_listen_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("SpeechRecognitionAction")`
-    : "";
+  const code =
+    block.getRootBlock().type === "start_program"
+      ? `await getActionStatus("SpeechRecognitionAction")`
+      : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
@@ -468,8 +491,10 @@ const sources = initialize({
   }
 });
 
-poses$ = sources.PoseDetection.events("poses").startWith([]);
-poses$.addListener({ next: _ => {} });
+sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+
+//const poses$ = sources.PoseDetection.events("poses").startWith([]); 
+
 
 actionNames.map(actionName => {
   // HACK to give an initial value for result streams
@@ -493,8 +518,73 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
+async function neckExercise() {
+  var action_list, ready, cont, i;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  action_list = ['Move your left shoulder as far down as possible', 'hold a bit longer!', 'Bring your right ear to your right shoulder', 'Now lets bring it back to our original position', 'Move your right shoulder as far down as possible!', 'Keep that position for a few more seconds', 'Now bring your left ear to your left shoulder!'];
+  sendActionGoal("RobotSpeechbubbleAction", String('Get ready for a neck exercise! Look forward and keep your neck straight!'));
+  await sleep(2);
+  sendActionGoal("RobotSpeechbubbleAction", String('Let\'s get started!'));
+  for (var i_index in action_list) {
+    i = action_list[i_index];
+    sendActionGoal("RobotSpeechbubbleAction", String(i));
+    await sleep(1);
+    cont = null;
+    while (cont != "continue") {
+      sendActionGoal("HumanSpeechbubbleAction", ['continue']);
+      await sleep(1);
+      cont = (await getActionResult("HumanSpeechbubbleAction"));
+    }
+  }
+  sendActionGoal("RobotSpeechbubbleAction", String('You did it!'));
+}
+
+
+async function exercise() {
+  var result;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready?'));
+  result = null;
+  while (result != 'yes') {
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  cancelActionGoal("RobotSpeechbubbleAction");
+  await neckExercise();
+}
+
+
+// doesn't work -- ignore for now
+async function cont() {
+  var result;
+  sendActionGoal("RobotSpeechbubbleAction", String('Continue?'));
+  result = null;
+  while (result == null) {
+    neckExercise();
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+}
+  
+document.getElementById("run").onclick = () => {
+  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
+    editor
+  )}})();`;
+  eval(curCode);
+};
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
   console.log("started");
+  exercise();
+  getFacePoses();
+
+
 })();
