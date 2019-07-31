@@ -40,6 +40,99 @@ function sleep(second = 0, callback = () => {}) {
 
 const eventHandles = {};
 
+const defaultFaceFeatures = {
+  stamp: 0,
+  isVisible: false,
+  faceSize: 0,
+  faceHeight: 0,
+  faceCenterX: 0,
+  faceCenterY: 0,
+  faceAngle: 0,
+  noseAngle: 0
+};
+
+// helper function to detect facial features, such as direction. 
+function norm(pt) {
+  return Math.sqrt(pt.x * pt.x + pt.y * pt.y);
+}
+
+function extractFaceFeatures(poses) {
+  if (
+    poses.length === 0 ||
+    (!poses[0].keypoints.find(function(kpt) {
+      return kpt.part === "nose";
+    }) ||
+      !poses[0].keypoints.find(function(kpt) {
+        return kpt.part === "leftEye";
+      }) ||
+      !poses[0].keypoints.find(function(kpt) {
+        return kpt.part === "rightEye";
+      }))
+  ) {
+    return {
+      stamp: Date.now(),
+      isVisible: false,
+      faceSize: defaultFaceFeatures.faceSize,
+      faceHeight: defaultFaceFeatures.faceHeight,
+      faceCenterX: defaultFaceFeatures.faceCenterX,
+      faceCenterY: defaultFaceFeatures.faceCenterY,
+      faceAngle: defaultFaceFeatures.faceAngle,
+      noseAngle: defaultFaceFeatures.noseAngle
+    };
+  }
+
+  const ns = poses[0].keypoints.filter(function(kpt) {
+    return kpt.part === "nose";
+  })[0].position;
+  const le = poses[0].keypoints.filter(function(kpt) {
+    return kpt.part === "leftEye";
+  })[0].position;
+  const re = poses[0].keypoints.filter(function(kpt) {
+    return kpt.part === "rightEye";
+  })[0].position;
+  const dnsre = Math.sqrt(Math.pow(ns.x - le.x, 2) + Math.pow(ns.y - le.y, 2));
+  const dnsle = Math.sqrt(Math.pow(ns.x - re.x, 2) + Math.pow(ns.y - re.y, 2));
+  const drele = Math.sqrt(Math.pow(re.x - le.x, 2) + Math.pow(re.y - le.y, 2));
+  const s = 0.5 * (dnsre + dnsle + drele);
+  const faceSize = Math.sqrt(s * (s - dnsre) * (s - dnsle) * (s - drele));
+  const faceCenterX = (ns.x + le.x + re.x) / 3;
+  const faceCenterY = (ns.y + le.y + re.y) / 3;
+
+  // a point between two eyes
+  const bw = {
+    x: (le.x + re.x) * 0.5,
+    y: (le.y + re.y) * 0.5
+  };
+  // a vector from the point between two eyes to the right eye
+  const vbl = {
+    x: le.x - bw.x,
+    y: le.y - bw.y
+  };
+  const faceRotation = Math.atan2(vbl.y, vbl.x);
+
+  const vbn = {
+    x: ns.x - bw.x,
+    y: ns.y - bw.y
+  };
+  const dvbl = Math.sqrt(Math.pow(vbl.x, 2) + Math.pow(vbl.y, 2));
+  const dvbn = Math.sqrt(Math.pow(vbn.x, 2) + Math.pow(vbn.y, 2));
+  let noseRotation = Math.acos((vbl.x * vbn.x + vbl.y * vbn.y) / (dvbl * dvbn));
+
+  const faceAngle = (faceRotation / Math.PI) * 180;
+  const noseAngle = ((noseRotation - Math.PI / 2) / Math.PI) * 180;
+
+  return {
+    stamp: Date.now(),
+    isVisible: true,
+    faceSize: faceSize,
+    faceHeight: norm(vbn),
+    faceCenterX: faceCenterX,
+    faceCenterY: faceCenterY,
+    faceAngle: faceAngle,
+    noseAngle: noseAngle
+  };
+}
+
 // IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
 function detectFace(id, callback) {
   eventHandles[id] = {
@@ -47,9 +140,16 @@ function detectFace(id, callback) {
     listener: {
       next: poses => {
         if (poses.length === 0) {
-          return callback(null, null);
+          return callback(null, null, 0);
         } else {
           const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
+          let noseAngle = extractFaceFeatures(poses).noseAngle;
+          let faceDirection = 
+              noseAngle > 20 
+              ? "left" 
+              : noseAngle < -20 
+              ? "right" 
+              : "center";
           return callback(
             !nosePoint
               ? null
@@ -60,7 +160,8 @@ function detectFace(id, callback) {
               ? null
               : nosePoint.position.y === 0
               ? 0
-              : (480 - nosePoint.position.y) / 480
+              : (480 - nosePoint.position.y) / 480,
+            faceDirection
           );
         }
       }
@@ -256,100 +357,107 @@ Blockly.defineBlocksWithJsonArray([
 // IMPORTANT!! callbacks are introduces local variables, which blockly does not
 //   usually allow; it might bring confusion in future
 
+function check(block) {
+  return (
+    block.getRootBlock().type === "start_program" ||
+    block.getRootBlock().type === "procedures_defnoreturn"
+  );
+}
+
 Blockly.JavaScript["detect_face"] = function(block) {
-  const code =
-    block.getRootBlock().type === "start_program"
-      ? `detectFace(${Math.floor(
-          Math.random() * Math.pow(10, 8)
-        )}}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
-          block,
-          "DO"
-        )}})`
-      : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["stop_detect_face"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `stopDetectFace(${Blockly.JavaScript.valueToCode(
-        block,
-        "ID",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )});`
-    : "";
-};
-
-Blockly.JavaScript["sleep"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `sleep(${Blockly.JavaScript.valueToCode(
-        block,
-        "SE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});`
-    : "";
-};
-
-Blockly.JavaScript["display_message"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
-    : "";
-};
-
-Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-        block,
-        "CHOICES",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}, (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
-    : "";
-};
-
-Blockly.JavaScript["speak"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `sendActionGoalCallback("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})`
-    : "";
-};
-
-Blockly.JavaScript["listen"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
+  const code = check(block)
+    ? `detectFace(${Math.floor(
+        Math.random() * Math.pow(10, 8)
+      )}, (posX, posY, faceDir) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
       )}})`
     : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["stop_detect_face"] = function(block) {
+  return check(block)
+    ? `stopDetectFace(${Blockly.JavaScript.valueToCode(
+        block,
+        "ID",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
+
+Blockly.JavaScript["sleep"] = function(block) {
+  return check(block)
+    ? `sleep(${Blockly.JavaScript.valueToCode(
+        block,
+        "SE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+    : "";
+};
+
+Blockly.JavaScript["display_message"] = function(block) {
+  return check(block)
+    ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
+    : "";
+};
+
+Blockly.JavaScript["ask_multiple_choice"] = function(block) {
+  return check(block)
+    ? `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
+        block,
+        "CHOICES",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
+    : "";
+};
+
+Blockly.JavaScript["speak"] = function(block) {
+  return check(block)
+    ? `sendActionGoalCallback("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
+    : "";
+};
+
+Blockly.JavaScript["listen"] = function(block) {
+  return check(block)
+    ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
+    : "";
 };
 
 Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("RobotSpeechbubbleAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("RobotSpeechbubbleAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("HumanSpeechbubbleAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("HumanSpeechbubbleAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_speak"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("SpeechSynthesisAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("SpeechSynthesisAction");\n` : "";
 };
 
 Blockly.JavaScript["cancel_listen"] = function(block) {
-  return block.getRootBlock().type === "start_program"
-    ? `cancelActionGoal("SpeechRecognitionAction");\n`
-    : "";
+  return check(block) ? `cancelActionGoal("SpeechRecognitionAction");\n` : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {

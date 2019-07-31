@@ -26,6 +26,7 @@
                       <mutation name="handle face event">
                         <arg name="posX"></arg>
                         <arg name="posY"></arg>
+                        <arg name="faceDir"></arg>
                       </mutation>
                       <value name="ARG0">
                         <block type="variables_get">
@@ -35,6 +36,11 @@
                       <value name="ARG1">
                         <block type="variables_get">
                           <field name="VAR">posY</field>
+                        </block>
+                      </value>
+                      <value name="ARG2">
+                        <block type="variables_get">
+                          <field name="VAR">faceDir</field>
                         </block>
                       </value>
                     </block>
