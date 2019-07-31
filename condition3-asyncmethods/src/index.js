@@ -7,6 +7,9 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
+import {
+  extractFaceFeatures
+} from "tabletrobotface-userstudy";
 import { promisify } from "util";
 
 //------------------------------------------------------------------------------
@@ -79,6 +82,29 @@ function getNumDetectedFaces() {
   })();
 }
 
+function getHumanFaceDirection() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        const features = extractFaceFeatures(val);
+        if (features.isVisible) {
+          if (features.noseAngle < -5) {
+            callback(null, "Right");
+          } else if (features.noseAngle > 5) {
+            callback(null, "Left");
+          } else {
+            callback(null, "Center");
+          }
+        } else {
+          callback(null, "face not found");
+        }
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
 function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
@@ -95,6 +121,14 @@ function sleep(sec) {
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "get_face_direction",
+    message0: "get direction of face",
+    output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "get_num_detected_faces",
     message0: "get number of detected faces",
@@ -292,6 +326,11 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
+
+Blockly.JavaScript["get_face_direction"] = function(block) {
+  const code = check(block) ? "await getHumanFaceDirection()" : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
 
 Blockly.JavaScript["get_num_detected_faces"] = function(block) {
   const code = check(block) ? "await getNumDetectedFaces()" : "";
@@ -497,4 +536,26 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
+
+  var faceDirection, cont;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  faceDirection = null;
+  cont = null;
+
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
+
+  while (faceDirection !== 'Left' && cont !== 'yes') {
+    faceDirection = (await getHumanFaceDirection());
+    
+    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
+    await sleep(1);
+    cont = (await getActionResult("HumanSpeechbubbleAction"));
+    
+    console.log(cont);
+    console.log(faceDirection);
+  }
+  cancelActionGoal("HumanSpeechbubbleAction");
+  sendActionGoal("RobotSpeechbubbleAction", String(' done'));
 })();

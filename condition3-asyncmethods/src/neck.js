@@ -412,7 +412,6 @@ Blockly.JavaScript["get_face_direction"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-
 Blockly.JavaScript["get_num_detected_faces"] = function(block) {
   const code = check(block) ? "await getNumDetectedFaces()" : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
