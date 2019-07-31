@@ -1,0 +1,10 @@
+{
+  "private": "true",
+  "scripts": {
+    "build": "for f in ./src/*.md; do npx remark -r remarkrc.yml \"$f\" -o tex/$(basename \"$f\" .md).tex; done",
+    "sync": "cp -v tex/*.tex paper/"
+  },
+  "devDependencies": {
+    "@paperist/remark-latex": "2.0.0"
+  }
+}

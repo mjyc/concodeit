@@ -1,0 +1,14 @@
+<% if (depth == 1) {
+  -%>\section{<%= value -%>}<%
+} else if (depth == 2) {
+  -%>\subsection{<%= value -%>}<%
+} else if (depth == 3) {
+  -%>\subsubsection{<%= value -%>}<%
+} else if (depth == 4) {
+  -%>\paragraph{<%= value -%>}<%
+} else {
+  -%>\subparagraph{<%= value -%>}<%
+} -%>
+
+<%= label %>
+<%# Line Break %>

@@ -1,0 +1,13 @@
+# Required
+output: true
+plugins:
+  - "@paperist/remark-latex"
+
+# Optional
+# NOTE: You should put remark-latex configs under `latex`.
+settings:
+  latex:
+    baseTemplate: templates/baseTemplate.ejs
+    templatesDir: templates
+    imageConfigs:
+      width: 0.9\linewidth
