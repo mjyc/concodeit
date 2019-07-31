@@ -1,4 +1,4 @@
-import "./styles.css";
+Plan: look at geneimport "./styles.css";
 
 import Blockly from "node-blockly/browser";
 import {
@@ -368,11 +368,7 @@ Blockly.JavaScript["detect_face"] = function(block) {
   const code = check(block)
     ? `detectFace(${Math.floor(
         Math.random() * Math.pow(10, 8)
-<<<<<<< HEAD
       )}, (posX, posY, faceDir) => {\n${Blockly.JavaScript.statementToCode(
-=======
-      )}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
->>>>>>> bb0859a19864c271e3ae7e452bd10cb0eb379b87
         block,
         "DO"
       )}})`
