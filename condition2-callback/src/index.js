@@ -1,4 +1,4 @@
-Plan: look at geneimport "./styles.css";
+import "./styles.css";
 
 import Blockly from "node-blockly/browser";
 import {
@@ -8,6 +8,7 @@ import {
   makeCancelGoal
 } from "cycle-robot-drivers-async";
 import { promisify } from "util";
+import { extractFaceFeatures } from "tabletrobotface-userstudy";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -39,99 +40,6 @@ function sleep(second = 0, callback = () => {}) {
 }
 
 const eventHandles = {};
-
-const defaultFaceFeatures = {
-  stamp: 0,
-  isVisible: false,
-  faceSize: 0,
-  faceHeight: 0,
-  faceCenterX: 0,
-  faceCenterY: 0,
-  faceAngle: 0,
-  noseAngle: 0
-};
-
-// helper function to detect facial features, such as direction. 
-function norm(pt) {
-  return Math.sqrt(pt.x * pt.x + pt.y * pt.y);
-}
-
-function extractFaceFeatures(poses) {
-  if (
-    poses.length === 0 ||
-    (!poses[0].keypoints.find(function(kpt) {
-      return kpt.part === "nose";
-    }) ||
-      !poses[0].keypoints.find(function(kpt) {
-        return kpt.part === "leftEye";
-      }) ||
-      !poses[0].keypoints.find(function(kpt) {
-        return kpt.part === "rightEye";
-      }))
-  ) {
-    return {
-      stamp: Date.now(),
-      isVisible: false,
-      faceSize: defaultFaceFeatures.faceSize,
-      faceHeight: defaultFaceFeatures.faceHeight,
-      faceCenterX: defaultFaceFeatures.faceCenterX,
-      faceCenterY: defaultFaceFeatures.faceCenterY,
-      faceAngle: defaultFaceFeatures.faceAngle,
-      noseAngle: defaultFaceFeatures.noseAngle
-    };
-  }
-
-  const ns = poses[0].keypoints.filter(function(kpt) {
-    return kpt.part === "nose";
-  })[0].position;
-  const le = poses[0].keypoints.filter(function(kpt) {
-    return kpt.part === "leftEye";
-  })[0].position;
-  const re = poses[0].keypoints.filter(function(kpt) {
-    return kpt.part === "rightEye";
-  })[0].position;
-  const dnsre = Math.sqrt(Math.pow(ns.x - le.x, 2) + Math.pow(ns.y - le.y, 2));
-  const dnsle = Math.sqrt(Math.pow(ns.x - re.x, 2) + Math.pow(ns.y - re.y, 2));
-  const drele = Math.sqrt(Math.pow(re.x - le.x, 2) + Math.pow(re.y - le.y, 2));
-  const s = 0.5 * (dnsre + dnsle + drele);
-  const faceSize = Math.sqrt(s * (s - dnsre) * (s - dnsle) * (s - drele));
-  const faceCenterX = (ns.x + le.x + re.x) / 3;
-  const faceCenterY = (ns.y + le.y + re.y) / 3;
-
-  // a point between two eyes
-  const bw = {
-    x: (le.x + re.x) * 0.5,
-    y: (le.y + re.y) * 0.5
-  };
-  // a vector from the point between two eyes to the right eye
-  const vbl = {
-    x: le.x - bw.x,
-    y: le.y - bw.y
-  };
-  const faceRotation = Math.atan2(vbl.y, vbl.x);
-
-  const vbn = {
-    x: ns.x - bw.x,
-    y: ns.y - bw.y
-  };
-  const dvbl = Math.sqrt(Math.pow(vbl.x, 2) + Math.pow(vbl.y, 2));
-  const dvbn = Math.sqrt(Math.pow(vbn.x, 2) + Math.pow(vbn.y, 2));
-  let noseRotation = Math.acos((vbl.x * vbn.x + vbl.y * vbn.y) / (dvbl * dvbn));
-
-  const faceAngle = (faceRotation / Math.PI) * 180;
-  const noseAngle = ((noseRotation - Math.PI / 2) / Math.PI) * 180;
-
-  return {
-    stamp: Date.now(),
-    isVisible: true,
-    faceSize: faceSize,
-    faceHeight: norm(vbn),
-    faceCenterX: faceCenterX,
-    faceCenterY: faceCenterY,
-    faceAngle: faceAngle,
-    noseAngle: noseAngle
-  };
-}
 
 // IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
 function detectFace(id, callback) {
