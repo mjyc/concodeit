@@ -123,7 +123,7 @@ function sleep(sec) {
 Blockly.defineBlocksWithJsonArray([
   {
     type: "get_face_direction",
-    message0: "get direction of face",
+    message0: "get face direction",
     output: "String",
     colour: 210,
     tooltip: "",
@@ -536,26 +536,4 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
-
-  var faceDirection, cont;
-  // beg start_program
-  cancelActionGoals();
-  // end start_program
-  faceDirection = null;
-  cont = null;
-
-  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
-
-  while (faceDirection !== 'Left' && cont !== 'yes') {
-    faceDirection = (await getHumanFaceDirection());
-    
-    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
-    await sleep(1);
-    cont = (await getActionResult("HumanSpeechbubbleAction"));
-    
-    console.log(cont);
-    console.log(faceDirection);
-  }
-  cancelActionGoal("HumanSpeechbubbleAction");
-  sendActionGoal("RobotSpeechbubbleAction", String(' done'));
 })();

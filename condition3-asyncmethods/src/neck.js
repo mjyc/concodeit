@@ -679,4 +679,25 @@ document.getElementById("run").onclick = () => {
   //exercise();
   //getFacePoses();
   //getNumDetectedFaces();
+  var faceDirection, cont;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  faceDirection = null;
+  cont = null;
+
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
+
+  while (faceDirection !== 'Left' && cont !== 'yes') {
+    faceDirection = (await getHumanFaceDirection());
+    
+    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
+    await sleep(1);
+    cont = (await getActionResult("HumanSpeechbubbleAction"));
+    
+    console.log(cont);
+    console.log(faceDirection);
+  }
+  cancelActionGoal("HumanSpeechbubbleAction");
+  sendActionGoal("RobotSpeechbubbleAction", String('done'));
 })();
