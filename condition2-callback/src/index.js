@@ -8,6 +8,7 @@ import {
   makeCancelGoal
 } from "cycle-robot-drivers-async";
 import { promisify } from "util";
+import { extractFaceFeatures } from "tabletrobotface-userstudy";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -50,18 +51,22 @@ function detectFace(id, callback) {
           return callback(null, null);
         } else {
           const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
-          return callback(
-            !nosePoint
+          let noseAngle = extractFaceFeatures(poses).noseAngle;
+          let faceDirection =
+            noseAngle > 20 ? "left" : noseAngle < -20 ? "right" : "center";
+          return callback(null, {
+            posX: !nosePoint
               ? null
               : nosePoint.position.x === 0
               ? 0
               : nosePoint.position.x / 640,
-            !nosePoint
+            posY: !nosePoint
               ? null
               : nosePoint.position.y === 0
               ? 0
-              : (480 - nosePoint.position.y) / 480
-          );
+              : (480 - nosePoint.position.y) / 480,
+            faceDir: faceDirection
+          });
         }
       }
     }
@@ -267,7 +272,7 @@ Blockly.JavaScript["detect_face"] = function(block) {
   const code = check(block)
     ? `detectFace(${Math.floor(
         Math.random() * Math.pow(10, 8)
-      )}, (posX, posY) => {\n${Blockly.JavaScript.statementToCode(
+      )}, (err, {posX, posY, faceDir}) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
       )}})`
