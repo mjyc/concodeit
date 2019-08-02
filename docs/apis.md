@@ -16,13 +16,13 @@ type Action {
 }
 function getLastActionResult(action: Action): any
 
-type Event {
-  buttonClicked,
-  faceDetected,
-  voiceActivityDetected,
+type State {
+  //,
+  isFaceDetected,
+  isPersonSpeaking,
 }
-function getLastEvent(event: Event): any
 ```
+function getState(event: State): any
 
 ## Callback API
 
