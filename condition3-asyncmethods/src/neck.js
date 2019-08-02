@@ -13,7 +13,6 @@ import {
 } from "tabletrobotface-userstudy";
 import { promisify } from "util";
 
-
 //------------------------------------------------------------------------------
 // Helper Function Definitions
 
@@ -65,81 +64,16 @@ function getActionResult(actionName) {
   })();
 }
 
-let poses$;
-
-
-// correct implementation of getNumDetectedFaces()
-/*
-function getNumDetectedFaces() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-        // console.log(val);
-        // console.log(val[0].keypoints);
-        callback(null, val.length);
-      }
-    };
-    poses$.addListener(listener);
-  })();
-}
-*/
-
-// fake getNumDetectedFaces() for my testing purposes
-function getNumDetectedFaces() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-
-        const features = extractFaceFeatures(val);
-        console.log(features.noseAngle);
-
-        callback(null, val.length);
-      }
-    };
-    poses$.addListener(listener);
-  })();
-}
-
 //------------------------------------------------------------------------------
 // Face Detection Function 
 
-function getNosePositionX() {
+let poses$;
+function getNumDetectedFaces() {
   return promisify(callback => {
     const listener = {
       next: val => {
         poses$.removeListener(listener);
-        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
-        callback(null, nosePoint.position.x);
-      }
-    };
-    poses$.addListener(listener); 
-  })();
-}
-
-function getNosePositionY() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
-        callback(null, nosePoint.position.y);
-      }
-    };
-    poses$.addListener(listener); 
-  })();
-}
-
-function getFaceFeatures() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-
-        const features = extractFaceFeatures(val);
-        // features.noseAngle
-        callback(null, features);
+        callback(null, val.length);
       }
     };
     poses$.addListener(listener);
@@ -169,6 +103,8 @@ function getHumanFaceDirection() {
   })();
 }
 
+//------------------------------------------------------------------------------
+// Cancel Block
 function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
@@ -179,6 +115,52 @@ function cancelActionGoals() {
 
 function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
+}
+
+//------------------------------------------------------------------------------
+// Movement Primitive Functions
+
+var ros = new ROSLIB.Ros({ 
+  url : 'ws://localhost:9090' 
+});
+
+var jointMover = new ROSLIB.Service({
+  ros : ros,
+  name : '/open_manipulator/goal_joint_space_path_to_kinematics_position',
+  serviceType : 'open_manipulator_msgs/SetKinematicsPose'
+});
+
+function moveArm() {
+
+}
+
+function moveLeft() {
+  var request = new ROSLIB.ServiceRequest({
+    planning_group : "none",
+    end_effector_name : "open_manipulator",
+    kinematics_pose : {
+      pose: {
+        position: {
+          x: 0.01,
+          y: 0.25,
+          z: 0.01
+        },
+        orientation: {
+          x: 0, 
+          y: 0,
+          z: 0,
+          w: 0
+        }
+      },
+      max_accelerations_scaling_factor : 0.1, 
+      max_velocity_scaling_factor : 0.1,
+      tolerance: 0.1
+    },
+    path_time : 1.00
+  });
+  jointMover.callService(request, function(result) {
+    console.log('moved Left');
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -672,6 +654,10 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
+
+
+moveLeft();
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
@@ -679,6 +665,7 @@ document.getElementById("run").onclick = () => {
   //exercise();
   //getFacePoses();
   //getNumDetectedFaces();
+  /*
   var faceDirection, cont;
   // beg start_program
   cancelActionGoals();
@@ -700,4 +687,6 @@ document.getElementById("run").onclick = () => {
   }
   cancelActionGoal("HumanSpeechbubbleAction");
   sendActionGoal("RobotSpeechbubbleAction", String('done'));
+  */
+ moveLeft();
 })();

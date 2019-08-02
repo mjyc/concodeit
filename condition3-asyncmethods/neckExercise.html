@@ -3,6 +3,8 @@
   <head>
     <title>Neck Exercise</title>
     <meta charset="UTF-8" />
+    <script src="https://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.js"></script> 
   </head>
 
   <body>
@@ -16,6 +18,16 @@
       <div>
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
+          <category name="Movement" colour="190">
+            <block type="variables_set">
+              <field name="VAR">x_pos</field>
+              <value name="move arm">
+                <block type="math_number">
+                  <field name="NUM">0.0</field>
+                </block>
+              </value>
+            </block>
+          </category>
           <category name="Sensing" colour="210">
             <block type="variables_set">
               <field name="VAR">numFaces</field>

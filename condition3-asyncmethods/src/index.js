@@ -12,6 +12,8 @@ import {
 } from "tabletrobotface-userstudy";
 import { promisify } from "util";
 
+
+
 //------------------------------------------------------------------------------
 // Helper Function Definitions
 
@@ -63,6 +65,21 @@ function getActionResult(actionName) {
   })();
 }
 
+function cancelActionGoal(actionName) {
+  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
+}
+
+function cancelActionGoals() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
+}
+
+function sleep(sec) {
+  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
+}
+
+//------------------------------------------------------------------------------
+// Face Detection Functions
+
 let poses$;
 function getNumDetectedFaces() {
   return promisify(callback => {
@@ -105,17 +122,37 @@ function getHumanFaceDirection() {
   })();
 }
 
-function cancelActionGoal(actionName) {
-  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
+//------------------------------------------------------------------------------
+// Simple Concurrent Neck Exercise
+async function conNeckSimple() {
+  var faceDirection, cont;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  faceDirection = null;
+  cont = null;
+
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
+
+  while (faceDirection !== 'Left' && cont !== 'yes') {
+    faceDirection = (await getHumanFaceDirection());
+    
+    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
+    await sleep(1);
+    cont = (await getActionResult("HumanSpeechbubbleAction"));
+    
+    console.log(cont);
+    console.log(faceDirection);
+  }
+  cancelActionGoal("HumanSpeechbubbleAction");
+  sendActionGoal("RobotSpeechbubbleAction", String('done'));
+
+
 }
 
-function cancelActionGoals() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
-}
 
-function sleep(sec) {
-  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
-}
+//------------------------------------------------------------------------------
+// Movement Primitive Functions
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
@@ -536,4 +573,5 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
+  conNeckSimple();
 })();
