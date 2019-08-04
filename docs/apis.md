@@ -5,9 +5,11 @@
 ```
 function sleep(duration: number): void  // blocking
 function setMessage(message: string): void
+function startFollowingFace(): void
+function stopFollowingFace(): void
 // TODO: make sure below action functions don't need to return "ID"
-function startSay(message: string): void
-function startGesture(name: string): void
+function startSaying(text: string): void
+function startGesturing(name: string): void
 
 function isSayFinished(): boolean
 function isGestureFinished(): boolean
@@ -38,10 +40,12 @@ function resetLastClickedButton(): void // set lastClickedButton to ""
 ## Callback API
 
 ```
-function sleep(duration: number, callback: function): void // durative
+function startSleeping(duration: number, callback: function): void // durative
 function setMessage(message: string): void  // instantaneous
-function say(message: string, setResultTo: string, callback: function): void  // durative
-function gesture(name: string, setResultTo: string, callback: function): void  // durative
+function startFollowingFace(): void  // instantaneous
+function stopFollowingFace(): void  // instantaneous
+function startSaying(text: string, callback: function): void  // durative
+function startGesturing(name: string, callback: function): void  // durative
 
 type Event {
   faceDetected,
@@ -65,6 +69,8 @@ function waitForEvent(event: Event, setResultTo: string, callback: function): Fa
 ```
 function sleep(duration: number): void // durative
 function setMessage(message: string): void  // instantaneous
+function followFace(): void  // durative
+function stopFollowingFace(): void  // instantaneous
 function say(message: string): void  // durative
 function gesture(name: string): void  // durative
 
