@@ -40,8 +40,8 @@ function resetLastClickedButton(): void // set lastClickedButton to ""
 ```
 function sleep(duration: number, callback: function): void // durative
 function setMessage(message: string): void  // instantaneous
-function say(message: string, callback: function): void  // durative
-function gesture(name: string, callback: function): void  // durative
+function say(message: string, setResultTo: string, callback: function): void  // durative
+function gesture(name: string, setResultTo: string, callback: function): void  // durative
 
 type Event {
   faceDetected,
