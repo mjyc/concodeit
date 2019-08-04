@@ -57,7 +57,7 @@ type SpeakingStateChanged {
   speaking,
   notSpeaking,
 }
-function waitForEvent(event: Event, callback: function): FaceDetectedEvent | SpeakingStateChanged
+function waitForEvent(event: Event, setResultTo: string, callback: function): FaceDetectedEvent | SpeakingStateChanged
 ```
 
 ## WaitFors API
