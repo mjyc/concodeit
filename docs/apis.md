@@ -3,47 +3,86 @@
 ## Async API
 
 ```
-function sleep(duration: number): void
+function sleep(duration: number): void  // blocking
 function setMessage(message: string): void
-function setButtons(buttons: [string]): void
-function say(message: string): void
+// TODO: make sure below action functions don't need to return "ID"
+function startSay(message: string): void
+function startGesture(name: string): void
 
-type Action {
-  sleep,
-  setMessage,
-  setButtons,
-  say,
-}
-function getLastActionResult(action: Action): any
+function isSayFinished(): boolean
+function isGestureFinished(): boolean
 
 type State {
-  //,
-  isFaceDetected,
-  isPersonSpeaking,
+  faceDirection,
+  isHumanSpeaking,
 }
+type FaceDetectedEvent {
+  none,
+  center,
+  left,
+  right,
+}
+type SpeakingStateChanged {
+  speaking,
+  notSpeaking,
+}
+function getState(state: State): FaceDetectedEvent | SpeakingStateChanged
 ```
-function getState(event: State): any
+
+<!--
+function setButtons(buttons: [string]): void
+lastClickedButton,
+function resetLastClickedButton(): void // set lastClickedButton to ""
+-->
 
 ## Callback API
 
 ```
-...
+function sleep(duration: number, callback: function): void // durative
+function setMessage(message: string): void  // instantaneous
+function say(message: string, callback: function): void  // durative
+function gesture(name: string, callback: function): void  // durative
+
+type Event {
+  faceDetected,
+  speakingStateChanged,
+}
+type FaceDetectedEvent {
+  none,
+  center,
+  left,
+  right,
+}
+type SpeakingStateChanged {
+  speaking,
+  notSpeaking,
+}
+function waitForEvent(event: Event, callback: function): FaceDetectedEvent | SpeakingStateChanged
 ```
 
 ## WaitFors API
 
 ```
-function sleep(duration: number):  // durative
-function setMessage(message: string): (string | null)  // instantaneous
-function setButtons(message: string): (string | null)  // instantaneous
-function say(message: string): (string | null)  // durative
+function sleep(duration: number): void // durative
+function setMessage(message: string): void  // instantaneous
+function say(message: string): void  // durative
+function gesture(name: string): void  // durative
 
 type Event {
-  buttonClicked,
   faceDetected,
-  voiceActivityDetected,
+  speakingStateChanged,
 }
-function waitForEvent(event: Event): any  // durative
+type FaceDetectedEvent {
+  none,
+  center,
+  left,
+  right,
+}
+type SpeakingStateChanged {
+  speaking,
+  notSpeaking,
+}
+function waitForEvent(event: Event): FaceDetectedEvent | SpeakingStateChanged  // durative
 
 function waitForAll(subprogram1: function, subprogram2: function): [any]
 function waitForOne(subprogram1: function, subprogram2: function): any
