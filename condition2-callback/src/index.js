@@ -52,12 +52,8 @@ function detectFace(id, callback) {
         } else {
           const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
           let noseAngle = extractFaceFeatures(poses).noseAngle;
-          let faceDirection = 
-              noseAngle > 20 
-              ? "left" 
-              : noseAngle < -20 
-              ? "right" 
-              : "center";
+          let faceDirection =
+            noseAngle > 20 ? "left" : noseAngle < -20 ? "right" : "center";
           return callback(
             !nosePoint
               ? null
@@ -443,6 +439,18 @@ document.getElementById("run").onclick = () => {
     editor
   )}})();`;
   eval(curCode);
+};
+
+document.getElementById("run_neckexercise").onclick = () => {
+  fetch("/public/neck.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.log(code);
+      var curCode = `(async () => {${code} runNeckExerciseApp()})();`;
+      eval(curCode);
+    });
 };
 
 //------------------------------------------------------------------------------

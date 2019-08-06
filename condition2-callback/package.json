@@ -2,6 +2,7 @@
   "private": "true",
   "main": "index.html",
   "scripts": {
+    "prestart": "rm -rf dist/public && mkdir -p dist && cp -r public dist/",
     "start": "parcel index.html --open",
     "build": "parcel build index.html"
   },
