@@ -12,8 +12,6 @@ import {
 } from "tabletrobotface-userstudy";
 import { promisify } from "util";
 
-
-
 //------------------------------------------------------------------------------
 // Helper Function Definitions
 
@@ -116,6 +114,7 @@ function getHumanFaceDirection() {
   })();
 }
 
+
 //------------------------------------------------------------------------------
 // Simple Concurrent Neck Exercise
 async function conNeckSimple() {
@@ -135,7 +134,7 @@ async function conNeckSimple() {
   cancelActionGoal("HumanSpeechbubbleAction");
   sendActionGoal("RobotSpeechbubbleAction", String('done'));
 }
-
+    
 //------------------------------------------------------------------------------
 // Full Concurrent Neck Exercise
 async function fullNeckExercise() {
@@ -152,10 +151,10 @@ async function fullNeckExercise() {
   index = 0;
   sendActionGoal("RobotSpeechbubbleAction", String('Let\'s get started!'));
   await sleep(2);
-  action_list = ['Get ready for a neck exercise! Look forward and keep your neck straight!', 
-                 'Stretch your shoulder to the left as far as possible!', 'hold a bit longer!', 
-                 'Bring your face back center', 'Stretch your shoulder to the right as far as possible!', 
-                 'keep going!'];
+  action_list = ['Get ready for the neck exercise! Look forward and keep your neck straight!', 
+                'Stretch your shoulder to the left as far as possible!', 'hold a bit longer!', 
+                'Bring your face back center', 'Stretch your shoulder to the right as far as possible!', 
+                'keep going!'];
   face_direct = ['Center', 'Left', 'Left', 'Center', 'Right', 'Right'];
   var cont = "yes";
   do {  
@@ -176,7 +175,7 @@ async function fullNeckExercise() {
           }
         }
       }
-    index++;
+      index++;
     }
     sendActionGoal("RobotSpeechbubbleAction", 'You did it!');
     await sleep(2);
@@ -187,7 +186,8 @@ async function fullNeckExercise() {
   } while (cont === "yes");
 }
 
-async function YesOrNo() {
+// Simple helper function to get yes or no response from user    
+async function YesOrNo() { 
   var result;
   result = null;
   var options = ['yes', 'no'];
@@ -619,8 +619,23 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
+
+document.getElementById("run_neckexercise").onclick = () => {
+  fetch("/public/neck.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.log(code);
+      var curCode = `(async () => {${code} fullNeckExercise()})();`;
+      eval(curCode);
+    });
+};
+
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
   console.log("started");
+  fullNeckExercise();
 })();
