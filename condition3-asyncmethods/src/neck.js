@@ -7,12 +7,11 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
+
 import {
   extractFaceFeatures
 } from "tabletrobotface-userstudy";
 import { promisify } from "util";
-
-
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -65,20 +64,8 @@ function getActionResult(actionName) {
   })();
 }
 
-function cancelActionGoal(actionName) {
-  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
-}
-
-function cancelActionGoals() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
-}
-
-function sleep(sec) {
-  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
-}
-
 //------------------------------------------------------------------------------
-// Face Detection Functions
+// Face Detection Function 
 
 let poses$;
 function getNumDetectedFaces() {
@@ -86,12 +73,6 @@ function getNumDetectedFaces() {
     const listener = {
       next: val => {
         poses$.removeListener(listener);
-        const nosePoint = val[0].keypoints.find(kpt => kpt.part === "nose");
-        console.log(val[0].keypoints.find(kpt => kpt.part === "nose"));
-        if (nosePoint == NULL) {
-          console.log("null");
-        }
-
         callback(null, val.length);
       }
     };
@@ -106,9 +87,9 @@ function getHumanFaceDirection() {
         poses$.removeListener(listener);
         const features = extractFaceFeatures(val);
         if (features.isVisible) {
-          if (features.noseAngle < -5) {
+          if (features.noseAngle < -7.5) {
             callback(null, "Right");
-          } else if (features.noseAngle > 5) {
+          } else if (features.noseAngle > 7.5) {
             callback(null, "Left");
           } else {
             callback(null, "Center");
@@ -123,29 +104,60 @@ function getHumanFaceDirection() {
 }
 
 //------------------------------------------------------------------------------
-// Simple Concurrent Neck Exercise
-async function conNeckSimple() {
-  var faceDirection, cont;
-  // beg start_program
-  cancelActionGoals();
-  // end start_program
-  faceDirection = null;
-  cont = null;
-  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
-  while (faceDirection !== 'Left' && cont !== 'yes') {
-    faceDirection = (await getHumanFaceDirection());
-    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
-    await sleep(1);
-    cont = (await getActionResult("HumanSpeechbubbleAction"));
-    console.log(cont);
-    console.log(faceDirection);
-  }
-  cancelActionGoal("HumanSpeechbubbleAction");
-  sendActionGoal("RobotSpeechbubbleAction", String('done'));
+// Cancel Block
+function cancelActionGoal(actionName) {
+  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
+}
+
+function cancelActionGoals() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
+}
+
+function sleep(sec) {
+  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
 //------------------------------------------------------------------------------
 // Movement Primitive Functions
+
+var ros = new ROSLIB.Ros({ 
+  url : 'ws://localhost:9090' 
+});
+
+var jointMover = new ROSLIB.Service({
+  ros : ros,
+  name : '/open_manipulator/goal_joint_space_path_to_kinematics_position',
+  serviceType : 'open_manipulator_msgs/SetKinematicsPose'
+});
+
+function move() {
+  var request = new ROSLIB.ServiceRequest({
+    planning_group : "none",
+    end_effector_name : "open_manipulator",
+    kinematics_pose : {
+      pose: {
+        position: {
+          x: 0.01,
+          y: 0.25,
+          z: 0.01
+        },
+        orientation: {
+          x: 0, 
+          y: 0,
+          z: 0,
+          w: 0
+        }
+      },
+      max_accelerations_scaling_factor : 0.1, 
+      max_velocity_scaling_factor : 0.1,
+      tolerance: 0.1
+    },
+    path_time : 1.00
+  });
+  jointMover.callService(request, function(result) {
+    console.log('moved Left');
+  });
+}
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
@@ -153,8 +165,24 @@ async function conNeckSimple() {
 Blockly.defineBlocksWithJsonArray([
   {
     type: "get_face_direction",
-    message0: "get face direction",
+    message0: "get direction of face",
     output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_y_pos_of_nose",
+    message: "get Y position of nose",
+    output: "Number",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_x_pos_of_nose",
+    message: "get X position of nose",
+    output: "Number",
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -562,9 +590,156 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
+async function neckExercise() {
+  var action_list, ready, cont, i, face_direct, index;
+  index = 0;
+  // end start_program
+  sendActionGoal("RobotSpeechbubbleAction", String('Let\'s get started!'));
+  await sleep(2);
+  action_list = ['Get ready for a neck exercise! Look forward and keep your neck straight!', 
+                 'Stretch your shoulder to the left as far as possible!', 'hold a bit longer!', 
+                 'Bring your face back center', 'Stretch your shoulder to the right as far as possible!', 
+                 'keep going!'];
+  face_direct = ['Center', 'Left', 'Left', 'Center', 'Right', 'Right'];
+  for (var i_index in action_list) {
+    i = action_list[i_index];
+    sendActionGoal("RobotSpeechbubbleAction", String(i));
+    await sleep(2);
+    await correctFaceOrCont(face_direct[index]);
+   index++;
+  }
+  sendActionGoal("RobotSpeechbubbleAction", String('You did it!'));
+  await sleep(2);
+  sendActionGoal("RobotSpeechbubbleAction", String('Do you want to stretch again?'));
+}
+
+async function correctFaceOrCont(direction) {
+  var faceDirection;
+  faceDirection = null;
+  while (faceDirection !== direction) {
+    faceDirection = (await getHumanFaceDirection());
+    await sleep(1);
+    console.log(faceDirection);
+    if (direction === "Right" || direction === "Left") {
+      if (faceDirection === "Center") {
+        sendActionGoal("RobotSpeechbubbleAction", 'Stretch the neck more to the ' + direction + ' ! You got this!');
+        await sleep(2);
+      }
+    }
+  }
+}
+
+async function exercise() {
+  var result;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready?'));
+  result = null;
+  while (result != 'yes') {
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  cancelActionGoal("RobotSpeechbubbleAction");
+  await neckExercise();
+}
+
+async function fullNeckExercise() {
+  var result;
+  var action_list, i, face_direct, index;
+  cancelActionGoals();
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready?'));
+  result = null;
+  while (result != 'yes') {
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  index = 0;
+  sendActionGoal("RobotSpeechbubbleAction", String('Let\'s get started!'));
+  await sleep(2);
+  action_list = ['Get ready for a neck exercise! Look forward and keep your neck straight!', 
+                 'Stretch your shoulder to the left as far as possible!', 'hold a bit longer!', 
+                 'Bring your face back center', 'Stretch your shoulder to the right as far as possible!', 
+                 'keep going!'];
+  face_direct = ['Center', 'Left', 'Left', 'Center', 'Right', 'Right'];
+  var cont = "yes";
+  do {  
+    for (var i_index in action_list) {
+      i = action_list[i_index];
+      sendActionGoal("RobotSpeechbubbleAction", String(i));
+      await sleep(2);
+      var direction = face_direct[index];
+      var faceDirection;
+      faceDirection = null;
+      while (faceDirection !== direction) {
+        faceDirection = (await getHumanFaceDirection());
+        await sleep(1);
+        console.log(faceDirection);
+        if (direction === "Right" || direction === "Left") {
+          if (faceDirection === "Center") {
+            sendActionGoal("RobotSpeechbubbleAction", 'Stretch the neck more to the ' + direction + ' ! You got this!');
+            await sleep(2);
+          }
+        }
+      }
+    index++;
+    }
+    sendActionGoal("RobotSpeechbubbleAction", 'You did it!');
+    await sleep(2);
+    cont = null;
+    var options = ['yes', 'no'];
+    sendActionGoal("RobotSpeechbubbleAction", 'Do you want to continue?');
+    cont = await YesOrNo();
+  } while (cont === "yes");
+}
+
+
+async function YesOrNo() {
+  var result;
+  result = null;
+  var options = ['yes', 'no'];
+  sendActionGoal("HumanSpeechbubbleAction", options);
+  while (options.indexOf(result) === -1) {
+    sendActionGoal("HumanSpeechbubbleAction", options);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+    console.log(options.indexOf(result) + " " + result);
+  }
+  console.log(options.indexOf(result) + " " + result);
+  cancelActionGoal("RobotSpeechbubbleAction");
+  return result;
+}
+
+  
+document.getElementById("run").onclick = () => {
+  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
+    editor
+  )}})();`;
+  eval(curCode);
+};
+
+async function conNeckSimple() {
+  var faceDirection, cont;
+  faceDirection = null;
+  cont = null;
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
+  while (faceDirection !== 'Left' && cont !== 'yes') {
+    faceDirection = (await getHumanFaceDirection());
+    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
+    await sleep(1);
+    cont = (await getActionResult("HumanSpeechbubbleAction"));
+    console.log(cont);
+    console.log(faceDirection);
+  }
+  cancelActionGoal("HumanSpeechbubbleAction");
+  sendActionGoal("RobotSpeechbubbleAction", String('done'));
+}
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
   console.log("started");
-  conNeckSimple();
+  fullNeckExercise();
 })();
