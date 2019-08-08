@@ -7,6 +7,7 @@
 
   <body>
     <button id="run">Run</button>
+    <button id="run_neckexercise">Neck Exercise</button>
 
     <xml id="startBlocks" style="display:none">
       <block type="start_program"> </block>
@@ -21,6 +22,12 @@
               <field name="VAR">numFaces</field>
               <value name="VALUE">
                 <block type="get_num_detected_faces"></block>
+              </value>
+            </block>
+            <block type="variables_set">
+              <field name="VAR">faceDirection</field>
+              <value name="VALUE">
+                <block type="get_face_direction"></block>
               </value>
             </block>
           </category>

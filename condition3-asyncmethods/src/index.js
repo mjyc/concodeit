@@ -7,6 +7,9 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
+import {
+  extractFaceFeatures
+} from "tabletrobotface-userstudy";
 import { promisify } from "util";
 
 //------------------------------------------------------------------------------
@@ -60,19 +63,6 @@ function getActionResult(actionName) {
   })();
 }
 
-let poses$;
-function getNumDetectedFaces() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-        callback(null, val.length);
-      }
-    };
-    poses$.addListener(listener);
-  })();
-}
-
 function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
@@ -86,9 +76,146 @@ function sleep(sec) {
 }
 
 //------------------------------------------------------------------------------
+// Face Detection Functions
+
+let poses$;
+function getNumDetectedFaces() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        callback(null, val.length);
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
+function getHumanFaceDirection() {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        poses$.removeListener(listener);
+        const features = extractFaceFeatures(val);
+        if (features.isVisible) {
+          if (features.noseAngle < -5) {
+            callback(null, "Right");
+          } else if (features.noseAngle > 5) {
+            callback(null, "Left");
+          } else {
+            callback(null, "Center");
+          }
+        } else {
+          callback(null, "face not found");
+        }
+      }
+    };
+    poses$.addListener(listener);
+  })();
+}
+
+
+//------------------------------------------------------------------------------
+// Simple Concurrent Neck Exercise
+async function conNeckSimple() {
+  var faceDirection, cont;
+  // beg start_program
+  cancelActionGoals();
+  // end start_program
+  faceDirection = null;
+  cont = null;
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready? Turn left!'));
+  while (faceDirection !== 'Left' && cont !== 'yes') {
+    faceDirection = (await getHumanFaceDirection());
+    sendActionGoal("HumanSpeechbubbleAction", ['yes']);
+    await sleep(1);
+    cont = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  cancelActionGoal("HumanSpeechbubbleAction");
+  sendActionGoal("RobotSpeechbubbleAction", String('done'));
+}
+    
+//------------------------------------------------------------------------------
+// Full Concurrent Neck Exercise
+async function fullNeckExercise() {
+  var result;
+  var action_list, i, face_direct, index;
+  cancelActionGoals();
+  sendActionGoal("RobotSpeechbubbleAction", String('Are you ready?'));
+  result = null;
+  while (result != 'yes') {
+    sendActionGoal("HumanSpeechbubbleAction", ['yes', 'no']);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  index = 0;
+  sendActionGoal("RobotSpeechbubbleAction", String('Let\'s get started!'));
+  await sleep(2);
+  action_list = ['Get ready for the neck exercise! Look forward and keep your neck straight!', 
+                'Stretch your shoulder to the left as far as possible!', 'hold a bit longer!', 
+                'Bring your face back center', 'Stretch your shoulder to the right as far as possible!', 
+                'keep going!'];
+  face_direct = ['Center', 'Left', 'Left', 'Center', 'Right', 'Right'];
+  var cont = "yes";
+  do {  
+    for (var i_index in action_list) {
+      i = action_list[i_index];
+      sendActionGoal("RobotSpeechbubbleAction", String(i));
+      await sleep(2);
+      var direction = face_direct[index];
+      var faceDirection;
+      faceDirection = null;
+      while (faceDirection !== direction) {
+        faceDirection = (await getHumanFaceDirection());
+        await sleep(1);
+        if (direction === "Right" || direction === "Left") {
+          if (faceDirection === "Center") {
+            sendActionGoal("RobotSpeechbubbleAction", 'Stretch the neck more to the ' + direction + ' ! You got this!');
+            await sleep(2);
+          }
+        }
+      }
+      index++;
+    }
+    sendActionGoal("RobotSpeechbubbleAction", 'You did it!');
+    await sleep(2);
+    cont = null;
+    var options = ['yes', 'no'];
+    sendActionGoal("RobotSpeechbubbleAction", 'Do you want to continue?');
+    cont = await YesOrNo();
+  } while (cont === "yes");
+}
+
+// Simple helper function to get yes or no response from user    
+async function YesOrNo() { 
+  var result;
+  result = null;
+  var options = ['yes', 'no'];
+  sendActionGoal("HumanSpeechbubbleAction", options);
+  while (options.indexOf(result) === -1) {
+    sendActionGoal("HumanSpeechbubbleAction", options);
+    await sleep(1);
+    result = (await getActionResult("HumanSpeechbubbleAction"));
+  }
+  cancelActionGoal("RobotSpeechbubbleAction");
+  return result;
+}
+
+//------------------------------------------------------------------------------
+// Movement Primitive Functions
+
+//------------------------------------------------------------------------------
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "get_face_direction",
+    message0: "get face direction",
+    output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "get_num_detected_faces",
     message0: "get number of detected faces",
@@ -286,6 +413,11 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
+
+Blockly.JavaScript["get_face_direction"] = function(block) {
+  const code = check(block) ? "await getHumanFaceDirection()" : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
 
 Blockly.JavaScript["get_num_detected_faces"] = function(block) {
   const code = check(block) ? "await getNumDetectedFaces()" : "";
@@ -487,8 +619,23 @@ document.getElementById("run").onclick = () => {
   eval(curCode);
 };
 
+
+document.getElementById("run_neckexercise").onclick = () => {
+  fetch("/public/neck.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.log(code);
+      var curCode = `(async () => {${code} fullNeckExercise()})();`;
+      eval(curCode);
+    });
+};
+
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
   console.log("started");
+  fullNeckExercise();
 })();
