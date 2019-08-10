@@ -3,6 +3,10 @@
   <head>
     <title></title>
     <meta charset="UTF-8" />
+
+    <!-- Import joslibjs and eventEmitter2 -->
+    <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="https://static.robotwebtools.org/roslibjs/current/roslib.js"></script>
   </head>
 
   <body>
@@ -42,6 +46,7 @@
                 </block>
               </value>
             </block>
+            <block type="move"></block>
             <block type="variables_set">
               <field name="VAR">result</field>
               <value name="VALUE">
