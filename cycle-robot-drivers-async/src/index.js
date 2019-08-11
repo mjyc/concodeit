@@ -15,6 +15,7 @@ import {
   isEqualGoalStatus,
   isEqualGoalID
 } from "@cycle-robot-drivers/action";
+import makeVADDriver from "./makeVADDriver";
 
 const goals$ = xs.create();
 const cancels$ = xs.create();
@@ -94,7 +95,8 @@ export function initialize(options = {}) {
     },
     {
       DOM: makeDOMDriver(options.container),
-      TabletFace: makeTabletFaceDriver(options.TabletFace)
+      TabletFace: makeTabletFaceDriver(options.TabletFace),
+      VAD: makeVADDriver()
     },
     options
   );

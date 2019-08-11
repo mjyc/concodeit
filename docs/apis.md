@@ -96,10 +96,17 @@ function waitForOne(subprogram1: function, subprogram2: function): any
 
 ## Notes
 
-For `startGesturing` or `gesture`, use:
+1. For `startGesturing` or `gesture`, use:
 
 ```
 sendActionGoal("FacialExpressionAction", "HAPPY") // "SAD", "ANGRY", "FOCUSED", "CONFUSED"
 sendActionGoalCallback("FacialExpressionAction", "HAPPY", callback)
 ```
 
+2. For `isSpeaking` or `IsSpeakingChanged`, start by checking out the below functions:
+
+```
+await waitUntilVAD(); // waitFors
+detectVADChange(id, callback); // callback
+getVADState(id, callback); // async
+```

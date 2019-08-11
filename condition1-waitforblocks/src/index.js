@@ -89,6 +89,25 @@ function stopWaitUntilFaceEvent(id) {
   waitHandles[id].stop();
 }
 
+function waitUntilVAD(id) {
+  waitHandles[id] = {
+    listener: null,
+    stream: sources.VAD,
+    stop: () => {
+      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+    }
+  };
+  return promisify(cb => {
+    waitHandles[id].listener = {
+      next: val => {
+        waitHandles[id].stream.removeListener(waitHandles[id].listener);
+        cb(null, val);
+      }
+    };
+    waitHandles[id].stream.addListener(waitHandles[id].listener);
+  })();
+}
+
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
@@ -488,6 +507,7 @@ const sources = initialize({
 });
 
 sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+sources.VAD.addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var code = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`;

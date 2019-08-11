@@ -112,6 +112,19 @@ function getHumanFaceDirection() {
   })();
 }
 
+let VAD$;
+function getVADState(id, callback) {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        VAD$.removeListener(listener);
+        callback(null, val);
+      }
+    };
+    VAD$.addListener(listener);
+  })();
+}
+
 //------------------------------------------------------------------------------
 // Movement Primitive Functions
 
@@ -507,6 +520,8 @@ const sources = initialize({
 
 poses$ = sources.PoseDetection.events("poses").startWith([]);
 poses$.addListener({ next: _ => {} });
+VAD$ = sources.VAD;
+VAD$.addListener({ next: _ => {} });
 
 actionNames.map(actionName => {
   // HACK to give an initial value for result streams

@@ -54,8 +54,8 @@ function detectFace(id, callback) {
           let noseAngle = extractFaceFeatures(poses).noseAngle;
           let faceDirection =
             noseAngle > 20 ? "left" : noseAngle < -20 ? "right" : "center";
-          return callback(
-            !nosePoint
+          return callback(null, {
+            posX: !nosePoint
               ? null
               : nosePoint.position.x === 0
               ? 0
@@ -76,6 +76,21 @@ function detectFace(id, callback) {
 }
 
 function stopDetectFace(id) {
+  eventHandles[id].stream.removeListener(eventHandles[id].listener);
+}
+
+function detectVADChange(id, callback) {
+  eventHandles[id] = {
+    stream: sources.VAD,
+    listener: {
+      next: val => callback(null, val)
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
+function stopDetectVADChange(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
@@ -433,6 +448,7 @@ const sources = initialize({
 });
 
 sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+sources.VAD.addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
