@@ -16,19 +16,19 @@ function isGestureFinished(): boolean
 
 type State {
   faceDirection,
-  isHumanSpeaking,
+  isSpeaking,
 }
-type FaceDetectedEvent {
-  none,
+type FaceDirection {
+  noFace,
   center,
   left,
   right,
 }
-type SpeakingStateChanged {
+type IsSpeaking {
   speaking,
   notSpeaking,
 }
-function getState(state: State): FaceDetectedEvent | SpeakingStateChanged
+function getState(state: State): FaceDirection | IsSpeaking
 ```
 
 <!--
@@ -48,20 +48,20 @@ function startSaying(text: string, callback: function): void  // durative
 function startGesturing(name: string, callback: function): void  // durative
 
 type Event {
-  faceDetected,
-  speakingStateChanged,
+  faceDirectionChanged,
+  isSpeakingChanged,
 }
-type FaceDetectedEvent {
+type FaceDirectionChanged {
   none,
   center,
   left,
   right,
 }
-type SpeakingStateChanged {
+type IsSpeakingChanged {
   speaking,
   notSpeaking,
 }
-function waitForEvent(event: Event, setResultTo: string, callback: function): FaceDetectedEvent | SpeakingStateChanged
+function waitForEvent(event: Event, setResultTo: string, callback: function): FaceDirectionChanged | IsSpeakingChanged
 ```
 
 ## WaitFors API
@@ -75,21 +75,31 @@ function say(message: string): void  // durative
 function gesture(name: string): void  // durative
 
 type Event {
-  faceDetected,
-  speakingStateChanged,
+  faceDirectionChanged,
+  isSpeakingChanged,
 }
-type FaceDetectedEvent {
-  none,
+type FaceDirectionChanged {
+  noFace,
   center,
   left,
   right,
 }
-type SpeakingStateChanged {
+type IsSpeakingChanged {
   speaking,
   notSpeaking,
 }
-function waitForEvent(event: Event): FaceDetectedEvent | SpeakingStateChanged  // durative
+function waitForEvent(event: Event): FaceDirectionChanged | IsSpeakingChanged  // durative
 
 function waitForAll(subprogram1: function, subprogram2: function): [any]
 function waitForOne(subprogram1: function, subprogram2: function): any
 ```
+
+## Notes
+
+For `startGesturing` or `gesture`, use:
+
+```
+sendActionGoal("FacialExpressionAction", "HAPPY") // "SAD", "ANGRY", "FOCUSED", "CONFUSED"
+sendActionGoalCallback("FacialExpressionAction", "HAPPY", callback)
+```
+
