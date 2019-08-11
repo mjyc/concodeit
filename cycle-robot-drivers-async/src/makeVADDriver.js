@@ -74,7 +74,10 @@ const makeVADDriver = function() {
       stop: () => {}
     });
 
-    return output$.startWith(false).compose(dropRepeats());
+    return output$
+      .startWith(false)
+      .compose(dropRepeats())
+      .remember();
   };
 };
 

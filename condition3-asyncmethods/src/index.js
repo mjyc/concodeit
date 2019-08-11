@@ -113,7 +113,7 @@ function getHumanFaceDirection() {
 }
 
 let VAD$;
-function getVADState(id, callback) {
+function getVADState() {
   return promisify(callback => {
     const listener = {
       next: val => {
@@ -522,6 +522,7 @@ poses$ = sources.PoseDetection.events("poses").startWith([]);
 poses$.addListener({ next: _ => {} });
 VAD$ = sources.VAD;
 VAD$.addListener({ next: _ => {} });
+console.log(VAD$);
 
 actionNames.map(actionName => {
   // HACK to give an initial value for result streams
