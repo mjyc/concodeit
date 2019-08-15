@@ -376,7 +376,7 @@ Blockly.JavaScript["move"] = function(block) {
                 y : ${value_y},
                 z : ${value_z}
          };
-         move(pos, ${value_dur});`
+         moveEndEffector(pos, ${value_dur});`
     : "");
 };
 
