@@ -127,36 +127,13 @@ function getVADState() {
 
 //------------------------------------------------------------------------------
 // Update API stuff
-/*
-type State = {
-  faceDirection : String,
-  isSpeaking : Boolean,
-};
-
-function getState() {
-  return promisify(calback => {
-    const listener = {
-      next: val=> {
-
-      }
-    };
-  })();
+async function getState() {
+  var face = await getHumanFaceDirection();
+  var voice = await getVADState();
+  // return voice | face; // bitwise or operator? seems wrong...
+  return [face, voice];
 }
-*/
 
-function getState() {
-  var face = getHumanFaceDirection();
-  var voice = getVADState();
-  /*
-  var state = {
-    faceDirection: face,
-    isSpeaking = voice
-  };
-  */
-  console.log(face);
-  console.log(voice);
-  return face;
-}
 /*
 function startSaying(sentence) {
 
@@ -170,6 +147,14 @@ function startSaying(sentence) {
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "get_state",
+    message0: "get state",
+    output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "get_face_direction",
     message0: "get face direction",
@@ -385,6 +370,12 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
       )}));\n`
     : "";
 };
+
+Blockly.JavaScript["get_state"] = function(block) {
+  const code = check(block) ? "await getState()" : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 
 Blockly.JavaScript["get_face_direction"] = function(block) {
   const code = check(block) ? "await getHumanFaceDirection()" : "";
@@ -610,4 +601,5 @@ document.getElementById("run_neckexercise").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
+  console.log(getState());
 })();

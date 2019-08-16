@@ -18,15 +18,15 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
 
-          <category name="Gestures" colour="210">
-            <block type="start_gesturing">
-              <value name="ARG0">
-                <block type="String">
-                  <field name="TEXT">HAPPY</field>
-                </block>
+          <category name="States" colour="210">
+            <block type="variables_set">
+              <field name="VAR">getState</field>
+              <value name="VALUE">
+                <block type="get_state"></block>
               </value>
             </block>
           </category>
+
 
           <category name="Sensing" colour="210">
             <block type="variables_set">
