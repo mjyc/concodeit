@@ -108,6 +108,14 @@ function waitUntilVAD(id) {
   })();
 }
 
+function startFollowingFace() {
+  sources.followFace.shamefullySendNext(true);
+}
+
+function stopFollowingFace() {
+  sources.followFace.shamefullySendNext(false);
+}
+
 //------------------------------------------------------------------------------
 // Block Function Definitions
 

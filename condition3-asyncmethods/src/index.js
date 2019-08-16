@@ -73,6 +73,14 @@ function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
+function startFollowingFace() {
+  sources.followFace.shamefullySendNext(true);
+}
+
+function stopFollowingFace() {
+  sources.followFace.shamefullySendNext(false);
+}
+
 //------------------------------------------------------------------------------
 // Face Detection Functions
 
