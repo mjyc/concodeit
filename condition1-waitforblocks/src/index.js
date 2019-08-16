@@ -9,6 +9,11 @@ import {
   makeCancelGoal,
   createStreamEventListener
 } from "cycle-robot-drivers-async";
+// import { move, pan, tilt, pitch } from "./ros";
+//move(poss, 2);
+//pan(1.5, 2);
+//tilt(1.0, 2)
+//pitch(0.01, 2);
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -129,6 +134,38 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   //----------------------------------------------------------------------------
+  {
+    type: "move",
+    message0: "Move to position : x %1 y %2 z %3 in %4 seconds",
+    args0: [
+      {
+        type: "input_value",
+        name: "x",
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "y",
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "z",
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "dur",
+        check: "Number"
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "display_message",
     message0: "display message %1",
@@ -311,6 +348,37 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
+
+Blockly.JavaScript["move"] = function(block) {
+  var value_x = Blockly.JavaScript.valueToCode(
+    block,
+    "x",
+    Blockly.JavaScript.ORDER_ATOMIC
+  );
+  var value_y = Blockly.JavaScript.valueToCode(
+    block,
+    "y",
+    Blockly.JavaScript.ORDER_ATOMIC
+  );
+  var value_z = Blockly.JavaScript.valueToCode(
+    block,
+    "z",
+    Blockly.JavaScript.ORDER_ATOMIC
+  );
+  var value_dur = Blockly.JavaScript.valueToCode(
+    block,
+    "dur",
+    Blockly.JavaScript.ORDER_ATOMIC
+  );
+  return (code = check(block)
+    ? `var pos = {
+                x : ${value_x},
+                y : ${value_y},
+                z : ${value_z}
+         };
+         moveEndEffector(pos, ${value_dur});`
+    : "");
+};
 
 Blockly.JavaScript["display_message"] = function(block) {
   const code = check(block)
