@@ -594,13 +594,4 @@ document.getElementById("run").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
-  await sleep(3);
-  stopFollowingFace();
-  await sleep(1);
-  startFollowingFace();
-  await sleep(1);
-  stopFollowingFace();
-  await sleep(1);
-  startFollowingFace();
-  await sleep(1);
 })();
