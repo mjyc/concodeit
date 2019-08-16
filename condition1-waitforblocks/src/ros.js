@@ -186,4 +186,4 @@ function pitch(angle, dur) {
   move(pitchSrv, pitchClient);
 }
 
-export { move, pan, tilt, pitch };
+export { move, moveEndEffector, pan, tilt, pitch };

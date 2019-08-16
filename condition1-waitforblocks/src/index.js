@@ -10,7 +10,7 @@ import {
   makeCancelGoal,
   createStreamEventListener
 } from "cycle-robot-drivers-async";
-import { extractFaceFeatures } from "tabletrobotface-userstudy";
+import { moveEndEffector } from "./ros";
 // import { move, pan, tilt, pitch } from "./ros";
 //move(poss, 2);
 //pan(1.5, 2);
