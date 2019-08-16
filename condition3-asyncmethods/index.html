@@ -17,6 +17,17 @@
       <div>
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
+
+          <category name="Gestures" colour="210">
+            <block type="start_gesturing">
+              <value name="ARG0">
+                <block type="String">
+                  <field name="TEXT">HAPPY</field>
+                </block>
+              </value>
+            </block>
+          </category>
+
           <category name="Sensing" colour="210">
             <block type="variables_set">
               <field name="VAR">numFaces</field>
@@ -31,6 +42,7 @@
               </value>
             </block>
           </category>
+         
           <category name="Action" colour="230">
             <block type="sleep">
               <value name="ARG0">

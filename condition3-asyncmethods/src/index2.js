@@ -126,44 +126,6 @@ function getVADState() {
 }
 
 //------------------------------------------------------------------------------
-// Update API stuff
-/*
-type State = {
-  faceDirection : String,
-  isSpeaking : Boolean,
-};
-
-function getState() {
-  return promisify(calback => {
-    const listener = {
-      next: val=> {
-
-      }
-    };
-  })();
-}
-*/
-
-function getState() {
-  var face = getHumanFaceDirection();
-  var voice = getVADState();
-  /*
-  var state = {
-    faceDirection: face,
-    isSpeaking = voice
-  };
-  */
-  console.log(face);
-  console.log(voice);
-  return face;
-}
-/*
-function startSaying(sentence) {
-
-}
-*/
-
-//------------------------------------------------------------------------------
 // Movement Primitive Functions
 
 //------------------------------------------------------------------------------
@@ -375,16 +337,6 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
-
-Blockly.JavaScript["start_gesturing"] = function(block) {
-  return check(block)
-    ? `sendActionGoal("FacialExpressionAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE", // update to correct expression?
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
-    : "";
-};
 
 Blockly.JavaScript["get_face_direction"] = function(block) {
   const code = check(block) ? "await getHumanFaceDirection()" : "";
