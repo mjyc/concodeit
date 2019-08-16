@@ -94,6 +94,14 @@ function stopDetectVADChange(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
+function startFollowingFace() {
+  sources.followFace.shamefullySendNext(true);
+}
+
+function stopFollowingFace() {
+  sources.followFace.shamefullySendNext(false);
+}
+
 //------------------------------------------------------------------------------
 // Block Function Definitions
 

@@ -69,7 +69,7 @@ function waitForEvent(event: Event, setResultTo: string, callback: function): Fa
 ```
 function sleep(duration: number): void // durative
 function setMessage(message: string): void  // instantaneous
-function followFace(): void  // durative
+function startFollowingFace(): void  // instantaneous
 function stopFollowingFace(): void  // instantaneous
 function say(message: string): void  // durative
 function gesture(name: string): void  // durative
