@@ -18,11 +18,19 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
 
-          <category name="States" colour="210">
+          <category name="States" colour="190">
             <block type="variables_set">
               <field name="VAR">getState</field>
               <value name="VALUE">
                 <block type="get_state"></block>
+              </value>
+            </block>
+
+            <block type="start_gesturing">
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT">HAPPY</field>
+                </block>
               </value>
             </block>
           </category>

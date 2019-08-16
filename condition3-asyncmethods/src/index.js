@@ -134,24 +134,40 @@ async function getState() {
   return [face, voice];
 }
 
-/*
-function startSaying(sentence) {
-
+let GESTURES = ["HAPPY", "SAD", "ANGRY", "FOCUSED", "CONFUSED"];
+function startGesturing(gesture) {
+  if (GESTURES.indexOf(gesture) != -1) {
+    sendActionGoal("FacialExpressionAction", gesture);
+  }
 }
-*/
 
-//------------------------------------------------------------------------------
-// Movement Primitive Functions
+
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
   {
+    type: "start_gesturing",
+    message0: "start gesturing %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: "String"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 190,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "get_state",
     message0: "get state",
     output: "String",
-    colour: 210,
+    colour: 190,
     tooltip: "",
     helpUrl: ""
   },
@@ -363,9 +379,9 @@ function check(block) {
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
-    ? `sendActionGoal("FacialExpressionAction", String(${Blockly.JavaScript.valueToCode(
+    ? `startGesturing(String(${Blockly.JavaScript.valueToCode(
         block,
-        "MESSAGE", // update to correct expression?
+        "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
       )}));\n`
     : "";
@@ -601,5 +617,4 @@ document.getElementById("run_neckexercise").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
-  console.log(getState());
 })();
