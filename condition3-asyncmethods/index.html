@@ -19,13 +19,6 @@
         <xml id="toolbox" style="display: none">
 
           <category name="States" colour="190">
-            <block type="variables_set">
-              <field name="VAR">getState</field>
-              <value name="VALUE">
-                <block type="get_state"></block>
-              </value>
-            </block>
-
             <block type="start_gesturing">
               <value name="MESSAGE">
                 <block type="text">
@@ -33,16 +26,35 @@
                 </block>
               </value>
             </block>
+
+            <block type="start_following_face"></block>
+            <block type="stop_following_face"></block>
+
+            <block type="variables_set">
+              <field name="VAR">state</field>
+              <value name="VALUE">
+                <block type="get_state">
+                  <value name="MESSAGE">
+                    <block type="text">
+                      <field name="TEXT">faceDirection</field>
+                    </block>
+                  </value>
+                </block>
+              </value>
+            </block>
+
           </category>
 
 
           <category name="Sensing" colour="210">
+
             <block type="variables_set">
               <field name="VAR">numFaces</field>
               <value name="VALUE">
                 <block type="get_num_detected_faces"></block>
               </value>
             </block>
+            
             <block type="variables_set">
               <field name="VAR">faceDirection</field>
               <value name="VALUE">
@@ -137,6 +149,13 @@
               <field name="VAR">result</field>
               <value name="VALUE">
                 <block type="get_listen_result"></block>
+              </value>
+            </block>
+            <!--added this block here-->
+            <block type="variables_set">
+              <field name="VAR">status</field>
+              <value name="VALUE">
+                <block type="get_gesture_status"></block>
               </value>
             </block>
             <block type="cancel_display_message"></block>
