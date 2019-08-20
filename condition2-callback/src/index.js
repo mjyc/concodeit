@@ -117,6 +117,24 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "start_following_face",
+    message0: "start following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "stop_following_face",
+    message0: "stop following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "detect_face",
     message0: "detect face; when detected %1 do %2",
     args0: [
@@ -172,6 +190,26 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: "display_message",
     message0: "display message %1 %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "gesture",
+    message0: "gesture %1 %2",
     args0: [
       {
         type: "input_value",
@@ -336,6 +374,19 @@ Blockly.JavaScript["display_message"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["gesture"] = function(block) {
+  return check(block)
+    ? `sendActionGoalCallback("FacialExpressionAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
+    : "";
+};
+
 Blockly.JavaScript["ask_multiple_choice"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
@@ -391,6 +442,14 @@ Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
     ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
     : "";
+};
+
+Blockly.JavaScript["start_following_face"] = function(block) {
+  return check(block) ? `startFollowingFace();\n` : "";
+};
+
+Blockly.JavaScript["stop_following_face"] = function(block) {
+  return check(block) ? `stopFollowingFace();\n` : "";
 };
 
 //------------------------------------------------------------------------------
