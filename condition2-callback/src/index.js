@@ -103,23 +103,25 @@ function stopFollowingFace() {
 }
 
 function setMessage(message) {
-  sendActionGoalCallback("RobotSpeechbubbleAction", message, (result) => {});
+  sendActionGoalCallback("RobotSpeechbubbleAction", message, result => {});
 }
 
 function startGesturing(gesture, callback) {
-  sendActionGoalCallback("FacialExpressionAction", gesture, (result) => callback(result));
+  sendActionGoalCallback("FacialExpressionAction", gesture, result =>
+    callback(result)
+  );
 }
 
-function waitForEvent(event, setResultTo, callback) {
-
-} // : FaceDirectionChanged | IsSpeakingChanged
+function waitForEvent(event, setResultTo, callback) {} // : FaceDirectionChanged | IsSpeakingChanged
 
 function startSleeping(duration, callback) {
   sleep(duration, callback);
 }
 
 function startSaying(text, callback) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, (result) => callback(result));
+  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
+    callback(result)
+  );
 }
 //------------------------------------------------------------------------------
 // Block Function Definitions
@@ -150,22 +152,6 @@ Blockly.defineBlocksWithJsonArray([
     previousStatement: null,
     nextStatement: null,
     colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "set_message",
-    message0: "set message %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
     tooltip: "",
     helpUrl: ""
   },
@@ -223,8 +209,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "display_message",
-    message0: "display message %1 %2",
+    type: "set_message",
+    message0: "set message %1 %2",
     args0: [
       {
         type: "input_value",
@@ -387,15 +373,15 @@ Blockly.JavaScript["stop_detect_face"] = function(block) {
 };
 
 Blockly.JavaScript["sleep"] = function(block) {
-    return check(block)
+  return check(block)
     ? `startSleeping(${Blockly.JavaScript.valueToCode(
         block,
         "SE",
         Blockly.JavaScript.ORDER_ATOMIC
       )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
-}
-Blockly.JavaScript["display_message"] = function(block) {
+};
+Blockly.JavaScript["set_message"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
         block,
@@ -484,14 +470,6 @@ Blockly.JavaScript["start_following_face"] = function(block) {
 
 Blockly.JavaScript["stop_following_face"] = function(block) {
   return check(block) ? `stopFollowingFace();\n` : "";
-};
-
-Blockly.JavaScript["set_message"] = function(block) {
-  return check(block) ? `setMessage(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n` : "";
 };
 
 //------------------------------------------------------------------------------
