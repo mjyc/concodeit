@@ -1,5 +1,5 @@
 const xs = require("xstream").default;
-import dropRepeats from "xstream/extra/dropRepeats";
+const dropRepeats = require("xstream/extra/dropRepeats").default;
 const vad = require("@mjyc/voice-activity-detection");
 
 const makeVADDriver = function() {
@@ -81,4 +81,4 @@ const makeVADDriver = function() {
   };
 };
 
-module.exports = makeVADDriver;
+export default makeVADDriver;

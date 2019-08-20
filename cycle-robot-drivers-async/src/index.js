@@ -1,4 +1,5 @@
 import xs from "xstream";
+import sampleCombine from "xstream/extra/sampleCombine";
 import { makeDOMDriver } from "@cycle/dom";
 import { makeTabletFaceDriver } from "@cycle-robot-drivers/screen";
 import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
@@ -30,7 +31,35 @@ export let actionNames = [
 ];
 
 function main(sources) {
+  const videoWidth = 640;
+  const videoHeight = 480;
+  const followFace$ = (sources.followFace || xs.never()).startWith(false);
+  const tabletFace$ = sources.PoseDetection.events("poses")
+    .filter(
+      poses =>
+        poses.length === 1 &&
+        poses[0].keypoints.filter(kpt => kpt.part === "nose").length === 1
+    )
+    .compose(sampleCombine(followFace$))
+    .filter(([_, followFace]) => !!followFace)
+    .map(([poses, _]) => poses)
+    .map(poses => {
+      const nose = poses[0].keypoints.filter(kpt => kpt.part === "nose")[0];
+      const eyePosition = {
+        x: nose.position.x / videoWidth,
+        y: nose.position.y / videoHeight
+      };
+      return {
+        type: "SET_STATE",
+        value: {
+          leftEye: eyePosition,
+          rightEye: eyePosition
+        }
+      };
+    });
+
   return {
+    tabletFace: tabletFace$,
     FacialExpressionAction: {
       goal: goals$
         .filter(goals => goals.type === "FacialExpressionAction")
@@ -90,8 +119,9 @@ export function initialize(options = {}) {
   }
   runTabletRobotFaceApp(
     s => {
+      s.followFace = xs.create();
       sources = s;
-      return main();
+      return main(s);
     },
     {
       DOM: makeDOMDriver(options.container),
