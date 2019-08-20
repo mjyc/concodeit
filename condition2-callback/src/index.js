@@ -156,6 +156,22 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "set_message",
+    message0: "set message %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "detect_face",
     message0: "detect face; when detected %1 do %2",
     args0: [
@@ -470,6 +486,16 @@ Blockly.JavaScript["start_following_face"] = function(block) {
 
 Blockly.JavaScript["stop_following_face"] = function(block) {
   return check(block) ? `stopFollowingFace();\n` : "";
+};
+
+Blockly.JavaScript["set_message"] = function(block) {
+  return check(block)
+    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
 };
 
 //------------------------------------------------------------------------------
