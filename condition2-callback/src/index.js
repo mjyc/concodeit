@@ -123,6 +123,18 @@ function startSaying(text, callback) {
     callback(result)
   );
 }
+
+function waitForEvent(event, setResultTo, callback) {} // : FaceDirectionChanged | IsSpeakingChanged
+
+function startSleeping(duration, callback) {
+  sleep(duration, callback);
+}
+
+function startSaying(text, callback) {
+  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
+    callback(result)
+  );
+}
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
@@ -397,6 +409,7 @@ Blockly.JavaScript["sleep"] = function(block) {
       )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 };
+
 Blockly.JavaScript["set_message"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
