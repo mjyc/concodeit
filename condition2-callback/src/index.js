@@ -109,6 +109,18 @@ function setMessage(message) {
 function startGesturing(gesture, callback) {
   sendActionGoalCallback("FacialExpressionAction", gesture, (result) => callback(result));
 }
+
+function waitForEvent(event, setResultTo, callback) {
+
+} // : FaceDirectionChanged | IsSpeakingChanged
+
+function startSleeping(duration, callback) {
+  sleep(duration, callback);
+}
+
+function startSaying(text, callback) {
+  sendActionGoalCallback("SpeechSynthesisAction", text, (result) => callback(result));
+}
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
@@ -375,15 +387,14 @@ Blockly.JavaScript["stop_detect_face"] = function(block) {
 };
 
 Blockly.JavaScript["sleep"] = function(block) {
-  return check(block)
-    ? `sleep(${Blockly.JavaScript.valueToCode(
+    return check(block)
+    ? `startSleeping(${Blockly.JavaScript.valueToCode(
         block,
         "SE",
         Blockly.JavaScript.ORDER_ATOMIC
       )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
-};
-
+}
 Blockly.JavaScript["display_message"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
@@ -425,7 +436,7 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
 
 Blockly.JavaScript["speak"] = function(block) {
   return check(block)
-    ? `sendActionGoalCallback("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+    ? `startSaying(String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
