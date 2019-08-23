@@ -436,7 +436,7 @@ Blockly.JavaScript["done"] = function(block) {
 
 Blockly.JavaScript["wait_until_face_event"] = function(block) {
   return check(block)
-    ? `waitUntilFaceEvent("${Math.floor(
+    ? `await waitUntilFaceEvent("${Math.floor(
         Math.random() * Math.pow(10, 8)
       )}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
         block,
