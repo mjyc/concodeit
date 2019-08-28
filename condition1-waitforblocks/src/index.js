@@ -104,7 +104,7 @@ function waitUntilVAD(id) {
         cb(null, val);
       }
     };
-    waitHandles[id].stream.addListener(waitHandles[id].listener);
+    waitHandles[id].stream.drop(1).addListener(waitHandles[id].listener);
   })();
 }
 
@@ -514,8 +514,8 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: _ => {} });
-sources.VAD.addListener({ next: _ => {} });
+sources.PoseDetection.events("poses").addListener({ next: () => {} });
+sources.VAD.addListener({ next: () => {} });
 
 document.getElementById("run").onclick = () => {
   var code = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`;
