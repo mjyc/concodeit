@@ -9,6 +9,7 @@ import {
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
 import { promisify } from "util";
+import { get } from "https";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -134,12 +135,93 @@ function getVADState() {
 }
 
 //------------------------------------------------------------------------------
-// Movement Primitive Functions
+// Update API stuff
+async function getState(whichState) {
+  if (whichState === "faceDirection") {
+    return await getHumanFaceDirection();
+  } else if (whichState === "isSpeaking") {
+    return await getVADState();
+  }
+}
+
+let GESTURES = ["HAPPY", "SAD", "ANGRY", "FOCUSED", "CONFUSED"];
+function startGesturing(gesture) {
+  if (GESTURES.indexOf(gesture) != -1) {
+    sendActionGoal("FacialExpressionAction", gesture);
+  }
+}
+
+function setMessage(message) {
+  sendActionGoal("RobotSpeechbubbleAction", message);
+}
+
+function startSaying(message) {
+  sendActionGoal("SpeechSynthesisAction", message);
+}
+
+function isSayFinished() {
+  let speech_status = getActionStatus("SpeechSynthesisAction");
+  return speech_status !== "ACTIVE";
+}
+
+function isGestureFinished() {
+  let speech_status = getActionStatus("FacialExpressionAction");
+  return speech_status !== "ACTIVE";
+}
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "stop_following_face",
+    message0: "stop following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 190,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_following_face",
+    message0: "start following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 190,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_gesturing",
+    message0: "start gesturing %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: "String"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 190,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_state",
+    message0: "get state of %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: "String"
+      }
+    ],
+    output: "String",
+    colour: 190,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "get_face_direction",
     message0: "get face direction",
@@ -294,6 +376,14 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "get_gesture_status",
+    message0: "get gesture status",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "cancel_display_message",
     message0: "cancel display message",
     previousStatement: null,
@@ -346,6 +436,52 @@ function check(block) {
   );
 }
 
+//------------------------------------------------------------------------------
+// API Code Generating Blocks
+
+Blockly.JavaScript["start_following_face"] = function(block) {
+  return `startFollowingFace();\n`;
+};
+
+Blockly.JavaScript["stop_following_face"] = function(block) {
+  return `stopFollowingFace();\n`;
+};
+
+Blockly.JavaScript["start_gesturing"] = function(block) {
+  return check(block)
+    ? `startGesturing(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
+
+Blockly.JavaScript["get_state"] = function(block) {
+  const code = check(block)
+    ? `await getState(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}))`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+
+Blockly.JavaScript["speak"] = function(block) {
+  return check(block)
+    ? `sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
+
+//------------------------------------------------------------------------------
+// Face Detection Code Generating Blocks
+
 Blockly.JavaScript["get_face_direction"] = function(block) {
   const code = check(block) ? "await getHumanFaceDirection()" : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
@@ -355,6 +491,9 @@ Blockly.JavaScript["get_num_detected_faces"] = function(block) {
   const code = check(block) ? "await getNumDetectedFaces()" : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
+
+//------------------------------------------------------------------------------
+// Original Blocks
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
@@ -438,6 +577,13 @@ Blockly.JavaScript["get_speak_status"] = function(block) {
 Blockly.JavaScript["get_listen_status"] = function(block) {
   const code = check(block)
     ? `await getActionStatus("SpeechRecognitionAction")`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["get_gesture_status"] = function(block) {
+  const code = check(block)
+    ? `await isGestureFinished()`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
