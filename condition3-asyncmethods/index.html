@@ -17,19 +17,7 @@
       <div>
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
-
-          <category name="States" colour="190">
-            <block type="start_gesturing">
-              <value name="MESSAGE">
-                <block type="text">
-                  <field name="TEXT">HAPPY</field>
-                </block>
-              </value>
-            </block>
-
-            <block type="start_following_face"></block>
-            <block type="stop_following_face"></block>
-
+          <category name="Sensing" colour="210">
             <block type="variables_set">
               <field name="VAR">state</field>
               <value name="VALUE">
@@ -42,27 +30,7 @@
                 </block>
               </value>
             </block>
-
           </category>
-
-
-          <category name="Sensing" colour="210">
-
-            <block type="variables_set">
-              <field name="VAR">numFaces</field>
-              <value name="VALUE">
-                <block type="get_num_detected_faces"></block>
-              </value>
-            </block>
-            
-            <block type="variables_set">
-              <field name="VAR">faceDirection</field>
-              <value name="VALUE">
-                <block type="get_face_direction"></block>
-              </value>
-            </block>
-          </category>
-         
           <category name="Action" colour="230">
             <block type="sleep">
               <value name="ARG0">
@@ -71,55 +39,16 @@
                 </block>
               </value>
             </block>
-            <block type="display_message">
+            <block type="set_message">
               <value name="MESSAGE">
                 <block type="text">
                   <field name="TEXT">Hello there!</field>
                 </block>
               </value>
             </block>
-            <block type="variables_set">
-              <field name="VAR">status</field>
-              <value name="VALUE">
-                <block type="get_display_message_status"></block>
-              </value>
-            </block>
-            <block type="variables_set">
-              <field name="VAR">result</field>
-              <value name="VALUE">
-                <block type="get_display_message_result"></block>
-              </value>
-            </block>
-            <block type="ask_multiple_choice">
-              <value name="CHOICES">
-                <block type="lists_create_with">
-                  <mutation items="2"></mutation>
-                  <value name="ADD0">
-                    <block type="text">
-                      <field name="TEXT">Choice1</field>
-                    </block>
-                  </value>
-                  <value name="ADD1">
-                    <block type="text">
-                      <field name="TEXT">Choice2</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
-            </block>
-            <block type="variables_set">
-              <field name="VAR">status</field>
-              <value name="VALUE">
-                <block type="get_ask_multiple_choice_status"></block>
-              </value>
-            </block>
-            <block type="variables_set">
-              <field name="VAR">result</field>
-              <value name="VALUE">
-                <block type="get_ask_multiple_choice_result"></block>
-              </value>
-            </block>
-            <block type="speak">
+            <block type="start_following_face"></block>
+            <block type="stop_following_face"></block>
+            <block type="start_saying">
               <value name="MESSAGE">
                 <block type="text">
                   <field name="TEXT">Hi!</field>
@@ -127,41 +56,24 @@
               </value>
             </block>
             <block type="variables_set">
-              <field name="VAR">status</field>
+              <field name="VAR">sayFinished</field>
               <value name="VALUE">
-                <block type="get_speak_status"></block>
+                <block type="is_say_finished"></block>
+              </value>
+            </block>
+            <block type="start_gesturing">
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT">HAPPY</field>
+                </block>
               </value>
             </block>
             <block type="variables_set">
-              <field name="VAR">result</field>
+              <field name="VAR">gestureFinished</field>
               <value name="VALUE">
-                <block type="get_speak_result"></block>
+                <block type="is_gesture_finished"></block>
               </value>
             </block>
-            <block type="listen"></block>
-            <block type="variables_set">
-              <field name="VAR">status</field>
-              <value name="VALUE">
-                <block type="get_listen_status"></block>
-              </value>
-            </block>
-            <block type="variables_set">
-              <field name="VAR">result</field>
-              <value name="VALUE">
-                <block type="get_listen_result"></block>
-              </value>
-            </block>
-            <!--added this block here-->
-            <block type="variables_set">
-              <field name="VAR">status</field>
-              <value name="VALUE">
-                <block type="get_gesture_status"></block>
-              </value>
-            </block>
-            <block type="cancel_display_message"></block>
-            <block type="cancel_ask_multiple_choice"></block>
-            <block type="cancel_speak"></block>
-            <block type="cancel_listen"></block>
           </category>
           <category name="Program control" colour="290">
             <block type="start_program"></block>
