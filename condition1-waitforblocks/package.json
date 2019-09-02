@@ -2,13 +2,15 @@
   "private": "true",
   "main": "index.html",
   "scripts": {
+    "prestart": "rm -rf dist/public && mkdir -p dist && cp -r public dist/",
     "start": "parcel index.html --open",
     "build": "parcel build index.html"
   },
   "dependencies": {
     "cycle-robot-drivers-async": "file:../cycle-robot-drivers-async",
     "node-blockly": "1.0.36",
-    "roslib": "1.0.1"
+    "roslib": "1.0.1",
+    "tabletrobotface-userstudy": "0.0.5"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
