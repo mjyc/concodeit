@@ -111,6 +111,7 @@ function startGesturing(gesture, callback) {
   sendActionGoalCallback("FacialExpressionAction", gesture, (result) => callback(result));
 }
 
+<<<<<<< HEAD
 // uses the global id value from detectface
 // setResultTo not yet implemented due to weird blockly error
 function waitForEvent(event, callback) {
@@ -137,6 +138,10 @@ function waitForEvent(event, callback) {
     setResultTo = detectVADChange(Math.floor(Math.random() * Math.pow(10, 8)), callback);
     // (result) => callback(result);
   }
+=======
+function waitForEvent(event, setResultTo, callback) {
+
+>>>>>>> a56b5edd0efce0bb921a3078db9a9178d91a9868
 } // : FaceDirectionChanged | IsSpeakingChanged
 
 function startSleeping(duration, callback) {
@@ -295,6 +300,7 @@ Blockly.defineBlocksWithJsonArray([
     message0: "gesture %1 %2",
     args0: [
       {
+<<<<<<< HEAD
         type: "field_dropdown",
         name: "MESSAGE",
         "options": [
@@ -305,6 +311,11 @@ Blockly.defineBlocksWithJsonArray([
           [ "Focused", "\"FOCUSED\"" ],
           [ "Confused", "\"CONFUSED\"" ]
         ]
+=======
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+>>>>>>> a56b5edd0efce0bb921a3078db9a9178d91a9868
       },
       {
         type: "input_statement",
@@ -450,6 +461,7 @@ Blockly.JavaScript["sleep"] = function(block) {
       )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 }
+<<<<<<< HEAD
 
 Blockly.JavaScript["wait_for_event"] = function(block) {
     return check(block)
@@ -458,6 +470,8 @@ Blockly.JavaScript["wait_for_event"] = function(block) {
     : "";
 }
 
+=======
+>>>>>>> a56b5edd0efce0bb921a3078db9a9178d91a9868
 Blockly.JavaScript["display_message"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
@@ -473,8 +487,16 @@ Blockly.JavaScript["display_message"] = function(block) {
 
 Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
+<<<<<<< HEAD
     ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue("MESSAGE")
       }), (result) => {\n${Blockly.JavaScript.statementToCode(
+=======
+    ? `sendActionGoalCallback("FacialExpressionAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+>>>>>>> a56b5edd0efce0bb921a3078db9a9178d91a9868
         block,
         "DO"
       )}});\n`

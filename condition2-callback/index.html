@@ -72,6 +72,7 @@
                 </block>
               </value>
             </block>
+<<<<<<< HEAD
             <block type="wait_for_event">
               <field name="SE"></field>
               <value name="DO">
@@ -82,6 +83,8 @@
                 </block>
               </value>
             </block>
+=======
+>>>>>>> a56b5edd0efce0bb921a3078db9a9178d91a9868
             <block type="start_following_face"></block>
             <block type="stop_following_face"></block>
             <block type="set_message">
@@ -117,10 +120,21 @@
               <field name="NAME">handle ask multiple choice done</field>
             </block>
             <block type="gesture">
+<<<<<<< HEAD
               <field name="MESSAGE"></field>
               <value name="DO">
                 <block type="procedures_callnoreturn">
                   <mutation name="handle gesture done">
+=======
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT">HAPPY</field>
+                </block>
+              </value>
+              <value name="DO">
+                <block type="procedures_callnoreturn">
+                  <mutation name="handle display message done">
+>>>>>>> a56b5edd0efce0bb921a3078db9a9178d91a9868
                     <arg name="result"></arg>
                   </mutation>
                   <value name="ARG0">
