@@ -118,17 +118,12 @@
             </block>
             <block type="gesture">
               <field name="MESSAGE"></field>
-              <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle gesture done">
-              <value name="MESSAGE">
                 <block type="text">
                   <field name="TEXT">HAPPY</field>
                 </block>
-              </value>
               <value name="DO">
                 <block type="procedures_callnoreturn">
-                  <mutation name="handle display message done">
+                  <mutation name="handle gesture done">
                   <arg name="result"></arg>
                   </mutation>
                   <value name="ARG0">

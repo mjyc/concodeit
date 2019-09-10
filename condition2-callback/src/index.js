@@ -134,8 +134,12 @@ function waitForEvent(event, callback) {
   else if (event == "isSpeakingChanged") {
     // setResultTo = "IsSpeakingChanged";
     console.log("reached Speak Change condition");
-    setResultTo = detectVADChange(Math.floor(Math.random() * Math.pow(10, 8)), callback);
-    // (result) => callback(result);
+    if (typeof id === "undefined") {
+      console.log("id undefined");
+      return;
+    }
+    if (detectVADChange(id, callback) != null)
+      (result) => callback(result);
   }
 } // : FaceDirectionChanged | IsSpeakingChanged
 
