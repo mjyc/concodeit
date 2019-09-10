@@ -19,6 +19,32 @@
       <div>
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
+          <category name="States" colour="190">
+            <block type="start_gesturing">
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT">HAPPY</field>
+                </block>
+              </value>
+            </block>
+
+            <block type="start_following_face"></block>
+            <block type="stop_following_face"></block>
+
+            <block type="variables_set">
+              <field name="VAR">state</field>
+              <value name="VALUE">
+                <block type="get_state">
+                  <value name="MESSAGE">
+                    <block type="text">
+                      <field name="TEXT">faceDirection</field>
+                    </block>
+                  </value>
+                </block>
+              </value>
+            </block>
+          </category>
+
           <category name="Sensing" colour="210">
             <block type="variables_set">
               <field name="VAR">state</field>
@@ -27,6 +53,7 @@
               </value>
             </block>
           </category>
+
           <category name="Action" colour="230">
             <block type="sleep">
               <value name="ARG0">

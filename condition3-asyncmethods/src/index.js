@@ -9,6 +9,7 @@ import {
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
 import { promisify } from "util";
+import { get } from "https";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -317,6 +318,9 @@ Blockly.JavaScript["get_state"] = function(block) {
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
+
+//------------------------------------------------------------------------------
+// Original Blocks
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
