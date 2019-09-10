@@ -131,8 +131,7 @@ function waitForEvent(event, callback) {
       (result) => callback(result);
     }
   }
-  else if (event == "isSpeakingChanged") {
-    // setResultTo = "IsSpeakingChanged";
+  else if (event == "IsSpeakingChanged") {
     console.log("reached Speak Change condition");
     if (typeof id === "undefined") {
       console.log("id undefined");
