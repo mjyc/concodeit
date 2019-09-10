@@ -104,7 +104,7 @@ function waitUntilVAD(id) {
         cb(null, val);
       }
     };
-    waitHandles[id].stream.addListener(waitHandles[id].listener);
+    waitHandles[id].stream.drop(1).addListener(waitHandles[id].listener);
   })();
 }
 
@@ -436,7 +436,7 @@ Blockly.JavaScript["done"] = function(block) {
 
 Blockly.JavaScript["wait_until_face_event"] = function(block) {
   return check(block)
-    ? `waitUntilFaceEvent("${Math.floor(
+    ? `await waitUntilFaceEvent("${Math.floor(
         Math.random() * Math.pow(10, 8)
       )}", (posX, posY) => ${Blockly.JavaScript.valueToCode(
         block,
@@ -514,8 +514,8 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: _ => {} });
-sources.VAD.addListener({ next: _ => {} });
+sources.PoseDetection.events("poses").addListener({ next: () => {} });
+sources.VAD.addListener({ next: () => {} });
 
 document.getElementById("run").onclick = () => {
   var code = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`;
