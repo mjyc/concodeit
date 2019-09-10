@@ -43,17 +43,22 @@ const eventHandles = {};
 
 // IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
 function detectFace(id, callback) {
+  const SIDE_ANGLE = 20;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
       next: poses => {
         if (poses.length === 0) {
-          return callback(null, null);
+          return callback(null, { posX: null, posY: null, faceDir: null });
         } else {
           const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
-          let noseAngle = extractFaceFeatures(poses).noseAngle;
-          let faceDirection =
-            noseAngle > 20 ? "left" : noseAngle < -20 ? "right" : "center";
+          const noseAngle = extractFaceFeatures(poses).noseAngle;
+          const faceDirection =
+            noseAngle > SIDE_ANGLE
+              ? "left"
+              : noseAngle < -SIDE_ANGLE
+              ? "right"
+              : "center";
           return callback(null, {
             posX: !nosePoint
               ? null
@@ -112,19 +117,35 @@ function startGesturing(gesture, callback) {
   );
 }
 
-function waitForEvent(event, setResultTo, callback) {} // : FaceDirectionChanged | IsSpeakingChanged
-
-function startSleeping(duration, callback) {
-  sleep(duration, callback);
-}
-
-function startSaying(text, callback) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
-    callback(result)
-  );
-}
-
-function waitForEvent(event, setResultTo, callback) {} // : FaceDirectionChanged | IsSpeakingChanged
+// uses the global id value from detectface
+// setResultTo not yet implemented due to weird blockly error
+function waitForEvent(event, callback) {
+  console.log("reached method waitForEvent");
+  console.log("event: " + event);
+  if (event == "FaceDirectionChanged") {
+    if (typeof faceDir === "undefined") {
+      console.log("global variable faceDir undefined");
+      return;
+    }
+    var firstDir = faceDir;
+    setTimeout(function() {}, 100);
+    var secondDir = faceDir;
+    console.log("first Face Dir: " + firstDir);
+    console.log("second Face Dir:" + secondDir);
+    if (firstDir != secondDir) {
+      console.log("Face Direction Change Detected");
+      result => callback(result);
+    }
+  } else if (event == "isSpeakingChanged") {
+    // setResultTo = "IsSpeakingChanged";
+    console.log("reached Speak Change condition");
+    setResultTo = detectVADChange(
+      Math.floor(Math.random() * Math.pow(10, 8)),
+      callback
+    );
+    // (result) => callback(result);
+  }
+} // : FaceDirectionChanged | IsSpeakingChanged
 
 function startSleeping(duration, callback) {
   sleep(duration, callback);
@@ -237,6 +258,29 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "wait_for_event",
+    message0: "wait for event %1 then %2",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "SE",
+        options: [
+          ["FaceDirectionChanged", '"FaceDirectionChanged"'],
+          ["IsSpeakingChanged", '"IsSpeakingChanged"']
+        ]
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "set_message",
     message0: "set message %1 %2",
     args0: [
@@ -261,9 +305,16 @@ Blockly.defineBlocksWithJsonArray([
     message0: "gesture %1 %2",
     args0: [
       {
-        type: "input_value",
+        type: "field_dropdown",
         name: "MESSAGE",
-        check: ["String", "Number"]
+        options: [
+          ["", '""'],
+          ["Happy", '"HAPPY"'],
+          ["Sad", '"SAD"'],
+          ["Angry", '"ANGRY"'],
+          ["Focused", '"FOCUSED"'],
+          ["Confused", '"CONFUSED"']
+        ]
       },
       {
         type: "input_statement",
@@ -410,6 +461,17 @@ Blockly.JavaScript["sleep"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["wait_for_event"] = function(block) {
+  return check(block)
+    ? `waitForEvent(String(${block.getFieldValue(
+        "SE"
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}});\n`
+    : "";
+};
+
 Blockly.JavaScript["set_message"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
@@ -425,10 +487,8 @@ Blockly.JavaScript["set_message"] = function(block) {
 
 Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
-    ? `sendActionGoalCallback("FacialExpressionAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
+    ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
+        "MESSAGE"
       )}), (result) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
