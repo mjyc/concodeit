@@ -137,7 +137,7 @@ function stopWaitUntilFaceEvent(id) {
   waitHandles[id].stop();
 }
 
-function waitUntilVAD(id) {
+function waitUntilVADStateChanged(id) {
   waitHandles[id] = {
     listener: null,
     stream: sources.VAD,
@@ -150,6 +150,27 @@ function waitUntilVAD(id) {
       next: val => {
         waitHandles[id].stream.removeListener(waitHandles[id].listener);
         cb(null, val);
+      }
+    };
+    waitHandles[id].stream.addListener(waitHandles[id].listener);
+  })();
+}
+
+function waitUntilVADState(id, state) {
+  waitHandles[id] = {
+    listener: null,
+    stream: sources.VAD,
+    stop: () => {
+      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+    }
+  };
+  return promisify(cb => {
+    waitHandles[id].listener = {
+      next: val => {
+        if (val === state) {
+          waitHandles[id].stream.removeListener(waitHandles[id].listener);
+          cb(null, val);
+        }
       }
     };
     waitHandles[id].stream.addListener(waitHandles[id].listener);
