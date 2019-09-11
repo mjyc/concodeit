@@ -328,7 +328,7 @@ Blockly.JavaScript["sleep"] = function(block) {
 
 Blockly.JavaScript["set_message"] = function(block) {
   return check(block)
-    ? `sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
