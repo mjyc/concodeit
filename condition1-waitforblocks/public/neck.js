@@ -24,7 +24,7 @@ async function neckExercise() {
     })()
   ]);
 
-  await sleep(1);
+  await sleep(2);
   var direction = await checkFaceDirection(100);
   while (direction != FaceDirectionChanged.CENTER) {
     direction = await checkFaceDirection(100);
@@ -50,7 +50,7 @@ async function neckExercise() {
         while (!correct) {
           // If face is not facing right direction, print and say descriptive comment
           if (dir2 == wrong[i_index]) {
-            printFalseDir(i);
+            await printFalseDir(i);
           }
           await sleep(1);
           dir2 = await checkFaceDirection(111);
@@ -58,6 +58,8 @@ async function neckExercise() {
         cb(null, null);
       })()
     ]);
+    result = await sendActionGoal("RobotSpeechbubbleAction", "Good Job!");
+    await sleep(2);
   }
   result = await sendActionGoal(
     "RobotSpeechbubbleAction",
@@ -90,5 +92,3 @@ async function printFalseDir(i) {
   await sleep(1);
   result = await sendActionGoal("RobotSpeechbubbleAction", String(i));
 }
-
-await neckExercise();

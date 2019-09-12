@@ -607,5 +607,4 @@ document.getElementById("run_neckexercise").onclick = () => {
 // Scratch
 (async () => {
   console.log("started");
-  await neckExercise();
 })();
