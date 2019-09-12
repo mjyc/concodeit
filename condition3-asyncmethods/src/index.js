@@ -9,7 +9,6 @@ import {
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
 import { promisify } from "util";
-import { get } from "https";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -144,7 +143,7 @@ async function getState(whichState) {
   }
 }
 
-let GESTURES = ["HAPPY", "SAD", "ANGRY", "FOCUSED", "CONFUSED"];
+const GESTURES = ["HAPPY", "SAD", "ANGRY", "FOCUSED", "CONFUSED"];
 function startGesturing(gesture) {
   if (GESTURES.indexOf(gesture) != -1) {
     sendActionGoal("FacialExpressionAction", gesture);
@@ -174,40 +173,6 @@ function isGestureFinished() {
 
 Blockly.defineBlocksWithJsonArray([
   {
-    type: "stop_following_face",
-    message0: "stop following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 190,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_following_face",
-    message0: "start following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 190,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_gesturing",
-    message0: "start gesturing %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: "String"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 190,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
     type: "get_state",
     message0: "get state of %1",
     args0: [
@@ -218,22 +183,6 @@ Blockly.defineBlocksWithJsonArray([
       }
     ],
     output: "String",
-    colour: 190,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_face_direction",
-    message0: "get face direction",
-    output: "String",
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_num_detected_faces",
-    message0: "get number of detected faces",
-    output: "Number",
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -255,8 +204,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "display_message",
-    message0: "display message %1",
+    type: "set_message",
+    message0: "set message %1",
     args0: [
       {
         type: "input_value",
@@ -271,15 +220,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "ask_multiple_choice",
-    message0: "ask multiple choice %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "CHOICES",
-        check: "Array"
-      }
-    ],
+    type: "stop_following_face",
+    message0: "stop following face",
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -287,8 +229,17 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "speak",
-    message0: "speak %1",
+    type: "start_following_face",
+    message0: "start following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_saying",
+    message0: "start saying %1",
     args0: [
       {
         type: "input_value",
@@ -303,8 +254,23 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "listen",
-    message0: "listen",
+    type: "is_say_finished",
+    message0: "is say finished",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_gesturing",
+    message0: "start gesturing %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: "String"
+      }
+    ],
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -312,109 +278,9 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "get_display_message_result",
-    message0: "get display message result",
+    type: "is_gesture_finished",
+    message0: "is gesture finished",
     output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_ask_multiple_choice_result",
-    message0: "get multiple choice result",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_speak_result",
-    message0: "get speak result",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_listen_result",
-    message0: "get listen result",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_display_message_status",
-    message0: "get display message status",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_ask_multiple_choice_status",
-    message0: "get multiple choice status",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_speak_status",
-    message0: "get speak status",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_listen_status",
-    message0: "get listen status",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "get_gesture_status",
-    message0: "get gesture status",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_display_message",
-    message0: "cancel display message",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_ask_multiple_choice",
-    message0: "cancel ask multiple choice",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_speak",
-    message0: "cancel speak",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_listen",
-    message0: "cancel listen",
-    previousStatement: null,
-    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -439,12 +305,58 @@ function check(block) {
 //------------------------------------------------------------------------------
 // API Code Generating Blocks
 
+Blockly.JavaScript["get_state"] = function(block) {
+  const code = check(block)
+    ? `await getState(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}))`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["sleep"] = function(block) {
+  return check(block)
+    ? `await sleep(${Blockly.JavaScript.valueToCode(
+        block,
+        "ARG0",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
+
+Blockly.JavaScript["set_message"] = function(block) {
+  return check(block)
+    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
+
 Blockly.JavaScript["start_following_face"] = function(block) {
   return `startFollowingFace();\n`;
 };
 
 Blockly.JavaScript["stop_following_face"] = function(block) {
   return `stopFollowingFace();\n`;
+};
+
+Blockly.JavaScript["start_saying"] = function(block) {
+  return check(block)
+    ? `sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
+
+Blockly.JavaScript["is_say_finished"] = function(block) {
+  const code = check(block) ? `await isSayFinished()` : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
@@ -457,151 +369,9 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["get_state"] = function(block) {
-  const code = check(block)
-    ? `await getState(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}))`
-    : "";
+Blockly.JavaScript["is_gesture_finished"] = function(block) {
+  const code = check(block) ? `await isGestureFinished()` : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-
-Blockly.JavaScript["speak"] = function(block) {
-  return check(block)
-    ? `sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
-    : "";
-};
-
-//------------------------------------------------------------------------------
-// Face Detection Code Generating Blocks
-
-Blockly.JavaScript["get_face_direction"] = function(block) {
-  const code = check(block) ? "await getHumanFaceDirection()" : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_num_detected_faces"] = function(block) {
-  const code = check(block) ? "await getNumDetectedFaces()" : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-//------------------------------------------------------------------------------
-// Original Blocks
-
-Blockly.JavaScript["sleep"] = function(block) {
-  return check(block)
-    ? `await sleep(${Blockly.JavaScript.valueToCode(
-        block,
-        "ARG0",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )});\n`
-    : "";
-};
-
-Blockly.JavaScript["display_message"] = function(block) {
-  return check(block)
-    ? `sendActionGoal("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
-    : "";
-};
-
-Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return check(block)
-    ? `sendActionGoal("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-        block,
-        "CHOICES",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )});\n`
-    : "";
-};
-
-Blockly.JavaScript["get_display_message_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("RobotSpeechbubbleAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_ask_multiple_choice_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("HumanSpeechbubbleAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_speak_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("SpeechSynthesisAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_listen_result"] = function(block) {
-  const code = check(block)
-    ? `await getActionResult("SpeechRecognitionAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_display_message_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("RobotSpeechbubbleAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_ask_multiple_choice_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("HumanSpeechbubbleAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_speak_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("SpeechSynthesisAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_listen_status"] = function(block) {
-  const code = check(block)
-    ? `await getActionStatus("SpeechRecognitionAction")`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["get_gesture_status"] = function(block) {
-  const code = check(block)
-    ? `await isGestureFinished()`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return `cancelActionGoal("RobotSpeechbubbleAction");\n`;
-};
-
-Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return `cancelActionGoal("HumanSpeechbubbleAction");\n`;
-};
-
-Blockly.JavaScript["cancel_speak"] = function(block) {
-  return `cancelActionGoal("SpeechSynthesisAction");\n`;
-};
-
-Blockly.JavaScript["cancel_listen"] = function(block) {
-  return `cancelActionGoal("SpeechRecognitionAction");\n`;
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
