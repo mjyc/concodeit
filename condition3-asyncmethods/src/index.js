@@ -33,11 +33,7 @@ function getActionStatus(actionName) {
       next: val => {
         sources[actionName].status.removeListener(listener);
         console.debug(actionName, "status", val);
-        if (val.status === "SUCCEEDED") {
-          callback(null, val.status);
-        } else {
-          callback(null, null);
-        }
+        callback(null, val.status);
       }
     };
     sources[actionName].status.addListener(listener);
@@ -446,7 +442,6 @@ poses$ = sources.PoseDetection.events("poses").startWith([]);
 poses$.addListener({ next: _ => {} });
 VAD$ = sources.VAD;
 VAD$.addListener({ next: _ => {} });
-console.log(VAD$);
 
 actionNames.map(actionName => {
   // HACK to give an initial value for result streams
@@ -476,7 +471,7 @@ document.getElementById("run_neckexercise").onclick = () => {
       return response.text();
     })
     .then(function(code) {
-      console.log(code);
+      console.debug(code);
       var curCode = `(async () => {${code} fullNeckExercise()})();`;
       eval(curCode);
     });
