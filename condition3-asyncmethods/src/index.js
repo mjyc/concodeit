@@ -168,9 +168,7 @@ async function isGestureFinished() {
 // Monologue Program
 
 async function monologue() {
-  console.log("Hi");
   setMessage("Hello there!");
-  console.log("Bye");
   var faceDir = await getHumanFaceDirection();
   while (faceDir === "face not found") {
     await sleep(1);
