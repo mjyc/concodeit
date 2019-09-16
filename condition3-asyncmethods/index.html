@@ -18,6 +18,7 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
           <category name="Sensing" colour="210">
+
             <block type="variables_set">
               <field name="VAR">state</field>
               <value name="VALUE">
@@ -30,6 +31,7 @@
                 </block>
               </value>
             </block>
+
           </category>
           <category name="Action" colour="230">
             <block type="sleep">
@@ -61,13 +63,14 @@
                 <block type="is_say_finished"></block>
               </value>
             </block>
-            <block type="start_gesturing">
-              <value name="MESSAGE">
-                <block type="text">
-                  <field name="TEXT">HAPPY</field>
-                </block>
-              </value>
-            </block>
+
+	    <block type="variables_set">
+	      <field name="VAR">gesture</field>
+	      <value name="VALUE">
+	        <block type="start_gesturing"> </block>
+	      </value>
+	    </block>
+
             <block type="variables_set">
               <field name="VAR">gestureFinished</field>
               <value name="VALUE">

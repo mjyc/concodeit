@@ -262,13 +262,37 @@ async function interview() {
 
 Blockly.defineBlocksWithJsonArray([
   {
+    type: "start_gesturing",
+    message0: "start gesture  %1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "MESSAGE",
+        "options": [
+          [ "happy", "\"HAPPY\"" ],
+          [ "sad", "\"SAD\"" ],
+          [ "angry", "\"ANGRY\"" ],
+          [ "focused", "\"FOCUSED\"" ],
+          [ "confused", "\"CONFUSED\"" ]
+      	]
+      }
+    ],
+    output: "Action",
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "get_state",
     message0: "get state of %1",
     args0: [
       {
-        type: "input_value",
+        type: "field_dropdown",
         name: "MESSAGE",
-        check: "String"
+        "options": [
+          [ "faceDirection", "\"faceDirection\"" ],
+          [ "isSpeaking", "\"isSpeaking\"" ]
+      	]
       }
     ],
     output: "String",
@@ -350,22 +374,7 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  {
-    type: "start_gesturing",
-    message0: "start gesturing %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: "String"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
+
   {
     type: "is_gesture_finished",
     message0: "is gesture finished",
@@ -394,13 +403,10 @@ function check(block) {
 //------------------------------------------------------------------------------
 // API Code Generating Blocks
 
+
 Blockly.JavaScript["get_state"] = function(block) {
   const code = check(block)
-    ? `await getState(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}))`
+    ? `await getState(${block.getFieldValue('MESSAGE')})`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
@@ -449,14 +455,12 @@ Blockly.JavaScript["is_say_finished"] = function(block) {
 };
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
-  return check(block)
-    ? `startGesturing(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
+  const code = check(block)
+    ? `await startGesturing(${block.getFieldValue('MESSAGE')})`
     : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
+
 
 Blockly.JavaScript["is_gesture_finished"] = function(block) {
   const code = check(block) ? `await isGestureFinished()` : "";
@@ -575,5 +579,4 @@ document.getElementById("run_neckexercise").onclick = () => {
 (async () => {
   console.log("started");
   monologue();
-  console.log("started");
 })();
