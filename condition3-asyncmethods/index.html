@@ -63,14 +63,13 @@
                 <block type="is_say_finished"></block>
               </value>
             </block>
-
-	    <block type="variables_set">
-	      <field name="VAR">gesture</field>
-	      <value name="VALUE">
-	        <block type="start_gesturing"> </block>
-	      </value>
-	    </block>
-
+	    <block type="start_gesturing">
+              <value name="MESSAGE">
+                <block type="text">
+                  <field name="TEXT"></field>
+                </block>
+              </value>
+            </block>
             <block type="variables_set">
               <field name="VAR">gestureFinished</field>
               <value name="VALUE">

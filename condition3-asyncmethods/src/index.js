@@ -277,7 +277,8 @@ Blockly.defineBlocksWithJsonArray([
       	]
       }
     ],
-    output: "Action",
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -449,18 +450,17 @@ Blockly.JavaScript["start_saying"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["start_gesturing"] = function(block) {
+  return check(block)
+    ? `startGesturing(${block.getFieldValue('MESSAGE')})`
+    : "";
+};
+
+
 Blockly.JavaScript["is_say_finished"] = function(block) {
   const code = check(block) ? `await isSayFinished()` : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
-
-Blockly.JavaScript["start_gesturing"] = function(block) {
-  const code = check(block)
-    ? `await startGesturing(${block.getFieldValue('MESSAGE')})`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
 
 Blockly.JavaScript["is_gesture_finished"] = function(block) {
   const code = check(block) ? `await isGestureFinished()` : "";
