@@ -22,13 +22,7 @@
             <block type="variables_set">
               <field name="VAR">state</field>
               <value name="VALUE">
-                <block type="get_state">
-                  <value name="MESSAGE">
-                    <block type="text">
-                      <field name="TEXT">faceDirection</field>
-                    </block>
-                  </value>
-                </block>
+                <block type="get_state"></block>
               </value>
             </block>
 
@@ -63,13 +57,7 @@
                 <block type="is_say_finished"></block>
               </value>
             </block>
-	    <block type="start_gesturing">
-              <value name="MESSAGE">
-                <block type="text">
-                  <field name="TEXT"></field>
-                </block>
-              </value>
-            </block>
+	          <block type="start_gesturing"></block>
             <block type="variables_set">
               <field name="VAR">gestureFinished</field>
               <value name="VALUE">
