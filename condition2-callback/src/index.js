@@ -43,7 +43,7 @@ const eventHandles = {};
 
 // IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
 function detectFace(id, callback) {
-  const SIDE_ANGLE = 20;
+  const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -81,14 +81,19 @@ function stopDetectFace(id) {
 }
 
 function detectVADChange(id, callback) {
+  let jsonrtrn = {number: id, val:null}
   eventHandles[id] = {
     stream: sources.VAD,
     listener: {
-      next: val => callback(null, val)
+      next: val => {
+        jsonrtrn.val = val; 
+        //callback(null, val);
+      }
     }
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
+  //return id;
+  return jsonrtrn;
 }
 
 function stopDetectVADChange(id) {
@@ -113,32 +118,23 @@ function startGesturing(gesture, callback) {
 
 // uses the global id value from detectface
 // setResultTo not yet implemented due to weird blockly error
-function waitForEvent(event, callback) {
-  console.log("reached method waitForEvent");
-  console.log("event: " + event);
-  if (event == "FaceDirectionChanged" ) {
-    if (typeof faceDir === "undefined") {
-      console.log("global variable faceDir undefined");
-      return;
-    }
-    var firstDir = faceDir;
-    setTimeout(function(){}, 100);
-    var secondDir = faceDir;
-    console.log("first Face Dir: " + firstDir);
-    console.log("second Face Dir:" + secondDir);
-    if (firstDir != secondDir) {
-      console.log("Face Direction Change Detected");
-      (result) => callback(result);
-    }
+function waitForEvent(event, storagevar, callback) {
+  if (event == "FaceDirectionChanged" && storagevar == "true") {
+    callback();
   }
   else if (event == "IsSpeakingChanged") {
-    console.log("reached Speak Change condition");
-    if (typeof id === "undefined") {
-      console.log("id undefined");
-      return;
-    }
-    if (detectVADChange(id, callback) != null)
-      (result) => callback(result);
+    let idval = Math.floor(Math.random() * Math.pow(10, 8));
+    let speakingbool = detectVADChange(idval, callback).val;
+    let intervalID = setInterval(function() {
+      let tmpbool = detectVADChange(idval, callback).val;
+      if (tmpbool != speakingbool) {
+        callback();
+        speakingbool = tmpbool;
+        clearInterval(intervalID);
+      }
+      speakingbool = tmpbool;
+    }, 250);
+
   }
 } // : FaceDirectionChanged | IsSpeakingChanged
 
@@ -301,7 +297,6 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "MESSAGE",
         "options": [
-          [ "", "\"\""],
           [ "Happy", "\"HAPPY\"" ],
           [ "Sad", "\"SAD\"" ],
           [ "Angry", "\"ANGRY\"" ],
@@ -456,8 +451,9 @@ Blockly.JavaScript["sleep"] = function(block) {
 
 Blockly.JavaScript["wait_for_event"] = function(block) {
     return check(block)
-    ? `waitForEvent(String(${block.getFieldValue("SE")
-      }), (result) => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+    ? `waitForEvent(String(${block.getFieldValue("SE")}), "false", (result) => {${Blockly.JavaScript.statementToCode(block, "DO")}});\n
+    result=faceDir;\nsetTimeout(function(){result = (result===faceDir);\n
+    if (!result) {waitForEvent(String(${block.getFieldValue("SE")}), "true", (result) => {${Blockly.JavaScript.statementToCode(block, "DO")}})};}, 100);\n`
     : "";
 }
 
@@ -623,7 +619,7 @@ sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 sources.VAD.addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
-  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
+  var curCode = `var faceDir;\n (async () => {${Blockly.JavaScript.workspaceToCode(
     editor
   )}})();`;
   eval(curCode);
