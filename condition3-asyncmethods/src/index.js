@@ -155,12 +155,12 @@ function startSaying(message) {
 }
 
 function isSayFinished() {
-  let speech_status = getActionStatus("SpeechSynthesisAction");
+  const speech_status = await getActionStatus("SpeechSynthesisAction");
   return speech_status !== "ACTIVE";
 }
 
 function isGestureFinished() {
-  let speech_status = getActionStatus("FacialExpressionAction");
+  const speech_status = await getActionStatus("FacialExpressionAction");
   return speech_status !== "ACTIVE";
 }
 
