@@ -154,14 +154,14 @@ function startSaying(message) {
   sendActionGoal("SpeechSynthesisAction", message);
 }
 
-function isSayFinished() {
+async function isSayFinished() {
   const speech_status = await getActionStatus("SpeechSynthesisAction");
   return speech_status !== "ACTIVE";
 }
 
-function isGestureFinished() {
-  const speech_status = await getActionStatus("FacialExpressionAction");
-  return speech_status !== "ACTIVE";
+async function isGestureFinished() {
+  const gesture_status = await getActionStatus("FacialExpressionAction");
+  return gesture_status !== "ACTIVE";
 }
 
 //------------------------------------------------------------------------------
