@@ -482,7 +482,5 @@ document.getElementById("run_neckexercise").onclick = () => {
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
-  //console.log("started");
-  monologue();
   console.log("started");
 })();
