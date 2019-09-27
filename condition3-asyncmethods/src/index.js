@@ -33,11 +33,7 @@ function getActionStatus(actionName) {
       next: val => {
         sources[actionName].status.removeListener(listener);
         console.debug(actionName, "status", val);
-        if (val.status === "SUCCEEDED") {
-          callback(null, val.status);
-        } else {
-          callback(null, null);
-        }
+        callback(null, val.status);
       }
     };
     sources[actionName].status.addListener(listener);
@@ -158,14 +154,14 @@ function startSaying(message) {
   sendActionGoal("SpeechSynthesisAction", message);
 }
 
-function isSayFinished() {
-  let speech_status = getActionStatus("SpeechSynthesisAction");
+async function isSayFinished() {
+  const speech_status = await getActionStatus("SpeechSynthesisAction");
   return speech_status !== "ACTIVE";
 }
 
-function isGestureFinished() {
-  let speech_status = getActionStatus("FacialExpressionAction");
-  return speech_status !== "ACTIVE";
+async function isGestureFinished() {
+  const gesture_status = await getActionStatus("FacialExpressionAction");
+  return gesture_status !== "ACTIVE";
 }
 
 //------------------------------------------------------------------------------
@@ -446,7 +442,6 @@ poses$ = sources.PoseDetection.events("poses").startWith([]);
 poses$.addListener({ next: _ => {} });
 VAD$ = sources.VAD;
 VAD$.addListener({ next: _ => {} });
-console.log(VAD$);
 
 actionNames.map(actionName => {
   // HACK to give an initial value for result streams
@@ -476,7 +471,7 @@ document.getElementById("run_neckexercise").onclick = () => {
       return response.text();
     })
     .then(function(code) {
-      console.log(code);
+      console.debug(code);
       var curCode = `(async () => {${code} fullNeckExercise()})();`;
       eval(curCode);
     });
