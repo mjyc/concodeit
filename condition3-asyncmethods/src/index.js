@@ -479,6 +479,30 @@ document.getElementById("run_neckexercise").onclick = () => {
     });
 };
 
+document.getElementById("run_monologue").onclick = () => {
+  fetch("/public/monologue.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      var curCode = `(async () => {${code} monologue()})();`;
+      eval(curCode);
+    });
+};
+
+document.getElementById("run_interview").onclick = () => {
+  fetch("/public/interview.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      var curCode = `(async () => {${code} interview()})();`;
+      eval(curCode);
+    });
+};
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
