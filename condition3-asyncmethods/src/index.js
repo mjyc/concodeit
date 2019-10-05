@@ -152,7 +152,7 @@ function setMessage(message) {
 
 function startSaying(message) {
   sendActionGoal("SpeechSynthesisAction", message);
-}	
+}
 
 async function isSayFinished() {
   const speech_status = await getActionStatus("SpeechSynthesisAction");
@@ -175,13 +175,13 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "field_dropdown",
         name: "MESSAGE",
-        "options": [
-          [ "happy", "\"HAPPY\"" ],
-          [ "sad", "\"SAD\"" ],
-          [ "angry", "\"ANGRY\"" ],
-          [ "focused", "\"FOCUSED\"" ],
-          [ "confused", "\"CONFUSED\"" ]
-      	]
+        options: [
+          ["happy", '"HAPPY"'],
+          ["sad", '"SAD"'],
+          ["angry", '"ANGRY"'],
+          ["focused", '"FOCUSED"'],
+          ["confused", '"CONFUSED"']
+        ]
       }
     ],
     previousStatement: null,
@@ -197,10 +197,10 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "field_dropdown",
         name: "MESSAGE",
-        "options": [
-          [ "faceDirection", "\"faceDirection\"" ],
-          [ "isSpeaking", "\"isSpeaking\"" ]
-      	]
+        options: [
+          ["faceDirection", '"faceDirection"'],
+          ["isSpeaking", '"isSpeaking"']
+        ]
       }
     ],
     output: "String",
@@ -311,10 +311,9 @@ function check(block) {
 //------------------------------------------------------------------------------
 // API Code Generating Blocks
 
-
 Blockly.JavaScript["get_state"] = function(block) {
   const code = check(block)
-    ? `await getState(${block.getFieldValue('MESSAGE')})`
+    ? `await getState(${block.getFieldValue("MESSAGE")})`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
@@ -359,10 +358,9 @@ Blockly.JavaScript["start_saying"] = function(block) {
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
-    ? `startGesturing(${block.getFieldValue('MESSAGE')})`
+    ? `startGesturing(${block.getFieldValue("MESSAGE")})`
     : "";
 };
-
 
 Blockly.JavaScript["is_say_finished"] = function(block) {
   const code = check(block) ? `await isSayFinished()` : "";
