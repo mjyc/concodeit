@@ -19,57 +19,14 @@
         <xml id="toolbox" style="display: none">
           <category name="Sensing" colour="210">
             <block type="wait_for_event">
-              <field name="SE"></field>
+              <field name="SE">"FaceDirectionChanged"</field>
               <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle event happened">
-                    <arg name="result"></arg>
-                  </mutation>
-                </block>
-              </value>
-            </block>
-            <block type="variables_set">
-              <field name="VAR">id</field>
-              <value name="VALUE">
-                <block type="detect_face">
-                  <value name="DO">
-                    <block type="procedures_callnoreturn">
-                      <mutation name="handle face event">
-                        <arg name="posX"></arg>
-                        <arg name="posY"></arg>
-                        <arg name="faceDir"></arg>
-                      </mutation>
-                      <value name="ARG0">
-                        <block type="variables_get">
-                          <field name="VAR">posX</field>
-                        </block>
-                      </value>
-                      <value name="ARG1">
-                        <block type="variables_get">
-                          <field name="VAR">posY</field>
-                        </block>
-                      </value>
-                      <value name="ARG2">
-                        <block type="variables_get">
-                          <field name="VAR">faceDir</field>
-                        </block>
-                      </value>
+                <block type="set_message">
+                  <value name="MESSAGE">
+                    <block type="variables_get">
+                      <field name="VAR">event</field>
                     </block>
                   </value>
-                </block>
-              </value>
-            </block>
-            <block type="procedures_defnoreturn">
-              <mutation>
-                <arg name="posX"></arg>
-                <arg name="posY"></arg>
-              </mutation>
-              <field name="NAME">handle face event</field>
-            </block>
-            <block type="stop_detect_face">
-              <value name="ID">
-                <block type="variables_get">
-                  <field name="VAR">id</field>
                 </block>
               </value>
             </block>
@@ -86,18 +43,6 @@
               <value name="MESSAGE">
                 <block type="text">
                   <field name="TEXT">Hello there!</field>
-                </block>
-              </value>
-              <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle display message done">
-                    <arg name="result"></arg>
-                  </mutation>
-                  <value name="ARG0">
-                    <block type="variables_get">
-                      <field name="VAR">result</field>
-                    </block>
-                  </value>
                 </block>
               </value>
             </block>

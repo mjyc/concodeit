@@ -41,37 +41,26 @@ function sleep(second = 0, callback = () => {}) {
 
 const eventHandles = {};
 
-// IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
-function detectFace(id, callback) {
+let prevFaceDirection = "center";
+function detectFaceDirectionChange(id, callback) {
   const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
       next: poses => {
-        if (poses.length === 0) {
-          return callback(null, { posX: null, posY: null, faceDir: null });
-        } else {
-          const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
-          const noseAngle = extractFaceFeatures(poses).noseAngle;
-          const faceDirection =
-            noseAngle > SIDE_ANGLE
-              ? "left"
-              : noseAngle < -SIDE_ANGLE
-              ? "right"
-              : "center";
-          return callback(null, {
-            posX: !nosePoint
-              ? null
-              : nosePoint.position.x === 0
-              ? 0
-              : nosePoint.position.x / 640,
-            posY: !nosePoint
-              ? null
-              : nosePoint.position.y === 0
-              ? 0
-              : (480 - nosePoint.position.y) / 480,
-            faceDir: faceDirection
-          });
+        if (poses.length === 0) return;
+        const features = extractFaceFeatures(poses);
+        if (!features.isVisible) return;
+        const faceDirection =
+          features.noseAngle > SIDE_ANGLE
+            ? "left"
+            : features.noseAngle < -SIDE_ANGLE
+            ? "right"
+            : "center";
+        if (faceDirection !== prevFaceDirection) {
+          eventHandles[id].stream.removeListener(eventHandles[id].listener);
+          prevFaceDirection = faceDirection;
+          callback(null, faceDirection);
         }
       }
     }
@@ -80,27 +69,21 @@ function detectFace(id, callback) {
   return id;
 }
 
-function stopDetectFace(id) {
-  eventHandles[id].stream.removeListener(eventHandles[id].listener);
-}
-
 function detectVADChange(id, callback) {
-  let jsonrtrn = { number: id, val: null };
   eventHandles[id] = {
-    stream: sources.VAD,
+    stream: sources.VAD.drop(1).debug(),
     listener: {
       next: val => {
-        jsonrtrn.val = val;
-        //callback(null, val);
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, val);
       }
     }
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
-  //return id;
-  return jsonrtrn;
+  return id;
 }
 
-function stopDetectVADChange(id) {
+function stopDetectChange(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
@@ -122,25 +105,14 @@ function startGesturing(gesture, callback) {
   );
 }
 
-// uses the global id value from detectface
-// setResultTo not yet implemented due to weird blockly error
-function waitForEvent(event, storagevar, callback) {
-  if (event == "FaceDirectionChanged" && storagevar == "true") {
-    callback();
+function waitForEvent(event, callback) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  if (event == "FaceDirectionChanged") {
+    detectFaceDirectionChange(id, callback);
   } else if (event == "IsSpeakingChanged") {
-    let idval = Math.floor(Math.random() * Math.pow(10, 8));
-    let speakingbool = detectVADChange(idval, callback).val;
-    let intervalID = setInterval(function() {
-      let tmpbool = detectVADChange(idval, callback).val;
-      if (tmpbool != speakingbool) {
-        callback();
-        speakingbool = tmpbool;
-        clearInterval(intervalID);
-      }
-      speakingbool = tmpbool;
-    }, 250);
+    detectVADChange(id, callback);
   }
-} // : FaceDirectionChanged | IsSpeakingChanged
+}
 
 function startSleeping(duration, callback) {
   sleep(duration, callback);
@@ -301,7 +273,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "wait_for_event",
-    message0: "wait for event %1 then %2",
+    message0: "wait for event %1 %2 then %3",
     args0: [
       {
         type: "field_dropdown",
@@ -310,6 +282,9 @@ Blockly.defineBlocksWithJsonArray([
           ["FaceDirectionChanged", '"FaceDirectionChanged"'],
           ["IsSpeakingChanged", '"IsSpeakingChanged"']
         ]
+      },
+      {
+        type: "input_dummy"
       },
       {
         type: "input_statement",
@@ -362,43 +337,10 @@ Blockly.JavaScript["stop_following_face"] = function(block) {
   return check(block) ? `stopFollowingFace();\n` : "";
 };
 
-Blockly.JavaScript["detect_face"] = function(block) {
-  const code = check(block)
-    ? `detectFace(${Math.floor(
-        Math.random() * Math.pow(10, 8)
-      )}, (err, {posX, posY, faceDir}) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}})`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["stop_detect_face"] = function(block) {
-  return check(block)
-    ? `stopDetectFace(${Blockly.JavaScript.valueToCode(
-        block,
-        "ID",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )});\n`
-    : "";
-};
-
 Blockly.JavaScript["wait_for_event"] = function(block) {
   return check(block)
-    ? `waitForEvent(String(${block.getFieldValue(
-        "SE"
-      )}), "false", (result) => {${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n
-    result=faceDir;\nsetTimeout(function(){result = (result===faceDir);\n
-    if (!result) {waitForEvent(String(${block.getFieldValue(
-      "SE"
-    )}), "true", (result) => {${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}})};}, 100);\n`
+    ? `waitForEvent(String(${block.getFieldValue("SE")}), (err, res) => {
+  event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 };
 
