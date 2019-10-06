@@ -318,9 +318,6 @@ Blockly.JavaScript["get_state"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-//------------------------------------------------------------------------------
-// Original Blocks
-
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
     ? `await sleep(${Blockly.JavaScript.valueToCode(
