@@ -166,20 +166,22 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "start_following_face",
-    message0: "start following face",
+    type: "sleep",
+    message0: "sleep for %1 then %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "SE",
+        check: "Number"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
     previousStatement: null,
     nextStatement: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_following_face",
-    message0: "stop following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
+    colour: 230,
     tooltip: "",
     helpUrl: ""
   },
@@ -191,6 +193,73 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "MESSAGE",
         check: ["String", "Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_following_face",
+    message0: "start following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "stop_following_face",
+    message0: "stop following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_saying",
+    message0: "start saying %1 then %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_gesturing",
+    message0: "start gesturing %1 %2 then %3",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "MESSAGE",
+        options: [
+          ["Happy", '"HAPPY"'],
+          ["Sad", '"SAD"'],
+          ["Angry", '"ANGRY"'],
+          ["Focused", '"FOCUSED"'],
+          ["Confused", '"CONFUSED"']
+        ]
+      },
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
       }
     ],
     previousStatement: null,
@@ -233,26 +302,6 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "sleep",
-    message0: "sleep for %1 then %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "SE",
-        check: "Number"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
     type: "wait_for_event",
     message0: "wait for event %1 then %2",
     args0: [
@@ -262,53 +311,6 @@ Blockly.defineBlocksWithJsonArray([
         options: [
           ["FaceDirectionChanged", '"FaceDirectionChanged"'],
           ["IsSpeakingChanged", '"IsSpeakingChanged"']
-        ]
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "set_message",
-    message0: "set message %1 %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "gesture",
-    message0: "gesture %1 %2",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "MESSAGE",
-        options: [
-          ["", '""'],
-          ["Happy", '"HAPPY"'],
-          ["Sad", '"SAD"'],
-          ["Angry", '"ANGRY"'],
-          ["Focused", '"FOCUSED"'],
-          ["Confused", '"CONFUSED"']
         ]
       },
       {
@@ -342,26 +344,6 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "speak",
-    message0: "speak %1 %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
     type: "listen",
     message0: "listen %1",
     args0: [
@@ -370,42 +352,6 @@ Blockly.defineBlocksWithJsonArray([
         name: "DO"
       }
     ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_display_message",
-    message0: "cancel display message",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_ask_multiple_choice",
-    message0: "cancel ask multiple choice",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_speak",
-    message0: "cancel speak",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_listen",
-    message0: "cancel listen",
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -423,6 +369,34 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
+
+Blockly.JavaScript["sleep"] = function(block) {
+  return check(block)
+    ? `startSleeping(${Blockly.JavaScript.valueToCode(
+        block,
+        "SE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+    : "";
+};
+
+Blockly.JavaScript["set_message"] = function(block) {
+  return check(block)
+    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
+
+Blockly.JavaScript["start_following_face"] = function(block) {
+  return check(block) ? `startFollowingFace();\n` : "";
+};
+
+Blockly.JavaScript["stop_following_face"] = function(block) {
+  return check(block) ? `stopFollowingFace();\n` : "";
+};
 
 Blockly.JavaScript["detect_face"] = function(block) {
   const code = check(block)
@@ -446,16 +420,6 @@ Blockly.JavaScript["stop_detect_face"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["sleep"] = function(block) {
-  return check(block)
-    ? `startSleeping(${Blockly.JavaScript.valueToCode(
-        block,
-        "SE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-    : "";
-};
-
 Blockly.JavaScript["wait_for_event"] = function(block) {
   return check(block)
     ? `waitForEvent(String(${block.getFieldValue(
@@ -474,9 +438,9 @@ Blockly.JavaScript["wait_for_event"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["set_message"] = function(block) {
+Blockly.JavaScript["start_saying"] = function(block) {
   return check(block)
-    ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+    ? `startSaying(String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -487,7 +451,7 @@ Blockly.JavaScript["set_message"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["gesture"] = function(block) {
+Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
         "MESSAGE"
@@ -505,19 +469,6 @@ Blockly.JavaScript["ask_multiple_choice"] = function(block) {
         "CHOICES",
         Blockly.JavaScript.ORDER_ATOMIC
       )}, (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
-};
-
-Blockly.JavaScript["speak"] = function(block) {
-  return check(block)
-    ? `startSaying(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
       )}});\n`
@@ -552,24 +503,6 @@ Blockly.JavaScript["cancel_listen"] = function(block) {
 Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
     ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
-    : "";
-};
-
-Blockly.JavaScript["start_following_face"] = function(block) {
-  return check(block) ? `startFollowingFace();\n` : "";
-};
-
-Blockly.JavaScript["stop_following_face"] = function(block) {
-  return check(block) ? `stopFollowingFace();\n` : "";
-};
-
-Blockly.JavaScript["set_message"] = function(block) {
-  return check(block)
-    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
     : "";
 };
 
