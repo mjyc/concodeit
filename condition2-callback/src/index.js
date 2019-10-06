@@ -57,11 +57,10 @@ function detectFaceDirectionChange(id, callback) {
             : features.noseAngle < -SIDE_ANGLE
             ? "right"
             : "center";
-        if (faceDirection !== prevFaceDirection) {
-          eventHandles[id].stream.removeListener(eventHandles[id].listener);
-          prevFaceDirection = faceDirection;
-          callback(null, faceDirection);
-        }
+        if (faceDirection === prevFaceDirection) return;
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        prevFaceDirection = faceDirection;
+        callback(null, faceDirection);
       }
     }
   };
@@ -71,7 +70,7 @@ function detectFaceDirectionChange(id, callback) {
 
 function detectVADChange(id, callback) {
   eventHandles[id] = {
-    stream: sources.VAD.drop(1).debug(),
+    stream: sources.VAD.drop(1),
     listener: {
       next: val => {
         eventHandles[id].stream.removeListener(eventHandles[id].listener);
@@ -85,6 +84,46 @@ function detectVADChange(id, callback) {
 
 function stopDetectChange(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
+}
+
+function waitForFaceDirection(id, faceDirection, callback) {
+  const SIDE_ANGLE = 13;
+  eventHandles[id] = {
+    stream: sources.PoseDetection.events("poses"),
+    listener: {
+      next: poses => {
+        if (poses.length === 0) return;
+        const features = extractFaceFeatures(poses);
+        if (!features.isVisible) return;
+        const curFaceDirection =
+          features.noseAngle > SIDE_ANGLE
+            ? "left"
+            : features.noseAngle < -SIDE_ANGLE
+            ? "right"
+            : "center";
+        if (curFaceDirection !== faceDirection) return;
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, null);
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
+function waitForVoiceActivity(id, voiceActivity, callback) {
+  eventHandles[id] = {
+    stream: sources.VAD,
+    listener: {
+      next: val => {
+        if (val !== voiceActivity) return;
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, val);
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
 }
 
 function startSleeping(duration, callback) {
@@ -121,6 +160,21 @@ function waitForEvent(event, callback) {
     detectFaceDirectionChange(id, callback);
   } else if (event == "IsSpeakingChanged") {
     detectVADChange(id, callback);
+  }
+}
+
+function waitUntil(event, callback) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  if (event == "FaceDirectionCenter") {
+    waitForFaceDirection(id, "center", callback);
+  } else if (event == "FaceDirectionLeft") {
+    waitForFaceDirection(id, "left", callback);
+  } else if (event == "FaceDirectionRight") {
+    waitForFaceDirection(id, "right", callback);
+  } else if (event == "IsSpeakingFalse") {
+    waitForVoiceActivity(id, false, callback);
+  } else if (event == "IsSpeakingTrue") {
+    waitForVoiceActivity(id, true, callback);
   }
 }
 
@@ -264,6 +318,35 @@ Blockly.defineBlocksWithJsonArray([
     colour: 210,
     tooltip: "",
     helpUrl: ""
+  },
+  {
+    type: "wait_until",
+    message0: "wait until %1 %2 then %3",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "SE",
+        options: [
+          ["FaceDirectionCenter", '"FaceDirectionCenter"'],
+          ["FaceDirectionLeft", '"FaceDirectionLeft"'],
+          ["FaceDirectionRight", '"FaceDirectionRight"'],
+          ["IsSpeakingFalse", '"IsSpeakingFalse"'],
+          ["IsSpeakingTrue", '"IsSpeakingTrue"']
+        ]
+      },
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
   }
 ]);
 
@@ -333,6 +416,13 @@ Blockly.JavaScript["wait_for_event"] = function(block) {
   return check(block)
     ? `waitForEvent(String(${block.getFieldValue("SE")}), (err, res) => {
   event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+    : "";
+};
+
+Blockly.JavaScript["wait_until"] = function(block) {
+  return check(block)
+    ? `waitUntil(String(${block.getFieldValue("SE")}), () => {
+${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 };
 
