@@ -154,8 +154,6 @@ function startSaying(text, callback) {
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
-// IDEA: add "speak" and "listen"
-
 Blockly.defineBlocksWithJsonArray([
   {
     type: "start_program",
@@ -320,41 +318,7 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "ask_multiple_choice",
-    message0: "ask multiple choice %1 %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "CHOICES"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "listen",
-    message0: "listen %1",
-    args0: [
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
+    colour: 210,
     tooltip: "",
     helpUrl: ""
   }
@@ -460,44 +424,6 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
         "DO"
       )}});\n`
     : "";
-};
-
-Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return check(block)
-    ? `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-        block,
-        "CHOICES",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}, (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
-};
-
-Blockly.JavaScript["listen"] = function(block) {
-  return check(block)
-    ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
-};
-
-Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return check(block) ? `cancelActionGoal("RobotSpeechbubbleAction");\n` : "";
-};
-
-Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return check(block) ? `cancelActionGoal("HumanSpeechbubbleAction");\n` : "";
-};
-
-Blockly.JavaScript["cancel_speak"] = function(block) {
-  return check(block) ? `cancelActionGoal("SpeechSynthesisAction");\n` : "";
-};
-
-Blockly.JavaScript["cancel_listen"] = function(block) {
-  return check(block) ? `cancelActionGoal("SpeechRecognitionAction");\n` : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
