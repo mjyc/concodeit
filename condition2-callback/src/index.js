@@ -87,6 +87,14 @@ function stopDetectChange(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
+function startSleeping(duration, callback) {
+  sleep(duration, callback);
+}
+
+function setMessage(message) {
+  sendActionGoalCallback("RobotSpeechbubbleAction", message, result => {});
+}
+
 function startFollowingFace() {
   sources.followFace.shamefullySendNext(true);
 }
@@ -95,8 +103,10 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
-function setMessage(message) {
-  sendActionGoalCallback("RobotSpeechbubbleAction", message, result => {});
+function startSaying(text, callback) {
+  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
+    callback(result)
+  );
 }
 
 function startGesturing(gesture, callback) {
@@ -114,15 +124,6 @@ function waitForEvent(event, callback) {
   }
 }
 
-function startSleeping(duration, callback) {
-  sleep(duration, callback);
-}
-
-function startSaying(text, callback) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
-    callback(result)
-  );
-}
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
@@ -239,39 +240,6 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "detect_face",
-    message0: "detect face; when detected %1 do %2",
-    args0: [
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    output: "String",
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_detect_face",
-    message0: "stop detecting face %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "ID",
-        check: "String"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
     type: "wait_for_event",
     message0: "wait for event %1 %2 then %3",
     args0: [
@@ -337,13 +305,6 @@ Blockly.JavaScript["stop_following_face"] = function(block) {
   return check(block) ? `stopFollowingFace();\n` : "";
 };
 
-Blockly.JavaScript["wait_for_event"] = function(block) {
-  return check(block)
-    ? `waitForEvent(String(${block.getFieldValue("SE")}), (err, res) => {
-  event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-    : "";
-};
-
 Blockly.JavaScript["start_saying"] = function(block) {
   return check(block)
     ? `startSaying(String(${Blockly.JavaScript.valueToCode(
@@ -365,6 +326,13 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
         block,
         "DO"
       )}});\n`
+    : "";
+};
+
+Blockly.JavaScript["wait_for_event"] = function(block) {
+  return check(block)
+    ? `waitForEvent(String(${block.getFieldValue("SE")}), (err, res) => {
+  event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 };
 
