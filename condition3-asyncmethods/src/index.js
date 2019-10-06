@@ -9,7 +9,6 @@ import {
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
 import { promisify } from "util";
-import { get } from "https";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
