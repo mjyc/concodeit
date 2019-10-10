@@ -41,25 +41,27 @@ function sleep(second = 0, callback = () => {}) {
 
 const eventHandles = {};
 
-let prevFaceDirection = "center";
 function detectFaceDirectionChange(id, callback) {
+  let prevFaceDirection = null;
   const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
       next: poses => {
-        if (poses.length === 0) return;
         const features = extractFaceFeatures(poses);
-        if (!features.isVisible) return;
-        const faceDirection =
-          features.noseAngle > SIDE_ANGLE
-            ? "left"
-            : features.noseAngle < -SIDE_ANGLE
-            ? "right"
-            : "center";
+        const faceDirection = !features.isVisible
+          ? "noface"
+          : features.noseAngle > SIDE_ANGLE
+          ? "left"
+          : features.noseAngle < -SIDE_ANGLE
+          ? "right"
+          : "center";
+        if (prevFaceDirection === null) {
+          prevFaceDirection = faceDirection;
+          return;
+        }
         if (faceDirection === prevFaceDirection) return;
         eventHandles[id].stream.removeListener(eventHandles[id].listener);
-        prevFaceDirection = faceDirection;
         callback(null, faceDirection);
       }
     }
@@ -92,15 +94,14 @@ function waitForFaceDirection(id, faceDirection, callback) {
     stream: sources.PoseDetection.events("poses"),
     listener: {
       next: poses => {
-        if (poses.length === 0) return;
         const features = extractFaceFeatures(poses);
-        if (!features.isVisible) return;
-        const curFaceDirection =
-          features.noseAngle > SIDE_ANGLE
-            ? "left"
-            : features.noseAngle < -SIDE_ANGLE
-            ? "right"
-            : "center";
+        const curFaceDirection = !features.isVisible
+          ? "noface"
+          : features.noseAngle > SIDE_ANGLE
+          ? "left"
+          : features.noseAngle < -SIDE_ANGLE
+          ? "right"
+          : "center";
         if (curFaceDirection !== faceDirection) return;
         eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, null);
@@ -171,6 +172,8 @@ function waitUntil(event, callback) {
     waitForFaceDirection(id, "left", callback);
   } else if (event == "FaceDirectionRight") {
     waitForFaceDirection(id, "right", callback);
+  } else if (event == "NoFace") {
+    waitForFaceDirection(id, "noface", callback);
   } else if (event == "IsSpeakingFalse") {
     waitForVoiceActivity(id, false, callback);
   } else if (event == "IsSpeakingTrue") {
@@ -330,6 +333,7 @@ Blockly.defineBlocksWithJsonArray([
           ["FaceDirectionCenter", '"FaceDirectionCenter"'],
           ["FaceDirectionLeft", '"FaceDirectionLeft"'],
           ["FaceDirectionRight", '"FaceDirectionRight"'],
+          ["NoFace", '"NoFace"'],
           ["IsSpeakingFalse", '"IsSpeakingFalse"'],
           ["IsSpeakingTrue", '"IsSpeakingTrue"']
         ]
