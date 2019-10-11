@@ -41,34 +41,28 @@ function sleep(second = 0, callback = () => {}) {
 
 const eventHandles = {};
 
-// IDEA: provide faceYaw, faceRoll, faceSize in addition; "detectFaceFeatures"
-function detectFace(id, callback) {
+function detectFaceDirectionChange(id, callback) {
+  let prevFaceDirection = null;
   const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
       next: poses => {
-        if (poses.length === 0) {
-          return callback(null, {posX: null, posY: null, faceDir: null});
-        } else {
-          const nosePoint = poses[0].keypoints.find(kpt => kpt.part === "nose");
-          const noseAngle = extractFaceFeatures(poses).noseAngle;
-          const faceDirection =
-            noseAngle > SIDE_ANGLE ? "left" : noseAngle < -SIDE_ANGLE ? "right" : "center";
-          return callback(null, {
-            posX: !nosePoint
-              ? null
-              : nosePoint.position.x === 0
-              ? 0
-              : nosePoint.position.x / 640,
-            posY: !nosePoint
-              ? null
-              : nosePoint.position.y === 0
-              ? 0
-              : (480 - nosePoint.position.y) / 480,
-            faceDir: faceDirection
-          });
+        const features = extractFaceFeatures(poses);
+        const faceDirection = !features.isVisible
+          ? "noface"
+          : features.noseAngle > SIDE_ANGLE
+          ? "left"
+          : features.noseAngle < -SIDE_ANGLE
+          ? "right"
+          : "center";
+        if (prevFaceDirection === null) {
+          prevFaceDirection = faceDirection;
+          return;
         }
+        if (faceDirection === prevFaceDirection) return;
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, faceDirection);
       }
     }
   };
@@ -76,28 +70,69 @@ function detectFace(id, callback) {
   return id;
 }
 
-function stopDetectFace(id) {
-  eventHandles[id].stream.removeListener(eventHandles[id].listener);
-}
-
 function detectVADChange(id, callback) {
-  let jsonrtrn = {number: id, val:null}
   eventHandles[id] = {
-    stream: sources.VAD,
+    stream: sources.VAD.drop(1),
     listener: {
       next: val => {
-        jsonrtrn.val = val; 
-        //callback(null, val);
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, val);
       }
     }
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
-  //return id;
-  return jsonrtrn;
+  return id;
 }
 
-function stopDetectVADChange(id) {
+function stopDetectChange(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
+}
+
+function waitForFaceDirection(id, faceDirection, callback) {
+  const SIDE_ANGLE = 13;
+  eventHandles[id] = {
+    stream: sources.PoseDetection.events("poses"),
+    listener: {
+      next: poses => {
+        const features = extractFaceFeatures(poses);
+        const curFaceDirection = !features.isVisible
+          ? "noface"
+          : features.noseAngle > SIDE_ANGLE
+          ? "left"
+          : features.noseAngle < -SIDE_ANGLE
+          ? "right"
+          : "center";
+        if (curFaceDirection !== faceDirection) return;
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, null);
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
+function waitForVoiceActivity(id, voiceActivity, callback) {
+  eventHandles[id] = {
+    stream: sources.VAD,
+    listener: {
+      next: val => {
+        if (val !== voiceActivity) return;
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
+        callback(null, val);
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
+function startSleeping(duration, callback) {
+  sleep(duration, callback);
+}
+
+function setMessage(message) {
+  sendActionGoalCallback("RobotSpeechbubbleAction", message, result => {});
 }
 
 function startFollowingFace() {
@@ -108,47 +143,46 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
-function setMessage(message) {
-  sendActionGoalCallback("RobotSpeechbubbleAction", message, (result) => {});
+function startSaying(text, callback) {
+  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
+    callback(result)
+  );
 }
 
 function startGesturing(gesture, callback) {
-  sendActionGoalCallback("FacialExpressionAction", gesture, (result) => callback(result));
+  sendActionGoalCallback("FacialExpressionAction", gesture, result =>
+    callback(result)
+  );
 }
 
-// uses the global id value from detectface
-// setResultTo not yet implemented due to weird blockly error
-function waitForEvent(event, storagevar, callback) {
-  if (event == "FaceDirectionChanged" && storagevar == "true") {
-    callback();
+function waitForEvent(event, callback) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  if (event == "FaceDirectionChanged") {
+    detectFaceDirectionChange(id, callback);
+  } else if (event == "IsSpeakingChanged") {
+    detectVADChange(id, callback);
   }
-  else if (event == "IsSpeakingChanged") {
-    let idval = Math.floor(Math.random() * Math.pow(10, 8));
-    let speakingbool = detectVADChange(idval, callback).val;
-    let intervalID = setInterval(function() {
-      let tmpbool = detectVADChange(idval, callback).val;
-      if (tmpbool != speakingbool) {
-        callback();
-        speakingbool = tmpbool;
-        clearInterval(intervalID);
-      }
-      speakingbool = tmpbool;
-    }, 250);
+}
 
+function waitUntil(event, callback) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  if (event == "FaceDirectionCenter") {
+    waitForFaceDirection(id, "center", callback);
+  } else if (event == "FaceDirectionLeft") {
+    waitForFaceDirection(id, "left", callback);
+  } else if (event == "FaceDirectionRight") {
+    waitForFaceDirection(id, "right", callback);
+  } else if (event == "NoFace") {
+    waitForFaceDirection(id, "noface", callback);
+  } else if (event == "IsSpeakingFalse") {
+    waitForVoiceActivity(id, false, callback);
+  } else if (event == "IsSpeakingTrue") {
+    waitForVoiceActivity(id, true, callback);
   }
-} // : FaceDirectionChanged | IsSpeakingChanged
-
-function startSleeping(duration, callback) {
-  sleep(duration, callback);
 }
 
-function startSaying(text, callback) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, (result) => callback(result));
-}
 //------------------------------------------------------------------------------
 // Block Function Definitions
-
-// IDEA: add "speak" and "listen"
 
 Blockly.defineBlocksWithJsonArray([
   {
@@ -156,73 +190,6 @@ Blockly.defineBlocksWithJsonArray([
     message0: "start program",
     nextStatement: null,
     colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_following_face",
-    message0: "start following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_following_face",
-    message0: "stop following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "set_message",
-    message0: "set message %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "detect_face",
-    message0: "detect face; when detected %1 do %2",
-    args0: [
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    output: "String",
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_detect_face",
-    message0: "stop detecting face %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "ID",
-        check: "String"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
     tooltip: "",
     helpUrl: ""
   },
@@ -247,36 +214,102 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "set_message",
+    message0: "set message %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_following_face",
+    message0: "start following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "stop_following_face",
+    message0: "stop following face",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_saying",
+    message0: "start saying %1 then %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "MESSAGE",
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_gesturing",
+    message0: "start gesturing %1 %2 then %3",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "MESSAGE",
+        options: [
+          ["Happy", '"HAPPY"'],
+          ["Sad", '"SAD"'],
+          ["Angry", '"ANGRY"'],
+          ["Focused", '"FOCUSED"'],
+          ["Confused", '"CONFUSED"']
+        ]
+      },
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "wait_for_event",
-    message0: "wait for event %1 then %2",
+    message0: "wait for event %1 %2 then %3",
     args0: [
       {
         type: "field_dropdown",
         name: "SE",
-        "options": [
-        [ "FaceDirectionChanged", "\"FaceDirectionChanged\""],
-        [ "IsSpeakingChanged", "\"IsSpeakingChanged\"" ],
+        options: [
+          ["FaceDirectionChanged", '"FaceDirectionChanged"'],
+          ["IsSpeakingChanged", '"IsSpeakingChanged"']
         ]
       },
       {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "display_message",
-    message0: "display message %1 %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
+        type: "input_dummy"
       },
       {
         type: "input_statement",
@@ -285,43 +318,28 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 210,
     tooltip: "",
     helpUrl: ""
   },
   {
-    type: "gesture",
-    message0: "gesture %1 %2",
+    type: "wait_until",
+    message0: "wait until %1 %2 then %3",
     args0: [
       {
         type: "field_dropdown",
-        name: "MESSAGE",
-        "options": [
-          [ "Happy", "\"HAPPY\"" ],
-          [ "Sad", "\"SAD\"" ],
-          [ "Angry", "\"ANGRY\"" ],
-          [ "Focused", "\"FOCUSED\"" ],
-          [ "Confused", "\"CONFUSED\"" ]
+        name: "SE",
+        options: [
+          ["FaceDirectionCenter", '"FaceDirectionCenter"'],
+          ["FaceDirectionLeft", '"FaceDirectionLeft"'],
+          ["FaceDirectionRight", '"FaceDirectionRight"'],
+          ["NoFace", '"NoFace"'],
+          ["IsSpeakingFalse", '"IsSpeakingFalse"'],
+          ["IsSpeakingTrue", '"IsSpeakingTrue"']
         ]
       },
       {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "ask_multiple_choice",
-    message0: "ask multiple choice %1 %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "CHOICES"
+        type: "input_dummy"
       },
       {
         type: "input_statement",
@@ -330,78 +348,7 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "speak",
-    message0: "speak %1 %2",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "listen",
-    message0: "listen %1",
-    args0: [
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_display_message",
-    message0: "cancel display message",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_ask_multiple_choice",
-    message0: "cancel ask multiple choice",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_speak",
-    message0: "cancel speak",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "cancel_listen",
-    message0: "cancel listen",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
+    colour: 210,
     tooltip: "",
     helpUrl: ""
   }
@@ -417,83 +364,35 @@ function check(block) {
   );
 }
 
-Blockly.JavaScript["detect_face"] = function(block) {
-  const code = check(block)
-    ? `detectFace(${Math.floor(
-        Math.random() * Math.pow(10, 8)
-      )}, (err, {posX, posY, faceDir}) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}})`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["stop_detect_face"] = function(block) {
-  return check(block)
-    ? `stopDetectFace(${Blockly.JavaScript.valueToCode(
-        block,
-        "ID",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )});\n`
-    : "";
-};
-
 Blockly.JavaScript["sleep"] = function(block) {
-    return check(block)
+  return check(block)
     ? `startSleeping(${Blockly.JavaScript.valueToCode(
         block,
         "SE",
         Blockly.JavaScript.ORDER_ATOMIC
       )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
-}
+};
 
-Blockly.JavaScript["wait_for_event"] = function(block) {
-    return check(block)
-    ? `waitForEvent(String(${block.getFieldValue("SE")}), "false", (result) => {${Blockly.JavaScript.statementToCode(block, "DO")}});\n
-    result=faceDir;\nsetTimeout(function(){result = (result===faceDir);\n
-    if (!result) {waitForEvent(String(${block.getFieldValue("SE")}), "true", (result) => {${Blockly.JavaScript.statementToCode(block, "DO")}})};}, 100);\n`
-    : "";
-}
-
-Blockly.JavaScript["display_message"] = function(block) {
+Blockly.JavaScript["set_message"] = function(block) {
   return check(block)
-    ? `sendActionGoalCallback("RobotSpeechbubbleAction", String(${Blockly.JavaScript.valueToCode(
+    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
+      )}));\n`
     : "";
 };
 
-Blockly.JavaScript["gesture"] = function(block) {
-  return check(block)
-    ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue("MESSAGE")
-      }), (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
+Blockly.JavaScript["start_following_face"] = function(block) {
+  return check(block) ? `startFollowingFace();\n` : "";
 };
 
-Blockly.JavaScript["ask_multiple_choice"] = function(block) {
-  return check(block)
-    ? `sendActionGoalCallback("HumanSpeechbubbleAction", ${Blockly.JavaScript.valueToCode(
-        block,
-        "CHOICES",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}, (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
+Blockly.JavaScript["stop_following_face"] = function(block) {
+  return check(block) ? `stopFollowingFace();\n` : "";
 };
 
-Blockly.JavaScript["speak"] = function(block) {
+Blockly.JavaScript["start_saying"] = function(block) {
   return check(block)
     ? `startSaying(String(${Blockly.JavaScript.valueToCode(
         block,
@@ -506,51 +405,35 @@ Blockly.JavaScript["speak"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["listen"] = function(block) {
+Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
-    ? `sendActionGoalCallback("SpeechRecognitionAction", {}, (result) => {\n${Blockly.JavaScript.statementToCode(
+    ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
+        "MESSAGE"
+      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
         block,
         "DO"
       )}});\n`
     : "";
 };
 
-Blockly.JavaScript["cancel_display_message"] = function(block) {
-  return check(block) ? `cancelActionGoal("RobotSpeechbubbleAction");\n` : "";
+Blockly.JavaScript["wait_for_event"] = function(block) {
+  return check(block)
+    ? `waitForEvent(String(${block.getFieldValue("SE")}), (err, res) => {
+  event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+    : "";
 };
 
-Blockly.JavaScript["cancel_ask_multiple_choice"] = function(block) {
-  return check(block) ? `cancelActionGoal("HumanSpeechbubbleAction");\n` : "";
-};
-
-Blockly.JavaScript["cancel_speak"] = function(block) {
-  return check(block) ? `cancelActionGoal("SpeechSynthesisAction");\n` : "";
-};
-
-Blockly.JavaScript["cancel_listen"] = function(block) {
-  return check(block) ? `cancelActionGoal("SpeechRecognitionAction");\n` : "";
+Blockly.JavaScript["wait_until"] = function(block) {
+  return check(block)
+    ? `waitUntil(String(${block.getFieldValue("SE")}), () => {
+${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+    : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
     ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
     : "";
-};
-
-Blockly.JavaScript["start_following_face"] = function(block) {
-  return check(block) ? `startFollowingFace();\n` : "";
-};
-
-Blockly.JavaScript["stop_following_face"] = function(block) {
-  return check(block) ? `stopFollowingFace();\n` : "";
-};
-
-Blockly.JavaScript["set_message"] = function(block) {
-  return check(block) ? `setMessage(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n` : "";
 };
 
 //------------------------------------------------------------------------------

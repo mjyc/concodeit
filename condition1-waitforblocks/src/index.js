@@ -9,6 +9,7 @@ import {
   makeCancelGoal,
   createStreamEventListener
 } from "cycle-robot-drivers-async";
+import { extractFaceFeatures } from "tabletrobotface-userstudy";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -85,11 +86,58 @@ function waitUntilFaceEvent(id, predicate) {
   })(predicate);
 }
 
+const FaceDirectionChanged = {
+  NOFACE: "noFace",
+  CENTER: "center",
+  LEFT: "left",
+  RIGHT: "right"
+};
+
+const ANGLE = 10; // magnitude of head turn to determine direction
+/* Detects which direction user is facing
+   returns FaceDirectionChanged enum based on user direction
+   inputs:
+     id: process id for this */
+function checkFaceDirection(id) {
+  waitHandles[id] = {
+    listener: null,
+    stream: sources.PoseDetection.events("poses"),
+    stop: () => {
+      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+    }
+  };
+  return promisify(cb => {
+    waitHandles[id].listener = createStreamEventListener(
+      poses => {
+        const faceFeatures = extractFaceFeatures(poses);
+        if (faceFeatures.isVisible) {
+          if (faceFeatures.noseAngle < -1 * ANGLE) {
+            return cb(null, FaceDirectionChanged.RIGHT);
+          } else if (faceFeatures.noseAngle > ANGLE) {
+            return cb(null, FaceDirectionChanged.LEFT);
+          }
+
+          //If nose angle is between -10 and 10, then return center
+          return cb(null, FaceDirectionChanged.CENTER);
+        } else {
+          // If face is not detected, return noFace
+          return cb(null, FaceDirectionChanged.NOFACE);
+        }
+      },
+      (err, val) => {
+        waitHandles[id].stream.removeListener(waitHandles[id].listener);
+        cb(err, val);
+      }
+    );
+    waitHandles[id].stream.addListener(waitHandles[id].listener);
+  })();
+}
+
 function stopWaitUntilFaceEvent(id) {
   waitHandles[id].stop();
 }
 
-function waitUntilVAD(id) {
+function waitUntilVADStateChanged(id) {
   waitHandles[id] = {
     listener: null,
     stream: sources.VAD,
@@ -104,7 +152,28 @@ function waitUntilVAD(id) {
         cb(null, val);
       }
     };
-    waitHandles[id].stream.drop(1).addListener(waitHandles[id].listener);
+    waitHandles[id].stream.addListener(waitHandles[id].listener);
+  })();
+}
+
+function waitUntilVADState(id, state) {
+  waitHandles[id] = {
+    listener: null,
+    stream: sources.VAD,
+    stop: () => {
+      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+    }
+  };
+  return promisify(cb => {
+    waitHandles[id].listener = {
+      next: val => {
+        if (val === state) {
+          waitHandles[id].stream.removeListener(waitHandles[id].listener);
+          cb(null, val);
+        }
+      }
+    };
+    waitHandles[id].stream.addListener(waitHandles[id].listener);
   })();
 }
 
@@ -514,12 +583,24 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: () => {} });
-sources.VAD.addListener({ next: () => {} });
+sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+sources.VAD.addListener({ next: _ => {} });
 
 document.getElementById("run").onclick = () => {
   var code = `(async () => {${Blockly.JavaScript.workspaceToCode(editor)}})();`;
   eval(code);
+};
+
+document.getElementById("run_neckexercise").onclick = () => {
+  fetch("/public/neck.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.log(code);
+      var curCode = `(async () => {${code} neckExercise()})();`;
+      eval(curCode);
+    });
 };
 
 //------------------------------------------------------------------------------
