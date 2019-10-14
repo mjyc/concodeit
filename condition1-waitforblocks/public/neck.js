@@ -32,6 +32,7 @@ async function neckExercise() {
 
   for (var i_index in instructions) {
     i = instructions[i_index];
+    console.log(i);
     result = await sendActionGoal("RobotSpeechbubbleAction", String(i));
     var correct = false;
     var dir = await checkFaceDirection(1000);
