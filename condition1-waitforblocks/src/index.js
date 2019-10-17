@@ -361,6 +361,7 @@ Blockly.defineBlocksWithJsonArray([
           ["FaceDirectionCenter", '"FaceDirectionCenter"'],
           ["FaceDirectionLeft", '"FaceDirectionLeft"'],
           ["FaceDirectionRight", '"FaceDirectionRight"'],
+          ["NoFace", '"NoFace"'],
           ["IsSpeakingFalse", '"IsSpeakingFalse"'],
           ["IsSpeakingTrue", '"IsSpeakingTrue"']
         ]
