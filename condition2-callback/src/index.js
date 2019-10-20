@@ -501,12 +501,39 @@ const sources = initialize({
 sources.PoseDetection.events("poses").addListener({ next: _ => {} });
 sources.VAD.addListener({ next: _ => {} });
 
-document.getElementById("run").onclick = () => {
-  var curCode = `var faceDir;\n (async () => {${Blockly.JavaScript.workspaceToCode(
-    editor
-  )}})();`;
-  eval(curCode);
+const _exit = [];
+
+const run = code => {
+  // stop previously ran code
+  if (_exit.length > 0) {
+    _exit[_exit.length - 1] = true;
+  }
+  cancelActionGoals();
+  // patch & run code
+  const patched = code.replace(
+    /;\n/g,
+    `; if (_exit[${_exit.length}]) return;\n`
+  );
+  const wrapped = `_exit[${_exit.length}] = false;
+(async () => {
+await sleep(1); // HACK to wait until all actions are cancelled
+${patched}})();`;
+  eval(wrapped);
 };
+
+const stop = () => {
+  if (_exit.length > 0) {
+    _exit[_exit.length - 1] = true;
+  }
+  cancelActionGoals();
+};
+
+document.getElementById("run").onclick = () => {
+  var code = Blockly.JavaScript.workspaceToCode(editor);
+  run(code);
+};
+
+document.getElementById("stop").onclick = stop;
 
 document.getElementById("run_neckexercise").onclick = () => {
   fetch("/public/neck.js")
@@ -515,8 +542,7 @@ document.getElementById("run_neckexercise").onclick = () => {
     })
     .then(function(code) {
       console.log(code);
-      var curCode = `(async () => {${code} runNeckExerciseApp()})();`;
-      eval(curCode);
+      run(code);
     });
 };
 
