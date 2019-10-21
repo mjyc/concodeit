@@ -535,7 +535,7 @@ document.getElementById("run").onclick = () => {
 
 document.getElementById("stop").onclick = stop;
 
-document.getElementById("run_neckexercise").onclick = () => {
+document.getElementById("run_instruction").onclick = () => {
   fetch("/public/instruction.js")
     .then(function(response) {
       return response.text();
