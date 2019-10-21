@@ -31,4 +31,4 @@ waitUntil(String("FaceDirectionCenter"), () => {
       });
     });
   });
-});s
+});
