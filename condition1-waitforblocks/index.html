@@ -7,6 +7,7 @@
 
   <body>
     <button id="run">Run</button>
+    <button id="stop">Stop</button>
     <button id="run_neckexercise">Neck Exercise</button>
 
     <xml id="startBlocks" style="display:none">
@@ -18,21 +19,16 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
           <category name="Sensing" colour="210">
-            <block type="wait_until_face_event">
-              <value name="WU0">
-                <block type="logic_compare">
-                  <value name="A">
-                    <block type="variables_get">
-                      <field name="VAR">posX</field>
-                    </block>
-                  </value>
-                  <value name="B">
-                    <block type="variables_get">
-                      <field name="VAR">posY</field>
-                    </block>
-                  </value>
+            <block type="variables_set">
+              <field name="VAR">result</field>
+              <value name="VALUE">
+                <block type="wait_for_event">
+                  <field name="SE">"FaceDirectionChanged"</field>
                 </block>
               </value>
+            </block>
+            <block type="wait_until">
+              <field name="SE">"FaceDirectionCenter"</field>
             </block>
           </category>
           <category name="Action" colour="230">
@@ -46,29 +42,21 @@
             <block type="variables_set">
               <field name="VAR">result</field>
               <value name="VALUE">
-                <block type="ask_multiple_choice">
-                  <value name="CHOICES">
-                    <block type="lists_create_with">
-                      <mutation items="2"></mutation>
-                      <value name="ADD0">
-                        <block type="text">
-                          <field name="TEXT">Choice1</field>
-                        </block>
-                      </value>
-                      <value name="ADD1">
-                        <block type="text">
-                          <field name="TEXT">Choice2</field>
-                        </block>
-                      </value>
+                <block type="set_message">
+                  <value name="MESSAGE">
+                    <block type="text">
+                      <field name="TEXT">Hello there!</field>
                     </block>
                   </value>
                 </block>
               </value>
             </block>
+            <block type="start_following_face"></block>
+            <block type="stop_following_face"></block>
             <block type="variables_set">
               <field name="VAR">result</field>
               <value name="VALUE">
-                <block type="speak">
+                <block type="say">
                   <value name="MESSAGE">
                     <block type="text">
                       <field name="TEXT">Hi!</field>
@@ -80,13 +68,9 @@
             <block type="variables_set">
               <field name="VAR">result</field>
               <value name="VALUE">
-                <block type="listen"> </block>
+                <block type="gesture"> </block>
               </value>
             </block>
-            <block type="cancel_display_message"></block>
-            <block type="cancel_ask_multiple_choice"></block>
-            <block type="cancel_speak"></block>
-            <block type="cancel_listen"></block>
           </category>
           <category name="Conccurent" colour="290">
             <block type="wait_for_all"></block>
