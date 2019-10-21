@@ -536,13 +536,37 @@ document.getElementById("run").onclick = () => {
 document.getElementById("stop").onclick = stop;
 
 document.getElementById("run_neckexercise").onclick = () => {
-  fetch("/public/neck.js")
+  fetch("/public/instruction.js")
     .then(function(response) {
       return response.text();
     })
     .then(function(code) {
       console.log(code);
       run(code);
+    });
+};
+
+document.getElementById("run_monologue").onclick = () => {
+  fetch("/public/monologue.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      var curCode = `(async () => {${code}})();`;
+      eval(curCode);
+    });
+};
+
+document.getElementById("run_interview").onclick = () => {
+  fetch("/public/interview.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      var curCode = `(async () => {${code}})();`;
+      eval(curCode);
     });
 };
 
