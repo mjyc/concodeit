@@ -7,6 +7,7 @@
 
   <body>
     <button id="run">Run</button>
+    <button id="stop">Stop</button>
     <button id="run_neckexercise">Neck Exercise</button>
 
     <xml id="startBlocks" style="display:none">
@@ -18,48 +19,27 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
           <category name="Sensing" colour="210">
-            <block type="variables_set">
-              <field name="VAR">id</field>
-              <value name="VALUE">
-                <block type="detect_face">
-                  <value name="DO">
-                    <block type="procedures_callnoreturn">
-                      <mutation name="handle face event">
-                        <arg name="posX"></arg>
-                        <arg name="posY"></arg>
-                        <arg name="faceDir"></arg>
-                      </mutation>
-                      <value name="ARG0">
-                        <block type="variables_get">
-                          <field name="VAR">posX</field>
-                        </block>
-                      </value>
-                      <value name="ARG1">
-                        <block type="variables_get">
-                          <field name="VAR">posY</field>
-                        </block>
-                      </value>
-                      <value name="ARG2">
-                        <block type="variables_get">
-                          <field name="VAR">faceDir</field>
-                        </block>
-                      </value>
+            <block type="wait_for_event">
+              <field name="SE">"FaceDirectionChanged"</field>
+              <value name="DO">
+                <block type="set_message">
+                  <value name="MESSAGE">
+                    <block type="variables_get">
+                      <field name="VAR">event</field>
                     </block>
                   </value>
                 </block>
               </value>
             </block>
-            <block type="procedures_defnoreturn">
-              <mutation>
-                <arg name="posX"></arg>
-                <arg name="posY"></arg>
-              </mutation>
-              <field name="NAME">handle face event</field>
-            </block>
-            <block type="stop_detect_face">
-              <value name="ID">
-                <block type="variables_get">
-                  <field name="VAR">id</field>
+            <block type="wait_until">
+              <field name="SE">"FaceDirectionCenter"</field>
+              <value name="DO">
+                <block type="set_message">
+                  <value name="MESSAGE">
+                    <block type="text">
+                      <field name="TEXT">Hello there!</field>
+                    </block>
+                  </value>
                 </block>
               </value>
             </block>
@@ -72,116 +52,25 @@
                 </block>
               </value>
             </block>
-            <block type="display_message">
+            <block type="set_message">
               <value name="MESSAGE">
                 <block type="text">
                   <field name="TEXT">Hello there!</field>
                 </block>
               </value>
-              <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle display message done">
-                    <arg name="result"></arg>
-                  </mutation>
-                  <value name="ARG0">
-                    <block type="variables_get">
-                      <field name="VAR">result</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
             </block>
-            <block type="procedures_defnoreturn">
-              <mutation>
-                <arg name="result"></arg>
-              </mutation>
-              <field name="NAME">handle ask multiple choice done</field>
-            </block>
-            <block type="ask_multiple_choice">
-              <value name="CHOICES">
-                <block type="lists_create_with">
-                  <mutation items="2"></mutation>
-                  <value name="ADD0">
-                    <block type="text">
-                      <field name="TEXT">Choice1</field>
-                    </block>
-                  </value>
-                  <value name="ADD1">
-                    <block type="text">
-                      <field name="TEXT">Choice2</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
-              <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle ask multiple choice done">
-                    <arg name="result"></arg>
-                  </mutation>
-                  <value name="ARG0">
-                    <block type="variables_get">
-                      <field name="VAR">result</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
-            </block>
-            <block type="procedures_defnoreturn">
-              <mutation>
-                <arg name="result"></arg>
-              </mutation>
-              <field name="NAME">handle ask multiple choice done</field>
-            </block>
-            <block type="speak">
+            <block type="start_following_face"></block>
+            <block type="stop_following_face"></block>
+            <block type="start_saying">
               <value name="MESSAGE">
                 <block type="text">
                   <field name="TEXT">Hi!</field>
                 </block>
               </value>
-              <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle speak done">
-                    <arg name="result"></arg>
-                  </mutation>
-                  <value name="ARG0">
-                    <block type="variables_get">
-                      <field name="VAR">result</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
             </block>
-            <block type="procedures_defnoreturn">
-              <mutation>
-                <arg name="result"></arg>
-              </mutation>
-              <field name="NAME">handle speak done</field>
+            <block type="start_gesturing">
+              <field name="MESSAGE"></field>
             </block>
-
-            <block type="listen">
-              <value name="DO">
-                <block type="procedures_callnoreturn">
-                  <mutation name="handle listen done">
-                    <arg name="result"></arg>
-                  </mutation>
-                  <value name="ARG0">
-                    <block type="variables_get">
-                      <field name="VAR">result</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
-            </block>
-            <block type="procedures_defnoreturn">
-              <mutation>
-                <arg name="result"></arg>
-              </mutation>
-              <field name="NAME">handle listen done</field>
-            </block>
-            <block type="cancel_display_message"></block>
-            <block type="cancel_ask_multiple_choice"></block>
-            <block type="cancel_speak"></block>
-            <block type="cancel_listen"></block>
           </category>
           <category name="Program control " colour="290">
             <block type="start_program"></block>

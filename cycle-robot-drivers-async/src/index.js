@@ -137,9 +137,17 @@ export function makeSendGoal(actionName) {
   return (g, callback) => {
     const goal = initGoal(g);
     const goal_id = goal.goal_id;
-    sources[actionName].result.addListener({
-      next: i => callback(null, i),
-      error: err => callback(err)
+    const subscriber = sources[actionName].result.subscribe({
+      next: i => {
+        if (!isEqualGoalID(goal_id, i.status.goal_id)) return;
+        subscriber.unsubscribe();
+        callback(null, i);
+      },
+      error: err => {
+        if (!isEqualGoalID(goal_id, i.status.goal_id)) return;
+        subscriber.unsubscribe();
+        callback(err);
+      }
     });
     goals$.shamefullySendNext({
       type: actionName,
