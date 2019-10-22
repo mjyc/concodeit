@@ -82,7 +82,7 @@ function detectFaceDirectionChanged(id, callback) {
       next: poses => {
         const features = extractFaceFeatures(poses);
         const faceDirection = !features.isVisible
-          ? "noface"
+          ? "noFace"
           : features.noseAngle > ANGLE
           ? "left"
           : features.noseAngle < -ANGLE
@@ -225,7 +225,7 @@ async function waitForSpecificEvent(event) {
   } else if (event == "FaceDirectionRight") {
     return await waitUntilFaceEvent(id, "right");
   } else if (event == "NoFace") {
-    return await waitUntilFaceEvent(id, "noface");
+    return await waitUntilFaceEvent(id, "noFace");
   } else if (event == "IsSpeakingFalse") {
     return await waitUntilVADState(id, false);
   } else if (event == "IsSpeakingTrue") {
