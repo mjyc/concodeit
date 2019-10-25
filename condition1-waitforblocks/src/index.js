@@ -82,7 +82,7 @@ function detectFaceDirectionChanged(id, callback) {
       next: poses => {
         const features = extractFaceFeatures(poses);
         const faceDirection = !features.isVisible
-          ? "noface"
+          ? "noFace"
           : features.noseAngle > ANGLE
           ? "left"
           : features.noseAngle < -ANGLE
@@ -225,7 +225,7 @@ async function waitForSpecificEvent(event) {
   } else if (event == "FaceDirectionRight") {
     return await waitUntilFaceEvent(id, "right");
   } else if (event == "NoFace") {
-    return await waitUntilFaceEvent(id, "noface");
+    return await waitUntilFaceEvent(id, "noFace");
   } else if (event == "IsSpeakingFalse") {
     return await waitUntilVADState(id, false);
   } else if (event == "IsSpeakingTrue") {
@@ -361,6 +361,7 @@ Blockly.defineBlocksWithJsonArray([
           ["FaceDirectionCenter", '"FaceDirectionCenter"'],
           ["FaceDirectionLeft", '"FaceDirectionLeft"'],
           ["FaceDirectionRight", '"FaceDirectionRight"'],
+          ["NoFace", '"NoFace"'],
           ["IsSpeakingFalse", '"IsSpeakingFalse"'],
           ["IsSpeakingTrue", '"IsSpeakingTrue"']
         ]
@@ -660,6 +661,30 @@ document.getElementById("run_neckexercise").onclick = () => {
     .then(function(code) {
       console.debug(code);
       run(code);
+    });
+};
+
+document.getElementById("run_monologue").onclick = () => {
+  fetch("/public/monologue.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      var curCode = `(async () => {${code} monologue()})();`;
+      eval(curCode);
+    });
+};
+
+document.getElementById("run_interview").onclick = () => {
+  fetch("/public/interview.js")
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      var curCode = `(async () => {${code} interview()})();`;
+      eval(curCode);
     });
 };
 
