@@ -570,6 +570,15 @@ document.getElementById("run_interview").onclick = () => {
     });
 };
 
+document.getElementById("download").onclick = () => {
+  const text = document.getElementById("js").innerText;
+  const a = document.createElement("a");
+  a.id = "js";
+  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
+  a.download = "program";
+  a.click();
+};
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
