@@ -503,6 +503,19 @@ document.getElementById("run_interview").onclick = () => {
     });
 };
 
+document.getElementById("run_js_file").onclick = e => {
+  const filename = document.getElementById("filename").value;
+  console.log(filename);
+  fetch(`/programs/${filename}`)
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      run(code);
+    });
+};
+
 document.getElementById("download").onclick = () => {
   const text = document.getElementById("js").innerText;
   const a = document.createElement("a");
