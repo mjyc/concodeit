@@ -697,6 +697,30 @@ document.getElementById("download").onclick = () => {
   a.click();
 };
 
+document.getElementById("download_xml").onclick = () => {
+  const workspace = Blockly.getMainWorkspace();
+  const xml = Blockly.Xml.workspaceToDom(workspace);
+  const xmlText = Blockly.Xml.domToText(xml);
+  const a = document.createElement("a");
+  a.id = "xml";
+  a.href = "data:text/xml;charset=utf-8," + encodeURIComponent(xmlText);
+  a.download = "blocks";
+  a.click();
+};
+
+document.getElementById("load_xml").onchange = e => {
+  const xmlFile = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = evt => {
+    const xmlText = evt.target.result;
+    var xmlDom = Blockly.Xml.textToDom(xmlText);
+    var workspace = Blockly.getMainWorkspace();
+    workspace.clear();
+    Blockly.Xml.domToWorkspace(xmlDom, workspace);
+  };
+  reader.readAsText(xmlFile);
+};
+
 //------------------------------------------------------------------------------
 // Scratch
 (async () => {
