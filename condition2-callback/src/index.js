@@ -536,7 +536,7 @@ document.getElementById("run").onclick = () => {
 document.getElementById("stop").onclick = stop;
 
 document.getElementById("run_instruction").onclick = () => {
-  fetch("/public/instruction.js")
+  fetch("/programs/instruction.js")
     .then(function(response) {
       return response.text();
     })
@@ -547,7 +547,7 @@ document.getElementById("run_instruction").onclick = () => {
 };
 
 document.getElementById("run_monologue").onclick = () => {
-  fetch("/public/monologue.js")
+  fetch("/programs/monologue.js")
     .then(function(response) {
       return response.text();
     })
@@ -559,7 +559,7 @@ document.getElementById("run_monologue").onclick = () => {
 };
 
 document.getElementById("run_interview").onclick = () => {
-  fetch("/public/interview.js")
+  fetch("/programs/interview.js")
     .then(function(response) {
       return response.text();
     })
