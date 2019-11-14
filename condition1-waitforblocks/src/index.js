@@ -453,6 +453,60 @@ Blockly.defineBlocksWithJsonArray([
     colour: 290,
     tooltip: "",
     helpUrl: ""
+  },
+  {
+    type: "Action_Action_WaitAll",
+    message0: "Action Action Wait All",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Event_WaitAll",
+    message0: "Action Event Wait All",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Event_Event_WaitAll",
+    message0: "Event Event Wait All",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Action_WaitOne",
+    message0: "Action Action Wait One",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Event_WaitOne",
+    message0: "Action_Event_WaitOne",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Event_Event_WaitOne",
+    message0: "Event_Event_WaitOne",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
   }
   //----------------------------------------------------------------------------
 ]);
@@ -559,6 +613,67 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
 
 Blockly.JavaScript["start_program"] = function(block) {
   return "";
+};
+
+Blockly.JavaScript["Action_Action_WaitAll"] = function(block) {
+  return `var result;
+          await waitForAll(promisify2(async cb => {\n
+            result = (await say('Hello There'));
+            cb(null, null);\n
+          })(), promisify2(async cb => {
+            result = (await gesture("CONFUSED"));\n
+            cb(null, null);
+          })());\n
+          await sleep(1);
+          await waitForAll(promisify2(async cb => {\n
+            result = (await say('My name is Meebo'));
+            cb(null, null);\n
+          })(), promisify2(async cb => {
+            result = (await gesture("HAPPY"));\n
+            cb(null, null);
+          })());
+`;
+};
+
+Blockly.JavaScript["Action_Event_WaitAll"] = function(block) {
+  return `var result;
+          result = (await say('Hello There'));\n
+          await waitForSpecificEvent(String("FaceDirectionCenter"));\n
+          result = (await say('Nice to Meet You'));`;
+};
+
+Blockly.JavaScript["Event_Event_WaitAll"] = function(block) {
+  return `var result;
+          await waitForAll(promisify2(async cb => {\n
+            await waitForSpecificEvent(String("FaceDirectionCenter"));\n
+            cb(null, null);
+          })(), promisify2(async cb => {\n
+            await waitForSpecificEvent(String("IsSpeakingFalse"));
+            cb(null, null);\n
+          })());
+          result = (await say('Hello'));
+          result = 0;`;
+};
+
+Blockly.JavaScript["Action_Action_WaitOne"] = function(block) {
+  return `var result;
+          result = (await say('Hello'));\n
+          await sleep(3);
+          result = (await say('Timed Out'));`;
+};
+
+Blockly.JavaScript["Action_Event_WaitOne"] = function(block) {
+  return `var result;
+          result = (await say('Hello my name is Meebo'));\n
+          await waitForSpecificEvent(String("NoFace"));\n
+          result = (await setMessage('On Standby'));`;
+};
+
+Blockly.JavaScript["Event_Event_WaitOne"] = function(block) {
+  return `var result;
+          await waitForSpecificEvent(String("FaceDirectionLeft"));\n
+          await waitForSpecificEvent(String("FaceDirectionRight"));\n
+          result = (await setMessage('Bye Now'));`;
 };
 
 //------------------------------------------------------------------------------

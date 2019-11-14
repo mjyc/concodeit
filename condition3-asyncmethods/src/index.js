@@ -298,6 +298,54 @@ Blockly.defineBlocksWithJsonArray([
     colour: 290,
     tooltip: "",
     helpUrl: ""
+  },
+  {
+    type: "Action_Action_WaitAll",
+    message0: "Action Action Wait All",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Event_WaitAll",
+    message0: "Action Event Wait All",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Event_Event_WaitAll",
+    message0: "Event Event Wait All",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Action_WaitOne",
+    message0: "Action Action Wait One",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Event_WaitOne",
+    message0: "Action Event Wait One",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Event_Event_WaitOne",
+    message0: "Event Event Wait One",
+    output: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
   }
 ]);
 
@@ -376,6 +424,36 @@ Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
     ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
     : "";
+};
+
+Blockly.JavaScript["start_program"] = function(block) {
+  return !!block.getNextBlock()
+    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
+    : "";
+};
+
+Blockly.JavaScript["Action_Action_WaitAll"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["Action_Event_WaitAll"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["Event_Event_WaitAll"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["Action_Action_WaitOne"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["Action_Event_WaitOne"] = function(block) {
+  return "";
+};
+
+Blockly.JavaScript["Event_Event_WaitOne"] = function(block) {
+  return "";
 };
 
 //------------------------------------------------------------------------------

@@ -351,6 +351,60 @@ Blockly.defineBlocksWithJsonArray([
     colour: 210,
     tooltip: "",
     helpUrl: ""
+  }, 
+  {
+    type: "Action_Action_WaitAll",
+    message0: "Action Action Wait All",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Event_WaitAll",
+    message0: "Action Event Wait All",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Event_Event_WaitAll",
+    message0: "Event Event Wait All",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Action_WaitOne",
+    message0: "Action Action Wait One",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Action_Event_WaitOne",
+    message0: "Action Event Wait One",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "Event_Event_WaitOne",
+    message0: "Event Event Wait One",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
   }
 ]);
 
@@ -433,6 +487,71 @@ ${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
 Blockly.JavaScript["start_program"] = function(block) {
   return !!block.getNextBlock()
     ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
+    : "";
+};
+
+Blockly.JavaScript["Action_Action_WaitAll"] = function(block) {
+  return check(block)
+    ? `// beg start_program\n
+          cancelActionGoals();\n
+          // end start_program\n
+          sendActionGoalCallback("FacialExpressionAction", String("CONFUSED"), (result) => {});\n
+          startSaying(String('Hello'), (result) => {\n
+          startSleeping(1, _ => {\n
+          sendActionGoalCallback("FacialExpressionAction", String("HAPPY"), (result) => {});\n
+          startSaying(String('My name is Meebo'), (result) => {});});});`
+    : "";
+};
+Blockly.JavaScript["Action_Event_WaitAll"] = function(block) {
+  return check(block)
+    ? `// beg start_program\n
+          cancelActionGoals();\n
+          // end start_program\n
+          startSaying(String('Hello There'), (result) => {\n
+          waitUntil(String("FaceDirectionCenter"), () => {\n
+          setMessage(String('Nice to Meet You'));});});`
+    : "";
+};
+Blockly.JavaScript["Event_Event_WaitAll"] = function(block) {
+  return check(block)
+    ? `// beg start_program\n
+          cancelActionGoals();\n
+          // end start_program\n
+          waitUntil(String("FaceDirectionCenter"), () => {\n
+          waitUntil(String("IsSpeakingFalse"), () => {\n
+          startSaying(String('Hello'), (result) => {});});});`
+    : "";
+};
+Blockly.JavaScript["Action_Action_WaitOne"] = function(block) {
+  return check(block)
+    ? `// beg start_program\n
+          cancelActionGoals();\n
+          // end start_program\n
+          startSaying(String('Hello'), (result) => {\n
+          startSleeping(3, _ => {\n
+          startSaying(String('Timed Out'), (result) => {});});});`
+    : "";
+};
+Blockly.JavaScript["Action_Event_WaitOne"] = function(block) {
+  return check(block)
+    ? `// beg start_program\n
+          cancelActionGoals();\n
+          // end start_program\n
+          startSaying(String('Hello my name is Meebo. Goodbye now'), (result) => {\n
+          waitUntil(String("NoFace"), () => {\n
+          setMessage(String('On Standby'));});});`
+    : "";
+};
+Blockly.JavaScript["Event_Event_WaitOne"] = function(block) {
+  return check(block)
+    ? `// beg start_program\n
+          cancelActionGoals();\n
+          // end start_program\n
+          waitUntil(String("FaceDirectionLeft"), () => {\n
+            waitUntil(String("FaceDirectionRight"), () => {\n
+              setMessage(String('Bye Now'));\n
+            });
+          });`
     : "";
 };
 
