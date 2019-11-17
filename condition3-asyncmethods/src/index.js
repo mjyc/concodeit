@@ -468,7 +468,7 @@ document.getElementById("run").onclick = () => {
 };
 
 document.getElementById("run_neckexercise").onclick = () => {
-  fetch("/public/neck.js")
+  fetch("/programs/neck.js")
     .then(function(response) {
       return response.text();
     })
@@ -480,7 +480,7 @@ document.getElementById("run_neckexercise").onclick = () => {
 };
 
 document.getElementById("run_monologue").onclick = () => {
-  fetch("/public/monologue.js")
+  fetch("/programs/monologue.js")
     .then(function(response) {
       return response.text();
     })
@@ -492,7 +492,7 @@ document.getElementById("run_monologue").onclick = () => {
 };
 
 document.getElementById("run_interview").onclick = () => {
-  fetch("/public/interview.js")
+  fetch("/programs/interview.js")
     .then(function(response) {
       return response.text();
     })
@@ -500,6 +500,19 @@ document.getElementById("run_interview").onclick = () => {
       console.debug(code);
       var curCode = `(async () => {${code} interview()})();`;
       eval(curCode);
+    });
+};
+
+document.getElementById("run_js_file").onclick = e => {
+  const filename = document.getElementById("filename").value;
+  console.log(filename);
+  fetch(`/programs/${filename}`)
+    .then(function(response) {
+      return response.text();
+    })
+    .then(function(code) {
+      console.debug(code);
+      run(code);
     });
 };
 
