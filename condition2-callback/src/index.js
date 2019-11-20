@@ -400,11 +400,12 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
         : Blockly.JavaScript.ORDER_NONE
     ) || "false";
   var branch = Blockly.JavaScript.statementToCode(block, "DO");
-  branch = Blockly.JavaScript.addLoopTrap(branch, block);
+  // branch = Blockly.JavaScript.addLoopTrap(branch, block); // addLoopTrap doesn't do anything significant and throws error
   if (until) {
     argument0 = "!" + argument0;
   }
-  return "while (" + argument0 + ") {\nawait sleep(100)" + branch + "}\n";
+  return "while (" + argument0 + ") {\n  await sleep(100);\n" + branch + "}\n";
+  return "";
 };
 
 function check(block) {

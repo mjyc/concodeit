@@ -169,6 +169,37 @@ async function isGestureFinished() {
 
 Blockly.defineBlocksWithJsonArray([
   {
+    type: "controls_whileUntil_with_sleep",
+    message0: "%1 %2",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "MODE",
+        options: [
+          ["%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_WHILE}", "WHILE"],
+          ["%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_UNTIL}", "UNTIL"]
+        ]
+      },
+      {
+        type: "input_value",
+        name: "BOOL",
+        check: "Boolean"
+      }
+    ],
+    message1: "%{BKY_CONTROLS_REPEAT_INPUT_DO} %1",
+    args1: [
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    style: "loop_blocks",
+    helpUrl: "%{BKY_CONTROLS_WHILEUNTIL_HELPURL}",
+    extensions: ["controls_whileUntil_tooltip"]
+  },
+  {
     type: "start_gesturing",
     message0: "start gesture  %1",
     args0: [
@@ -301,15 +332,35 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
+//------------------------------------------------------------------------------
+// API Code Generating Blocks
+
+Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
+  // Do while/until loop.
+  var until = block.getFieldValue("MODE") == "UNTIL";
+  var argument0 =
+    Blockly.JavaScript.valueToCode(
+      block,
+      "BOOL",
+      until
+        ? Blockly.JavaScript.ORDER_LOGICAL_NOT
+        : Blockly.JavaScript.ORDER_NONE
+    ) || "false";
+  var branch = Blockly.JavaScript.statementToCode(block, "DO");
+  // branch = Blockly.JavaScript.addLoopTrap(branch, block); // addLoopTrap doesn't do anything significant and throws error
+  if (until) {
+    argument0 = "!" + argument0;
+  }
+  return "while (" + argument0 + ") {\n  await sleep(100);\n" + branch + "}\n";
+  return "";
+};
+
 function check(block) {
   return (
     block.getRootBlock().type === "start_program" ||
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
-
-//------------------------------------------------------------------------------
-// API Code Generating Blocks
 
 Blockly.JavaScript["get_state"] = function(block) {
   const code = check(block)
