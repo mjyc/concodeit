@@ -35,8 +35,8 @@ function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
-function sleep(second = 0, callback = () => {}) {
-  setTimeout(callback, second * 1000);
+function sleep(sec, callback) {
+  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
 const eventHandles = {};
@@ -128,7 +128,7 @@ function waitForVoiceActivity(id, voiceActivity, callback) {
 }
 
 function startSleeping(duration, callback) {
-  sleep(duration, callback);
+  setTimeout(callback, duration * 1000);
 }
 
 function setMessage(message) {
@@ -404,7 +404,13 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return "while (" + argument0 + ") {\n  await sleep(100);\n" + branch + "}\n";
+  return (
+    "while (" +
+    argument0 +
+    ") {\n  await sleep(0.1);console.log('sleep');\n" +
+    branch +
+    "}\n"
+  );
   return "";
 };
 
@@ -469,7 +475,7 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
 
 Blockly.JavaScript["wait_for_event"] = function(block) {
   return check(block)
-    ? `waitForEvent(String(${block.getFieldValue("SE")}), (err, res) => {
+    ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
   event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
     : "";
 };
