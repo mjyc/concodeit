@@ -47,23 +47,6 @@ function getActionStatus(actionName) {
   })();
 }
 
-function getActionResult(actionName) {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        sources[actionName].result.removeListener(listener);
-        console.debug(actionName, "result", val);
-        if (val.status.status === "SUCCEEDED") {
-          callback(null, val.result);
-        } else {
-          callback(null, null);
-        }
-      }
-    };
-    sources[actionName].result.addListener(listener);
-  })();
-}
-
 function cancelActionGoal(actionName) {
   if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
 }
@@ -84,23 +67,8 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
-//------------------------------------------------------------------------------
-// Face Detection Functions
-
 let poses$;
-function getNumDetectedFaces() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-        callback(null, val.length);
-      }
-    };
-    poses$.addListener(listener);
-  })();
-}
-
-function getHumanFaceDirection() {
+function getFaceDirection() {
   return promisify(callback => {
     const listener = {
       next: val => {
@@ -136,11 +104,9 @@ function getVADState() {
   })();
 }
 
-//------------------------------------------------------------------------------
-// Update API stuff
 async function getState(whichState) {
   if (whichState === "faceDirection") {
-    return await getHumanFaceDirection();
+    return await getFaceDirection();
   } else if (whichState === "isSpeaking") {
     return await getVADState();
   }
@@ -340,8 +306,10 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 //------------------------------------------------------------------------------
-// API Code Generating Blocks
+// Code Generators
 
+// copied and modified
+//   https://github.com/google/blockly/blob/23a78c89e4c0f2801768b5c55c7f91ac261f4bc6/generators/javascript/loops.js#L60-L72
 Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   // Do while/until loop.
   var until = block.getFieldValue("MODE") == "UNTIL";
@@ -469,7 +437,6 @@ editor = render("editor", "toolbox");
 
 updateCode();
 
-//------------------------------------------------------------------------------
 const sources = initialize({
   container: document.getElementById("app"),
   styles: {
@@ -504,14 +471,14 @@ VAD$ = sources.VAD;
 VAD$.addListener({ next: _ => {} });
 
 actionNames.map(actionName => {
-  // HACK to give an initial value for result streams
+  // provide an initial value for result streams
   sources[actionName].result = sources[actionName].result.startWith({
     status: { status: null }
   });
   sources[actionName].result.addListener({ next: _ => {} });
 });
 actionNames.map(actionName => {
-  // HACK to give an initial value for status streams
+  // provide an initial value for status streams
   sources[actionName].status = sources[actionName].status.startWith({
     status: null
   });
@@ -543,45 +510,18 @@ document.getElementById("run").onclick = () => {
   run(code);
 };
 
-document.getElementById("run_neckexercise").onclick = () => {
-  fetch("/programs/neck.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code} fullNeckExercise()})();`;
-      eval(curCode);
-    });
+document.getElementById("download_js").onclick = () => {
+  const text = document.getElementById("js").innerText;
+  const a = document.createElement("a");
+  a.id = "js";
+  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
+  a.download = "program";
+  a.click();
 };
 
-document.getElementById("run_monologue").onclick = () => {
-  fetch("/programs/monologue.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code} monologue()})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_interview").onclick = () => {
-  fetch("/programs/interview.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code} interview()})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_js_file").onclick = e => {
+document.getElementById("run_js").onclick = e => {
   const filename = document.getElementById("filename").value;
-  console.log(filename);
+  console.debug(`filepath /programs/${filename}`);
   fetch(`/programs/${filename}`)
     .then(function(response) {
       return response.text();
@@ -590,15 +530,6 @@ document.getElementById("run_js_file").onclick = e => {
       console.debug(code);
       run(code);
     });
-};
-
-document.getElementById("download").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
 };
 
 document.getElementById("download_xml").onclick = () => {
