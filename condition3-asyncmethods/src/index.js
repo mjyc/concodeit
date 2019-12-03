@@ -33,7 +33,14 @@ function getActionStatus(actionName) {
       next: val => {
         sources[actionName].status.removeListener(listener);
         console.debug(actionName, "status", val);
-        callback(null, val.status);
+        if (
+          handles[actionName].goal_id &&
+          handles[actionName].goal_id.id === val.goal_id.id
+        ) {
+          callback(null, val.status);
+        } else {
+          callback(null, null);
+        }
       }
     };
     sources[actionName].status.addListener(listener);
@@ -156,12 +163,12 @@ function startSaying(message) {
 
 async function isSayFinished() {
   const speech_status = await getActionStatus("SpeechSynthesisAction");
-  return speech_status !== "ACTIVE";
+  return speech_status !== null && speech_status !== "ACTIVE";
 }
 
 async function isGestureFinished() {
   const gesture_status = await getActionStatus("FacialExpressionAction");
-  return gesture_status !== "ACTIVE";
+  return gesture_status !== null && gesture_status !== "ACTIVE";
 }
 
 //------------------------------------------------------------------------------
