@@ -409,7 +409,7 @@ Blockly.JavaScript["start_saying"] = function(block) {
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
-    ? `startGesturing(${block.getFieldValue("MESSAGE")})`
+    ? `startGesturing(${block.getFieldValue("MESSAGE")});\n`
     : "";
 };
 
@@ -511,11 +511,29 @@ actionNames.map(actionName => {
   sources[actionName].status.addListener({ next: _ => {} });
 });
 
+const _exit = [];
+
+const run = code => {
+  // stop previously ran code
+  if (_exit.length > 0) {
+    _exit[_exit.length - 1] = true;
+  }
+  cancelActionGoals();
+  // patch & run code
+  const patched = code.replace(
+    /;\n/g,
+    `; if (_exit[${_exit.length}]) return;\n`
+  );
+  const wrapped = `_exit[${_exit.length}] = false;
+(async () => {
+await sleep(0.5); // HACK to wait until all actions are cancelled
+${patched}})();`;
+  eval(wrapped);
+};
+
 document.getElementById("run").onclick = () => {
-  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
-    editor
-  )}})();`;
-  eval(curCode);
+  const code = Blockly.JavaScript.workspaceToCode(editor);
+  run(code);
 };
 
 document.getElementById("run_neckexercise").onclick = () => {
