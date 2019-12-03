@@ -105,9 +105,9 @@ function getVADState() {
 }
 
 async function getState(whichState) {
-  if (whichState === "faceDirection") {
+  if (whichState === "humanFaceDirection") {
     return await getFaceDirection();
-  } else if (whichState === "isSpeaking") {
+  } else if (whichState === "isHumanSpeaking") {
     return await getVADState();
   }
 }
@@ -202,8 +202,8 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "MESSAGE",
         options: [
-          ["faceDirection", '"faceDirection"'],
-          ["isSpeaking", '"isSpeaking"']
+          ["humanFaceDirection", '"humanFaceDirection"'],
+          ["isHumanSpeaking", '"isHumanSpeaking"']
         ]
       }
     ],
