@@ -33,7 +33,14 @@ function getActionStatus(actionName) {
       next: val => {
         sources[actionName].status.removeListener(listener);
         console.debug(actionName, "status", val);
-        callback(null, val.status);
+        if (
+          handles[actionName].goal_id &&
+          handles[actionName].goal_id.id === val.goal_id.id
+        ) {
+          callback(null, val.status);
+        } else {
+          callback(null, null);
+        }
       }
     };
     sources[actionName].status.addListener(listener);
@@ -156,18 +163,49 @@ function startSaying(message) {
 
 async function isSayFinished() {
   const speech_status = await getActionStatus("SpeechSynthesisAction");
-  return speech_status !== "ACTIVE";
+  return speech_status !== null && speech_status !== "ACTIVE";
 }
 
 async function isGestureFinished() {
   const gesture_status = await getActionStatus("FacialExpressionAction");
-  return gesture_status !== "ACTIVE";
+  return gesture_status !== null && gesture_status !== "ACTIVE";
 }
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
 
 Blockly.defineBlocksWithJsonArray([
+  {
+    type: "controls_whileUntil_with_sleep",
+    message0: "%1 %2",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "MODE",
+        options: [
+          ["%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_WHILE}", "WHILE"],
+          ["%{BKY_CONTROLS_WHILEUNTIL_OPERATOR_UNTIL}", "UNTIL"]
+        ]
+      },
+      {
+        type: "input_value",
+        name: "BOOL",
+        check: "Boolean"
+      }
+    ],
+    message1: "%{BKY_CONTROLS_REPEAT_INPUT_DO} %1",
+    args1: [
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    style: "loop_blocks",
+    helpUrl: "%{BKY_CONTROLS_WHILEUNTIL_HELPURL}",
+    extensions: ["controls_whileUntil_tooltip"]
+  },
   {
     type: "start_gesturing",
     message0: "start gesture  %1",
@@ -301,15 +339,35 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
+//------------------------------------------------------------------------------
+// API Code Generating Blocks
+
+Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
+  // Do while/until loop.
+  var until = block.getFieldValue("MODE") == "UNTIL";
+  var argument0 =
+    Blockly.JavaScript.valueToCode(
+      block,
+      "BOOL",
+      until
+        ? Blockly.JavaScript.ORDER_LOGICAL_NOT
+        : Blockly.JavaScript.ORDER_NONE
+    ) || "false";
+  var branch = Blockly.JavaScript.statementToCode(block, "DO");
+  // branch = Blockly.JavaScript.addLoopTrap(branch, block); // addLoopTrap doesn't do anything significant and throws error
+  if (until) {
+    argument0 = "!" + argument0;
+  }
+  return "while (" + argument0 + ") {\n  await sleep(0.1);\n" + branch + "}\n";
+  return "";
+};
+
 function check(block) {
   return (
     block.getRootBlock().type === "start_program" ||
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
-
-//------------------------------------------------------------------------------
-// API Code Generating Blocks
 
 Blockly.JavaScript["get_state"] = function(block) {
   const code = check(block)
@@ -358,7 +416,7 @@ Blockly.JavaScript["start_saying"] = function(block) {
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
-    ? `startGesturing(${block.getFieldValue("MESSAGE")})`
+    ? `startGesturing(${block.getFieldValue("MESSAGE")});\n`
     : "";
 };
 
@@ -460,11 +518,29 @@ actionNames.map(actionName => {
   sources[actionName].status.addListener({ next: _ => {} });
 });
 
+const _exit = [];
+
+const run = code => {
+  // stop previously ran code
+  if (_exit.length > 0) {
+    _exit[_exit.length - 1] = true;
+  }
+  cancelActionGoals();
+  // patch & run code
+  const patched = code.replace(
+    /;\n/g,
+    `; if (_exit[${_exit.length}]) return;\n`
+  );
+  const wrapped = `_exit[${_exit.length}] = false;
+(async () => {
+await sleep(0.5); // HACK to wait until all actions are cancelled
+${patched}})();`;
+  eval(wrapped);
+};
+
 document.getElementById("run").onclick = () => {
-  var curCode = `(async () => {${Blockly.JavaScript.workspaceToCode(
-    editor
-  )}})();`;
-  eval(curCode);
+  const code = Blockly.JavaScript.workspaceToCode(editor);
+  run(code);
 };
 
 document.getElementById("run_neckexercise").onclick = () => {
