@@ -586,50 +586,24 @@ const stop = () => {
 };
 
 document.getElementById("run").onclick = () => {
-  var code = Blockly.JavaScript.workspaceToCode(editor);
+  const code = Blockly.JavaScript.workspaceToCode(editor);
   run(code);
 };
 
 document.getElementById("stop").onclick = stop;
 
-document.getElementById("run_instruction").onclick = () => {
-  fetch("/programs/instruction.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.log(code);
-      run(code);
-    });
+document.getElementById("download_js").onclick = () => {
+  const text = document.getElementById("js").innerText;
+  const a = document.createElement("a");
+  a.id = "js";
+  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
+  a.download = "program";
+  a.click();
 };
 
-document.getElementById("run_monologue").onclick = () => {
-  fetch("/programs/monologue.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code}})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_interview").onclick = () => {
-  fetch("/programs/interview.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code}})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_js_file").onclick = e => {
+document.getElementById("run_js").onclick = e => {
   const filename = document.getElementById("filename").value;
-  console.log(filename);
+  console.debug(`filepath /programs/${filename}`);
   fetch(`/programs/${filename}`)
     .then(function(response) {
       return response.text();
@@ -638,15 +612,6 @@ document.getElementById("run_js_file").onclick = e => {
       console.debug(code);
       run(code);
     });
-};
-
-document.getElementById("download").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
 };
 
 document.getElementById("download_xml").onclick = () => {
