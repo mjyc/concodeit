@@ -662,6 +662,7 @@ const stop = () => {
     _exit[_exit.length - 1] = true;
   }
   cancelActionGoals();
+  stopFollowingFace();
 };
 
 document.getElementById("run").onclick = () => {
