@@ -2,7 +2,7 @@ var result;
 
 
 result = (await setMessage('Hello there!'));
-await waitForSpecificEvent(String("FaceDirectionCenter"));
+await waitForSpecificEvent(String("humanFaceLookingAtCenter"));
 await sleep(1);
 _stop["]jWX9RV6AVP}dewN6$qm"] = false;
 await waitForOne(promisify2(async cb => {
@@ -18,14 +18,14 @@ await waitForOne(promisify2(async cb => {
       result = (await say('Nice to meet you')); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
       cb(null, null); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
     })(), promisify2(async cb => {
-      await waitForSpecificEvent(String("NoFace")); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
+      await waitForSpecificEvent(String("noHumanFaceFound")); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
       result = (await setMessage('Goodbye')); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
       result = (await say('Goodbye')); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
       cb(null, null); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
     })()); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
     cb(null, null); if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
   })(), promisify2(async cb => {
-    await waitForSpecificEvent(String("NoFace")); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
+    await waitForSpecificEvent(String("noHumanFaceFound")); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
     result = (await setMessage('Goodbye')); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
     result = (await say('Goodbye')); if (_stop["+{,qUHa{0X-LISH{7D.Y"]) return; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
     cb(null, null); if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
@@ -33,7 +33,7 @@ await waitForOne(promisify2(async cb => {
   _stop["+{,qUHa{0X-LISH{7D.Y"] = true; if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
   cb(null, null);
 })(), promisify2(async cb => {
-  await waitForSpecificEvent(String("NoFace")); if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
+  await waitForSpecificEvent(String("noHumanFaceFound")); if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
   result = (await setMessage('Goodbye')); if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
   result = (await say('Goodbye')); if (_stop["]jWX9RV6AVP}dewN6$qm"]) return;
   cb(null, null);

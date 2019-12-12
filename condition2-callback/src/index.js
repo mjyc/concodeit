@@ -41,7 +41,7 @@ function sleep(sec, callback) {
 
 const NOSE_ANGLE_THRESHOLD = 10;
 const eventHandles = {};
-function detectFaceDirectionChange(id, callback) {
+function detectFaceDirectionChanged(id, callback) {
   let prevFaceDirection = null;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
@@ -69,7 +69,7 @@ function detectFaceDirectionChange(id, callback) {
   return id;
 }
 
-function detectVADChange(id, callback) {
+function detectVADChanged(id, callback) {
   eventHandles[id] = {
     stream: sources.VAD.drop(1),
     listener: {
@@ -156,19 +156,19 @@ function startGesturing(gesture, callback) {
 function waitForEvent(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
   if (event == "humanFaceDirectionChanged") {
-    detectFaceDirectionChange(id, callback);
+    detectFaceDirectionChanged(id, callback);
   } else if (event == "isHumanSpeakingChanged") {
-    detectVADChange(id, callback);
+    detectVADChanged(id, callback);
   }
 }
 
 function waitUntil(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceLookingCenter") {
+  if (event == "humanFaceLookingAtCenter") {
     waitForFaceDirection(id, "center", callback);
-  } else if (event == "humanFaceLookingLeft") {
+  } else if (event == "humanFaceLookingAtLeft") {
     waitForFaceDirection(id, "left", callback);
-  } else if (event == "humanFaceLookingRight") {
+  } else if (event == "humanFaceLookingAtRight") {
     waitForFaceDirection(id, "right", callback);
   } else if (event == "noHumanFaceFound") {
     waitForFaceDirection(id, "noface", callback);
@@ -359,9 +359,9 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["humanFaceLookingCenter", '"humanFaceLookingCenter"'],
-          ["humanFaceLookingLeft", '"humanFaceLookingLeft"'],
-          ["humanFaceLookingRight", '"humanFaceLookingRight"'],
+          ["humanFaceLookingAtCenter", '"humanFaceLookingAtCenter"'],
+          ["humanFaceLookingAtLeft", '"humanFaceLookingAtLeft"'],
+          ["humanFaceLookingAtRight", '"humanFaceLookingAtRight"'],
           ["noHumanFaceFound", '"noHumanFaceFound"'],
           ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
           ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']

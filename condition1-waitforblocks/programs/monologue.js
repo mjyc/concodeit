@@ -5,7 +5,7 @@ async function monologue() {
       result = (await setMessage('Hello there!'));
       cb(null, null);
     })(), promisify2(async cb => {
-      await waitForSpecificEvent(String("FaceDirectionCenter"));
+      await waitForSpecificEvent(String("humanFaceLookingAtCenter"));
       cb(null, null);
     })());
     _stop["gUh:n@dt:J|J}=mm9PL6"] = false;
@@ -15,7 +15,7 @@ async function monologue() {
       result = (await gesture("HAPPY")); if (_stop["gUh:n@dt:J|J}=mm9PL6"]) return;
       cb(null, null);
     })(), promisify2(async cb => {
-      await waitForSpecificEvent(String("NoFace")); if (_stop["gUh:n@dt:J|J}=mm9PL6"]) return;
+      await waitForSpecificEvent(String("noHumanFaceFound")); if (_stop["gUh:n@dt:J|J}=mm9PL6"]) return;
       cb(null, null);
     })());
     _stop["gUh:n@dt:J|J}=mm9PL6"] = true;
@@ -25,7 +25,7 @@ async function monologue() {
       result = (await say('I\'m made of a tablet display and a robot arm')); if (_stop["xZU=Yv8U2F+z5yrfX(%I"]) return;
       cb(null, null);
     })(), promisify2(async cb => {
-      await waitForSpecificEvent(String("NoFace")); if (_stop["xZU=Yv8U2F+z5yrfX(%I"]) return;
+      await waitForSpecificEvent(String("noHumanFaceFound")); if (_stop["xZU=Yv8U2F+z5yrfX(%I"]) return;
       cb(null, null);
     })());
     _stop["xZU=Yv8U2F+z5yrfX(%I"] = true;
@@ -36,12 +36,11 @@ async function monologue() {
       result = (await gesture("HAPPY")); if (_stop["[ASNieSoS^Sn9R}S#f0J"]) return;
       cb(null, null);
     })(), promisify2(async cb => {
-      await waitForSpecificEvent(String("NoFace")); if (_stop["[ASNieSoS^Sn9R}S#f0J"]) return;
+      await waitForSpecificEvent(String("noHumanFaceFound")); if (_stop["[ASNieSoS^Sn9R}S#f0J"]) return;
       cb(null, null);
     })());
     _stop["[ASNieSoS^Sn9R}S#f0J"] = true;
     result = (await setMessage('Goodbye!'));
-    result = (await say('Goodbye!')); 
-      result = (await gesture("HAPPY")); 
+    result = (await say('Goodbye!'));
+      result = (await gesture("HAPPY"));
   }
-  

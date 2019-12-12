@@ -2,7 +2,7 @@
 cancelActionGoals();
 // end start_program
 setMessage(String('Hello there!'));
-waitUntil(String("humanFaceLookingCenter"), () => {
+waitUntil(String("humanFaceLookingAtCenter"), () => {
   setMessage(String('My name is Meebo'));
   startSaying(String('My name is Meebo'), (result) => {
     waitUntil(String("noface"), () => {
