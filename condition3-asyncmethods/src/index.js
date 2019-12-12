@@ -67,6 +67,7 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
+const NOSE_ANGLE_THRESHOLD = 5;
 let poses$;
 function getFaceDirection() {
   return promisify(callback => {
@@ -74,16 +75,16 @@ function getFaceDirection() {
       next: val => {
         poses$.removeListener(listener);
         const features = extractFaceFeatures(val);
-        if (features.isVisible) {
-          if (features.noseAngle < -5) {
-            callback(null, "right");
-          } else if (features.noseAngle > 5) {
+        if (!features.isVisible) {
+          callback(null, "noface");
+        } else {
+          if (features.noseAngle > NOSE_ANGLE_THRESHOLD) {
             callback(null, "left");
+          } else if (features.noseAngle < -NOSE_ANGLE_THRESHOLD) {
+            callback(null, "right");
           } else {
             callback(null, "center");
           }
-        } else {
-          callback(null, "noface");
         }
       }
     };
