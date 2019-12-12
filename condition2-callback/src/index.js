@@ -83,10 +83,6 @@ function detectVADChange(id, callback) {
   return id;
 }
 
-function stopDetectChange(id) {
-  eventHandles[id].stream.removeListener(eventHandles[id].listener);
-}
-
 function waitForFaceDirection(id, faceDirection, callback) {
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
@@ -123,6 +119,10 @@ function waitForVoiceActivity(id, voiceActivity, callback) {
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
   return id;
+}
+
+function stopDetectChangeOrWait(id) {
+  eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
 function startSleeping(duration, callback) {
@@ -383,8 +383,8 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
-// IMPORTANT!! callbacks are introduces local variables, which blockly does not
-//   usually allow; it might bring confusion in future
+//------------------------------------------------------------------------------
+// Code Generators
 
 Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   // Do while/until loop.
