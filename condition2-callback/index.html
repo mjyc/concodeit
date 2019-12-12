@@ -25,7 +25,7 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
           <category name="Sensing" colour="210">
-            <block type="wait_for_event">
+            <block type="wait_for">
               <field name="SE">"humanFaceDirectionChanged"</field>
               <value name="DO">
                 <block type="set_message">
@@ -38,7 +38,7 @@
               </value>
             </block>
             <block type="wait_until">
-              <field name="SE">"humanFaceDirectionCenter"</field>
+              <field name="SE">"humanFaceLookingCenter"</field>
               <value name="DO">
                 <block type="set_message">
                   <value name="MESSAGE">

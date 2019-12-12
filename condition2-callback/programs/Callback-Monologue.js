@@ -3,7 +3,7 @@ cancelActionGoals();
 // end start_program
 setMessage(String('Hello there!'));
 startSaying(String('Hello there'), (result) => {
-  waitUntil(String("humanFaceDirectionCenter"), () => {
+  waitUntil(String("humanFaceLookingCenter"), () => {
     setMessage(String('My name is Meebo'));
     startSaying(String('My name is Meebo'), (result) => {
       sendActionGoalCallback("FacialExpressionAction", String("HAPPY"), (result) => {

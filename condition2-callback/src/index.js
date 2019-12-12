@@ -164,11 +164,11 @@ function waitForEvent(event, callback) {
 
 function waitUntil(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceDirectionCenter") {
+  if (event == "humanFaceLookingCenter") {
     waitForFaceDirection(id, "center", callback);
-  } else if (event == "humanFaceDirectionLeft") {
+  } else if (event == "humanFaceLookingLeft") {
     waitForFaceDirection(id, "left", callback);
-  } else if (event == "humanFaceDirectionRight") {
+  } else if (event == "humanFaceLookingRight") {
     waitForFaceDirection(id, "right", callback);
   } else if (event == "noHumanFaceFound") {
     waitForFaceDirection(id, "noface", callback);
@@ -326,8 +326,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "wait_for_event",
-    message0: "wait for event %1 %2 then %3",
+    type: "wait_for",
+    message0: "wait for %1 %2 then %3",
     args0: [
       {
         type: "field_dropdown",
@@ -359,9 +359,9 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["humanFaceDirectionCenter", '"humanFaceDirectionCenter"'],
-          ["humanFaceDirectionLeft", '"humanFaceDirectionLeft"'],
-          ["humanFaceDirectionRight", '"humanFaceDirectionRight"'],
+          ["humanFaceLookingCenter", '"humanFaceLookingCenter"'],
+          ["humanFaceLookingLeft", '"humanFaceLookingLeft"'],
+          ["humanFaceLookingRight", '"humanFaceLookingRight"'],
           ["noHumanFaceFound", '"noHumanFaceFound"'],
           ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
           ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
@@ -471,7 +471,7 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["wait_for_event"] = function(block) {
+Blockly.JavaScript["wait_for"] = function(block) {
   return check(block)
     ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
   event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`

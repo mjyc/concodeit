@@ -5,7 +5,7 @@ var event;
 cancelActionGoals();
 // end start_program
 startSaying(String('Let\'s start from looking forward'), (result) => {
-  waitUntil(String("humanFaceDirectionCenter"), () => {
+  waitUntil(String("humanFaceLookingCenter"), () => {
     startSaying(String('Now slowly rotate to your right'), (result) => {
       waitForEvent(String("humanFaceDirectionChanged"), (err, res) => {
         event = res;
@@ -14,7 +14,7 @@ startSaying(String('Let\'s start from looking forward'), (result) => {
           startSaying(String('Warning'), (result) => {
           });
         }
-        waitUntil(String("humanFaceDirectionRight"), () => {
+        waitUntil(String("humanFaceLookingRight"), () => {
           startSleeping(2, _ => {
             setMessage(String(event));
             if (event == 'right') {
@@ -30,7 +30,7 @@ startSaying(String('Let\'s start from looking forward'), (result) => {
                 startSaying(String('Warning'), (result) => {
                 });
               }
-              waitUntil(String("humanFaceDirectionLeft"), () => {
+              waitUntil(String("humanFaceLookingLeft"), () => {
                 startSaying(String('You are done'), (result) => {
                 });
               });
