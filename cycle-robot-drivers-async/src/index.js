@@ -34,29 +34,40 @@ function main(sources) {
   const videoWidth = 640;
   const videoHeight = 480;
   const followFace$ = (sources.followFace || xs.never()).startWith(false);
-  const tabletFace$ = sources.PoseDetection.events("poses")
-    .filter(
-      poses =>
-        poses.length === 1 &&
-        poses[0].keypoints.filter(kpt => kpt.part === "nose").length === 1
-    )
-    .compose(sampleCombine(followFace$))
-    .filter(([_, followFace]) => !!followFace)
-    .map(([poses, _]) => poses)
-    .map(poses => {
-      const nose = poses[0].keypoints.filter(kpt => kpt.part === "nose")[0];
-      const eyePosition = {
-        x: nose.position.x / videoWidth,
-        y: nose.position.y / videoHeight
-      };
-      return {
+  const tabletFace$ = xs.merge(
+    sources.PoseDetection.events("poses")
+      .filter(
+        poses =>
+          poses.length === 1 &&
+          poses[0].keypoints.filter(kpt => kpt.part === "nose").length === 1
+      )
+      .compose(sampleCombine(followFace$))
+      .filter(([_, followFace]) => !!followFace)
+      .map(([poses, _]) => poses)
+      .map(poses => {
+        const nose = poses[0].keypoints.filter(kpt => kpt.part === "nose")[0];
+        const eyePosition = {
+          x: nose.position.x / videoWidth,
+          y: nose.position.y / videoHeight
+        };
+        return {
+          type: "SET_STATE",
+          value: {
+            leftEye: eyePosition,
+            rightEye: eyePosition
+          }
+        };
+      }),
+    followFace$
+      .filter(x => !x)
+      .mapTo({
         type: "SET_STATE",
         value: {
-          leftEye: eyePosition,
-          rightEye: eyePosition
+          leftEye: { x: 0.5, y: 0.5 },
+          rightEye: { x: 0.5, y: 0.5 }
         }
-      };
-    });
+      })
+  );
 
   return {
     tabletFace: tabletFace$,
