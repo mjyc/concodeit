@@ -697,6 +697,13 @@ ${patched}})();`;
   eval(wrapped);
 };
 
+const stop = () => {
+  if (_exit.length > 0) {
+    _exit[_exit.length - 1] = true;
+  }
+  cancelActionGoals();
+};
+
 document.getElementById("run").onclick = () => {
   const code = Blockly.JavaScript.workspaceToCode(editor);
   run(code);
