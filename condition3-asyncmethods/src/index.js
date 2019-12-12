@@ -76,14 +76,14 @@ function getFaceDirection() {
         const features = extractFaceFeatures(val);
         if (features.isVisible) {
           if (features.noseAngle < -5) {
-            callback(null, "Right");
+            callback(null, "right");
           } else if (features.noseAngle > 5) {
-            callback(null, "Left");
+            callback(null, "left");
           } else {
-            callback(null, "Center");
+            callback(null, "center");
           }
         } else {
-          callback(null, "face not found");
+          callback(null, "noface");
         }
       }
     };
