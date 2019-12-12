@@ -5,7 +5,7 @@
   async function monologue() {
     setMessage("Hello there!");
     var faceDir = await getHumanFaceDirection();
-    while (faceDir === "face not found") {
+    while (faceDir === "noface") {
       await sleep(1);
       faceDir = await getHumanFaceDirection();
     }
@@ -24,13 +24,13 @@
     // if face exists and still talking
     faceDir = await getHumanFaceDirection();
     isSaying = !(await isSayFinished());
-    while (isSaying && faceDir !== "face not found") {
+    while (isSaying && faceDir !== "noface") {
       await sleep(1);
       faceDir = await getHumanFaceDirection();
       isSaying = !(await isSayFinished());
     }
 
-    if (faceDir === "face not found") {
+    if (faceDir === "noface") {
       await exit();
       return;
     }
@@ -38,7 +38,7 @@
     communicate("Nice to meet you", "Happy"); // what is the goodbye gesture?
     isSaying = !(await isSayFinished());
     faceDir = await getHumanFaceDirection();
-    while (isSaying && faceDir !== "face not found") {
+    while (isSaying && faceDir !== "noface") {
       await sleep(1);
       isSaying = !(await isSayFinished());
       faceDir = await getHumanFaceDirection();

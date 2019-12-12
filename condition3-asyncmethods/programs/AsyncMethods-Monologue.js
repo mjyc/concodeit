@@ -4,10 +4,10 @@ var state, sayFinished;
 cancelActionGoals();
 // end start_program
 setMessage(String("Hello there!"));
-state = await getState("faceDirection");
-while (state == "face not found") {
+state = await getState("humanFaceDirection");
+while (state == "noface") {
   await sleep(1);
-  state = await getState("faceDirection");
+  state = await getState("humanFaceDirection");
 }
 setMessage(String("My name is Meebo"));
 sendActionGoal("SpeechSynthesisAction", String("My name is Meebo"));
@@ -17,7 +17,7 @@ while (!sayFinished) {
   await sleep(1);
   sayFinished = await isSayFinished();
 }
-if (state != "face not found") {
+if (state != "noface") {
   setMessage(String("I'm made of a touch monitor and a robot arm"));
   sendActionGoal(
     "SpeechSynthesisAction",
@@ -28,7 +28,7 @@ if (state != "face not found") {
     await sleep(1);
     sayFinished = await isSayFinished();
   }
-  if (state != "face not found") {
+  if (state != "noface") {
     setMessage(String("Nice to meet you"));
     sendActionGoal("SpeechSynthesisAction", String("Nice to meet you"));
     sayFinished = await isSayFinished();

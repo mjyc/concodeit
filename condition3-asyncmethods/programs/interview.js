@@ -5,17 +5,17 @@
   async function interview() {
     setMessage("What does a typical day look like for you?");
     // user hasn't said anything yet
-    var isSpeaking = await getState("isSpeaking");
-    while (!isSpeaking) {
+    var isHumanSpeaking = await getState("isHumanSpeaking");
+    while (!isHumanSpeaking) {
       await sleep(1);
-      isSpeaking = await getState("isSpeaking");
+      isHumanSpeaking = await getState("isHumanSpeaking");
     }
     // started talking
     startFollowingFace();
     var dir = await getHumanFaceDirection();
-    while (isSpeaking || dir !== "Center") {
+    while (isHumanSpeaking || dir !== "center") {
       await sleep(1);
-      isSpeaking = await getState("isSpeaking");
+      isHumanSpeaking = await getState("isHumanSpeaking");
       dir = await getHumanFaceDirection();
     }
     // finished talking
@@ -24,16 +24,16 @@
     setMessage("What sort of vacations do you like to take?");
     startFollowingFace();
     // wait to start talking
-    isSpeaking = await getState("isSpeaking");
-    while (!isSpeaking) {
+    isHumanSpeaking = await getState("isHumanSpeaking");
+    while (!isHumanSpeaking) {
       await sleep(1);
-      isSpeaking = await getState("isSpeaking");
+      isHumanSpeaking = await getState("isHumanSpeaking");
     }
     // wait till finish talking
     dir = await getHumanFaceDirection();
-    while (isSpeaking || dir !== "Center") {
+    while (isHumanSpeaking || dir !== "center") {
       await sleep(1);
-      isSpeaking = await getState("isSpeaking");
+      isHumanSpeaking = await getState("isHumanSpeaking");
       dir = await getHumanFaceDirection();
     }
     stopFollowingFace();

@@ -2,18 +2,18 @@
   //----------------------------------------------------------------------------
   // Simple Concurrent Neck Exercise
   async function conNeckSimple() {
-    var faceDirection, cont;
+    var humanFaceDirection, cont;
     // beg start_program
     cancelActionGoals();
     // end start_program
-    faceDirection = null;
+    humanFaceDirection = null;
     cont = null;
     sendActionGoal(
       "RobotSpeechbubbleAction",
       String("Are you ready? Turn left!")
     );
-    while (faceDirection !== "Left" && cont !== "yes") {
-      faceDirection = await getHumanFaceDirection();
+    while (humanFaceDirection !== "left" && cont !== "yes") {
+      humanFaceDirection = await getHumanFaceDirection();
       sendActionGoal("HumanSpeechbubbleAction", ["yes"]);
       await sleep(1);
       cont = await getActionResult("HumanSpeechbubbleAction");
@@ -46,7 +46,7 @@
       "Stretch your shoulder to the right as far as possible!",
       "keep going!"
     ];
-    face_direct = ["Center", "Left", "Left", "Center", "Right", "Right"];
+    face_direct = ["center", "left", "left", "center", "right", "right"];
     var cont = "yes";
     do {
       for (var i_index in action_list) {
@@ -54,13 +54,13 @@
         sendActionGoal("RobotSpeechbubbleAction", String(i));
         await sleep(2);
         var direction = face_direct[index];
-        var faceDirection;
-        faceDirection = null;
-        while (faceDirection !== direction) {
-          faceDirection = await getHumanFaceDirection();
+        var humanFaceDirection;
+        humanFaceDirection = null;
+        while (humanFaceDirection !== direction) {
+          humanFaceDirection = await getHumanFaceDirection();
           await sleep(1);
-          if (direction === "Right" || direction === "Left") {
-            if (faceDirection === "Center") {
+          if (direction === "right" || direction === "left") {
+            if (humanFaceDirection === "center") {
               sendActionGoal(
                 "RobotSpeechbubbleAction",
                 "Stretch the neck more to the " + direction + " ! You got this!"
