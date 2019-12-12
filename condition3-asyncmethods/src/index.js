@@ -67,7 +67,7 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
-const NOSE_ANGLE_THRESHOLD = 5;
+const NOSE_ANGLE_THRESHOLD = 10;
 let poses$;
 function getFaceDirection() {
   return promisify(callback => {
