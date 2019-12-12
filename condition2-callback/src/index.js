@@ -39,11 +39,10 @@ function sleep(sec, callback) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
+const NOSE_ANGLE_THRESHOLD = 10;
 const eventHandles = {};
-
 function detectFaceDirectionChange(id, callback) {
   let prevFaceDirection = null;
-  const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -51,9 +50,9 @@ function detectFaceDirectionChange(id, callback) {
         const features = extractFaceFeatures(poses);
         const faceDirection = !features.isVisible
           ? "noface"
-          : features.noseAngle > SIDE_ANGLE
+          : features.noseAngle > NOSE_ANGLE_THRESHOLD
           ? "left"
-          : features.noseAngle < -SIDE_ANGLE
+          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
           ? "right"
           : "center";
         if (prevFaceDirection === null) {
@@ -89,7 +88,6 @@ function stopDetectChange(id) {
 }
 
 function waitForFaceDirection(id, faceDirection, callback) {
-  const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -97,9 +95,9 @@ function waitForFaceDirection(id, faceDirection, callback) {
         const features = extractFaceFeatures(poses);
         const curFaceDirection = !features.isVisible
           ? "noface"
-          : features.noseAngle > SIDE_ANGLE
+          : features.noseAngle > NOSE_ANGLE_THRESHOLD
           ? "left"
-          : features.noseAngle < -SIDE_ANGLE
+          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
           ? "right"
           : "center";
         if (curFaceDirection !== faceDirection) return;
@@ -157,26 +155,26 @@ function startGesturing(gesture, callback) {
 
 function waitForEvent(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "FaceDirectionChanged") {
+  if (event == "humanFaceDirectionChanged") {
     detectFaceDirectionChange(id, callback);
-  } else if (event == "IsSpeakingChanged") {
+  } else if (event == "isHumanSpeakingChanged") {
     detectVADChange(id, callback);
   }
 }
 
 function waitUntil(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "FaceDirectionCenter") {
+  if (event == "humanFaceDirectionCenter") {
     waitForFaceDirection(id, "center", callback);
-  } else if (event == "FaceDirectionLeft") {
+  } else if (event == "humanFaceDirectionLeft") {
     waitForFaceDirection(id, "left", callback);
-  } else if (event == "FaceDirectionRight") {
+  } else if (event == "humanFaceDirectionRight") {
     waitForFaceDirection(id, "right", callback);
-  } else if (event == "NoFace") {
+  } else if (event == "noHumanFaceFound") {
     waitForFaceDirection(id, "noface", callback);
-  } else if (event == "IsSpeakingFalse") {
+  } else if (event == "isHumanSpeakingFalse") {
     waitForVoiceActivity(id, false, callback);
-  } else if (event == "IsSpeakingTrue") {
+  } else if (event == "isHumanSpeakingTrue") {
     waitForVoiceActivity(id, true, callback);
   }
 }
@@ -306,11 +304,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "MESSAGE",
         options: [
-          ["Happy", '"HAPPY"'],
-          ["Sad", '"SAD"'],
-          ["Angry", '"ANGRY"'],
-          ["Focused", '"FOCUSED"'],
-          ["Confused", '"CONFUSED"']
+          ["happy", '"HAPPY"'],
+          ["sad", '"SAD"'],
+          ["angry", '"ANGRY"'],
+          ["focused", '"FOCUSED"'],
+          ["confused", '"CONFUSED"']
         ]
       },
       {
@@ -335,8 +333,8 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["FaceDirectionChanged", '"FaceDirectionChanged"'],
-          ["IsSpeakingChanged", '"IsSpeakingChanged"']
+          ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
+          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
         ]
       },
       {
@@ -361,12 +359,12 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["FaceDirectionCenter", '"FaceDirectionCenter"'],
-          ["FaceDirectionLeft", '"FaceDirectionLeft"'],
-          ["FaceDirectionRight", '"FaceDirectionRight"'],
-          ["NoFace", '"NoFace"'],
-          ["IsSpeakingFalse", '"IsSpeakingFalse"'],
-          ["IsSpeakingTrue", '"IsSpeakingTrue"']
+          ["humanFaceDirectionCenter", '"humanFaceDirectionCenter"'],
+          ["humanFaceDirectionLeft", '"humanFaceDirectionLeft"'],
+          ["humanFaceDirectionRight", '"humanFaceDirectionRight"'],
+          ["noHumanFaceFound", '"noHumanFaceFound"'],
+          ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
+          ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
         ]
       },
       {

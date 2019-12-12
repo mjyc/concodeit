@@ -2,16 +2,16 @@
 cancelActionGoals();
 // end start_program
 setMessage(String('What does a typical day look like for you'));
-waitUntil(String("IsSpeakingTrue"), () => {
+waitUntil(String("isHumanSpeakingTrue"), () => {
   startFollowingFace();
-  waitUntil(String("FaceDirectionCenter"), () => {
-    waitUntil(String("IsSpeakingFalse"), () => {
+  waitUntil(String("humanFaceDirectionCenter"), () => {
+    waitUntil(String("IsHumanSpeakingFalse"), () => {
       stopFollowingFace();
       setMessage(String('What sort of vacations do you like to take'));
-      waitUntil(String("IsSpeakingTrue"), () => {
+      waitUntil(String("isHumanSpeakingTrue"), () => {
         startFollowingFace();
-        waitUntil(String("FaceDirectionCenter"), () => {
-          waitUntil(String("IsSpeakingFalse"), () => {
+        waitUntil(String("humanFaceDirectionCenter"), () => {
+          waitUntil(String("IsHumanSpeakingFalse"), () => {
             setMessage(String('We are done thank you'));
           });
         });
