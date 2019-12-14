@@ -13,7 +13,7 @@ while (!state) {
 startFollowingFace();
 state = (await getState("isHumanSpeaking"));
 faceDir = (await getState("humanFaceDirection"));
-while (state && faceDir != 'center') {
+while (state || faceDir != 'center') {
   await sleep(1);
   state = (await getState("isHumanSpeaking"));
   faceDir = (await getState("humanFaceDirection"));
@@ -26,7 +26,7 @@ while (!state) {
 }
 state = (await getState("isHumanSpeaking"));
 faceDir = (await getState("humanFaceDirection"));
-while (state && faceDir != 'center') {
+while (state || faceDir != 'center') {
   await sleep(1);
   state = (await getState("isHumanSpeaking"));
   faceDir = (await getState("humanFaceDirection"));
