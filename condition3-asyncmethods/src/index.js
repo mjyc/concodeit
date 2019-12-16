@@ -143,6 +143,29 @@ async function isGestureFinished() {
 
 Blockly.defineBlocksWithJsonArray([
   {
+    type: "controls_repeat_ext_with_sleep",
+    message0: "%{BKY_CONTROLS_REPEAT_TITLE}",
+    args0: [
+      {
+        type: "input_value",
+        name: "TIMES",
+        check: "Number"
+      }
+    ],
+    message1: "%{BKY_CONTROLS_REPEAT_INPUT_DO} %1",
+    args1: [
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    style: "loop_blocks",
+    tooltip: "%{BKY_CONTROLS_REPEAT_TOOLTIP}",
+    helpUrl: "%{BKY_CONTROLS_REPEAT_HELPURL}"
+  },
+  {
     type: "controls_whileUntil_with_sleep",
     message0: "%1 %2",
     args0: [
@@ -308,6 +331,53 @@ Blockly.defineBlocksWithJsonArray([
 
 //------------------------------------------------------------------------------
 // Code Generators
+
+// copied and modified
+//   https://github.com/google/blockly/blob/23a78c89e4c0f2801768b5c55c7f91ac261f4bc6/generators/javascript/loops.js#L29-L55
+Blockly.JavaScript["controls_repeat_ext_with_sleep"] = function(block) {
+  // Repeat n times.
+  if (block.getField("TIMES")) {
+    // Internal number.
+    var repeats = String(Number(block.getFieldValue("TIMES")));
+  } else {
+    // External number.
+    var repeats =
+      Blockly.JavaScript.valueToCode(
+        block,
+        "TIMES",
+        Blockly.JavaScript.ORDER_ASSIGNMENT
+      ) || "0";
+  }
+  var branch = Blockly.JavaScript.statementToCode(block, "DO");
+  // branch = Blockly.JavaScript.addLoopTrap(branch, block); // addLoopTrap doesn't do anything significant and throws error
+  var code = "";
+  var loopVar = Blockly.JavaScript.variableDB_.getDistinctName(
+    "count",
+    Blockly.Variables.NAME_TYPE
+  );
+  var endVar = repeats;
+  if (!repeats.match(/^\w+$/) && !Blockly.isNumber(repeats)) {
+    var endVar = Blockly.JavaScript.variableDB_.getDistinctName(
+      "repeat_end",
+      Blockly.Variables.NAME_TYPE
+    );
+    code += "var " + endVar + " = " + repeats + ";\n";
+  }
+  code +=
+    "for (var " +
+    loopVar +
+    " = 0; " +
+    loopVar +
+    " < " +
+    endVar +
+    "; " +
+    loopVar +
+    "++) {\n" +
+    branch +
+    "  await sleep(0.1);\n" +
+    "}\n";
+  return code;
+};
 
 // copied and modified
 //   https://github.com/google/blockly/blob/23a78c89e4c0f2801768b5c55c7f91ac261f4bc6/generators/javascript/loops.js#L60-L72
