@@ -8,14 +8,12 @@
   <body>
     <button id="run">Run</button>
     <button id="stop">Stop</button>
-    <button id="run_monologue">Monologue</button>
-    <button id="run_instruction">Instruction</button>
-    <button id="run_interview">Interview</button>
-    <button id="run_js_file">Run JS file</button>
+    <button id="download_js">Download as JS</button>
+    <button id="run_js">Run JS</button>
+    <span><small>/programs/</small></span>
     <input id="filename" type="text" value="" />
-    <br />
-    <button id="download">Download</button>
     <button id="download_xml">Download as XML</button>
+    <span><small>Load XML</small></span>
     <input id="load_xml" name="load" type="file" />
 
     <xml id="startBlocks" style="display:none">
@@ -27,8 +25,8 @@
         <div id="editor" style="height:480px;width:800px"></div>
         <xml id="toolbox" style="display: none">
           <category name="Sensing" colour="210">
-            <block type="wait_for_event">
-              <field name="SE">"FaceDirectionChanged"</field>
+            <block type="wait_for">
+              <field name="SE">"humanFaceDirectionChanged"</field>
               <value name="DO">
                 <block type="set_message">
                   <value name="MESSAGE">
@@ -40,7 +38,7 @@
               </value>
             </block>
             <block type="wait_until">
-              <field name="SE">"FaceDirectionCenter"</field>
+              <field name="SE">"humanFaceLookingAtCenter"</field>
               <value name="DO">
                 <block type="set_message">
                   <value name="MESSAGE">

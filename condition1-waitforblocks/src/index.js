@@ -45,47 +45,20 @@ function promisify2(f) {
   return promisify(f);
 }
 
-const FaceDirectionChanged = {
-  noFace: "noFace",
-  center: "center",
-  left: "left",
-  right: "right"
-};
-
-const IsSpeakingChanged = {
-  speaking: true,
-  notSpeaking: false
-};
-
-const Event = {
-  face: {
-    noFace: FaceDirectionChanged.noFace,
-    center: FaceDirectionChanged.center,
-    left: FaceDirectionChanged.left,
-    right: FaceDirectionChanged.right
-  },
-  speak: {
-    speaking: IsSpeakingChanged.speaking,
-    notSpeaking: IsSpeakingChanged.notSpeaking
-  }
-};
-
-const ANGLE = 10; // magnitude of head turn to determine direction
-
-const waitHandles = {};
-
+const NOSE_ANGLE_THRESHOLD = 10;
+const eventHandles = {};
 function detectFaceDirectionChanged(id, callback) {
   let prevFaceDirection = null;
-  waitHandles[id] = {
+  eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
       next: poses => {
         const features = extractFaceFeatures(poses);
         const faceDirection = !features.isVisible
-          ? "noFace"
-          : features.noseAngle > ANGLE
+          ? "noface"
+          : features.noseAngle > NOSE_ANGLE_THRESHOLD
           ? "left"
-          : features.noseAngle < -ANGLE
+          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
           ? "right"
           : "center";
         if (prevFaceDirection === null) {
@@ -93,12 +66,12 @@ function detectFaceDirectionChanged(id, callback) {
           return;
         }
         if (faceDirection === prevFaceDirection) return;
-        waitHandles[id].stream.removeListener(waitHandles[id].listener);
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, faceDirection);
       }
     }
   };
-  waitHandles[id].stream.addListener(waitHandles[id].listener);
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
   return id;
 }
 
@@ -106,140 +79,127 @@ function waitUntilFaceDirectionChanged(id) {
   return promisify(detectFaceDirectionChanged)(id);
 }
 
-/* Waits for face to turn to direction direction before terminating
-   inputs:
-    id: process id for this
-    direction: direction to face */
 function waitUntilFaceEvent(id, direction) {
-  waitHandles[id] = {
+  eventHandles[id] = {
     listener: null,
     stream: sources.PoseDetection.events("poses"),
     stop: () => {
-      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+      eventHandles[id].stream.removeListener(eventHandles[id].listener);
     }
   };
   return promisify((pred, cb) => {
-    waitHandles[id].listener = createStreamEventListener(
+    eventHandles[id].listener = createStreamEventListener(
       poses => {
         const faceFeatures = extractFaceFeatures(poses);
         return pred(
           !faceFeatures.isVisible
-            ? FaceDirectionChanged.noFace
-            : faceFeatures.noseAngle < -1 * ANGLE
-            ? FaceDirectionChanged.right
-            : faceFeatures.noseAngle > ANGLE
-            ? FaceDirectionChanged.left
-            : FaceDirectionChanged.center
+            ? "noface"
+            : faceFeatures.noseAngle < -NOSE_ANGLE_THRESHOLD
+            ? "right"
+            : faceFeatures.noseAngle > NOSE_ANGLE_THRESHOLD
+            ? "left"
+            : "center"
         );
       },
       (err, val) => {
-        waitHandles[id].stream.removeListener(waitHandles[id].listener);
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         cb(err, direction);
       }
     );
-    waitHandles[id].stream.addListener(waitHandles[id].listener);
+    eventHandles[id].stream.addListener(eventHandles[id].listener);
   })(dir => dir == direction);
 }
 
 function waitUntilVADStateChanged(id) {
-  waitHandles[id] = {
+  eventHandles[id] = {
     listener: null,
     stream: sources.VAD,
     stop: () => {
-      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+      eventHandles[id].stream.removeListener(eventHandles[id].listener);
     }
   };
   return promisify(cb => {
-    waitHandles[id].listener = {
+    eventHandles[id].listener = {
       next: val => {
-        waitHandles[id].stream.removeListener(waitHandles[id].listener);
+        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         cb(null, val);
       }
     };
-    waitHandles[id].stream.addListener(waitHandles[id].listener);
+    eventHandles[id].stream.addListener(eventHandles[id].listener);
   })();
 }
 
 function waitUntilVADState(id, state) {
-  waitHandles[id] = {
+  eventHandles[id] = {
     listener: null,
     stream: sources.VAD,
     stop: () => {
-      waitHandles[id].stream.removeListener(waitHandles[id].listener);
+      eventHandles[id].stream.removeListener(eventHandles[id].listener);
     }
   };
   return promisify(cb => {
-    waitHandles[id].listener = {
+    eventHandles[id].listener = {
       next: val => {
         if (val === state) {
-          waitHandles[id].stream.removeListener(waitHandles[id].listener);
+          eventHandles[id].stream.removeListener(eventHandles[id].listener);
           cb(null, val);
         }
       }
     };
-    waitHandles[id].stream.addListener(waitHandles[id].listener);
+    eventHandles[id].stream.addListener(eventHandles[id].listener);
   })();
 }
 
 function setMessage(message) {
-  // : void, instantaneous
   sendActionGoal("RobotSpeechbubbleAction", String(message));
 }
 
 function startFollowingFace() {
-  // : void, instantaneous
   sources.followFace.shamefullySendNext(true);
 }
 
 function stopFollowingFace() {
-  // : void, instantaneous
   sources.followFace.shamefullySendNext(false);
 }
 
 async function say(message) {
-  // : void, durative
   return sendActionGoal("SpeechSynthesisAction", String(message));
 }
 
 async function gesture(name) {
-  // : void, durative
   return sendActionGoal("FacialExpressionAction", String(name));
 }
 
 async function waitForEvent(event) {
-  // FaceDirectionChanged | IsSpeakingChanged // durative
   const id = Math.floor(Math.random() * Math.pow(10, 8));
   if (event == "FaceDirectionChanged") {
     return await waitUntilFaceDirectionChanged(id);
   }
-  // else if event == Event.face...
   return await waitUntilVADStateChanged(id);
 }
 
 async function waitForSpecificEvent(event) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "FaceDirectionCenter") {
+  if (event == "humanFaceLookingAtCenter") {
     return await waitUntilFaceEvent(id, "center");
-  } else if (event == "FaceDirectionLeft") {
+  } else if (event == "humanFaceLookingAtLeft") {
     return await waitUntilFaceEvent(id, "left");
-  } else if (event == "FaceDirectionRight") {
+  } else if (event == "humanFaceLookingAtRight") {
     return await waitUntilFaceEvent(id, "right");
-  } else if (event == "NoFace") {
-    return await waitUntilFaceEvent(id, "noFace");
-  } else if (event == "IsSpeakingFalse") {
+  } else if (event == "noHumanFaceFound") {
+    return await waitUntilFaceEvent(id, "noface");
+  } else if (event == "isHumanSpeakingFalse") {
     return await waitUntilVADState(id, false);
-  } else if (event == "IsSpeakingTrue") {
+  } else if (event == "isHumanSpeakingTrue") {
     return await waitUntilVADState(id, true);
   }
 }
 
 function waitForAll(subprogram1, subprogram2) {
-  // : [any]
   return Promise.all([subprogram1, subprogram2]);
 }
 
 function waitForOne(subprogram1, subprogram2) {
-  // : any
   return Promise.race([subprogram1, subprogram2]);
 }
 
@@ -389,12 +349,12 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["FaceDirectionCenter", '"FaceDirectionCenter"'],
-          ["FaceDirectionLeft", '"FaceDirectionLeft"'],
-          ["FaceDirectionRight", '"FaceDirectionRight"'],
-          ["NoFace", '"NoFace"'],
-          ["IsSpeakingFalse", '"IsSpeakingFalse"'],
-          ["IsSpeakingTrue", '"IsSpeakingTrue"']
+          ["humanFaceLookingAtCenter", '"humanFaceLookingAtCenter"'],
+          ["humanFaceLookingAtLeft", '"humanFaceLookingAtLeft"'],
+          ["humanFaceLookingAtRight", '"humanFaceLookingAtRight"'],
+          ["noHumanFaceFound", '"noHumanFaceFound"'],
+          ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
+          ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
         ]
       }
     ],
@@ -697,6 +657,14 @@ ${patched}})();`;
   eval(wrapped);
 };
 
+const stop = () => {
+  if (_exit.length > 0) {
+    _exit[_exit.length - 1] = true;
+  }
+  cancelActionGoals();
+  stopFollowingFace();
+};
+
 document.getElementById("run").onclick = () => {
   const code = Blockly.JavaScript.workspaceToCode(editor);
   run(code);
@@ -704,44 +672,18 @@ document.getElementById("run").onclick = () => {
 
 document.getElementById("stop").onclick = stop;
 
-document.getElementById("run_neckexercise").onclick = () => {
-  fetch("/programs/neck.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      run(code);
-    });
+document.getElementById("download_js").onclick = () => {
+  const text = document.getElementById("js").innerText;
+  const a = document.createElement("a");
+  a.id = "js";
+  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
+  a.download = "program";
+  a.click();
 };
 
-document.getElementById("run_monologue").onclick = () => {
-  fetch("/programs/monologue.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code} monologue()})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_interview").onclick = () => {
-  fetch("/programs/interview.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code} interview()})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_js_file").onclick = e => {
+document.getElementById("run_js").onclick = e => {
   const filename = document.getElementById("filename").value;
-  console.log(filename);
+  console.debug(`filepath /programs/${filename}`);
   fetch(`/programs/${filename}`)
     .then(function(response) {
       return response.text();
@@ -750,15 +692,6 @@ document.getElementById("run_js_file").onclick = e => {
       console.debug(code);
       run(code);
     });
-};
-
-document.getElementById("download").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
 };
 
 document.getElementById("download_xml").onclick = () => {

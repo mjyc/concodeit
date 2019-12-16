@@ -39,11 +39,10 @@ function sleep(sec, callback) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
+const NOSE_ANGLE_THRESHOLD = 10;
 const eventHandles = {};
-
-function detectFaceDirectionChange(id, callback) {
+function detectFaceDirectionChanged(id, callback) {
   let prevFaceDirection = null;
-  const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -51,9 +50,9 @@ function detectFaceDirectionChange(id, callback) {
         const features = extractFaceFeatures(poses);
         const faceDirection = !features.isVisible
           ? "noface"
-          : features.noseAngle > SIDE_ANGLE
+          : features.noseAngle > NOSE_ANGLE_THRESHOLD
           ? "left"
-          : features.noseAngle < -SIDE_ANGLE
+          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
           ? "right"
           : "center";
         if (prevFaceDirection === null) {
@@ -70,7 +69,7 @@ function detectFaceDirectionChange(id, callback) {
   return id;
 }
 
-function detectVADChange(id, callback) {
+function detectVADChanged(id, callback) {
   eventHandles[id] = {
     stream: sources.VAD.drop(1),
     listener: {
@@ -84,12 +83,7 @@ function detectVADChange(id, callback) {
   return id;
 }
 
-function stopDetectChange(id) {
-  eventHandles[id].stream.removeListener(eventHandles[id].listener);
-}
-
 function waitForFaceDirection(id, faceDirection, callback) {
-  const SIDE_ANGLE = 13;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -97,9 +91,9 @@ function waitForFaceDirection(id, faceDirection, callback) {
         const features = extractFaceFeatures(poses);
         const curFaceDirection = !features.isVisible
           ? "noface"
-          : features.noseAngle > SIDE_ANGLE
+          : features.noseAngle > NOSE_ANGLE_THRESHOLD
           ? "left"
-          : features.noseAngle < -SIDE_ANGLE
+          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
           ? "right"
           : "center";
         if (curFaceDirection !== faceDirection) return;
@@ -125,6 +119,10 @@ function waitForVoiceActivity(id, voiceActivity, callback) {
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
   return id;
+}
+
+function stopDetectChangeOrWait(id) {
+  eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
 function startSleeping(duration, callback) {
@@ -157,26 +155,26 @@ function startGesturing(gesture, callback) {
 
 function waitForEvent(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "FaceDirectionChanged") {
-    detectFaceDirectionChange(id, callback);
-  } else if (event == "IsSpeakingChanged") {
-    detectVADChange(id, callback);
+  if (event == "humanFaceDirectionChanged") {
+    detectFaceDirectionChanged(id, callback);
+  } else if (event == "isHumanSpeakingChanged") {
+    detectVADChanged(id, callback);
   }
 }
 
 function waitUntil(event, callback) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "FaceDirectionCenter") {
+  if (event == "humanFaceLookingAtCenter") {
     waitForFaceDirection(id, "center", callback);
-  } else if (event == "FaceDirectionLeft") {
+  } else if (event == "humanFaceLookingAtLeft") {
     waitForFaceDirection(id, "left", callback);
-  } else if (event == "FaceDirectionRight") {
+  } else if (event == "humanFaceLookingAtRight") {
     waitForFaceDirection(id, "right", callback);
-  } else if (event == "NoFace") {
+  } else if (event == "noHumanFaceFound") {
     waitForFaceDirection(id, "noface", callback);
-  } else if (event == "IsSpeakingFalse") {
+  } else if (event == "isHumanSpeakingFalse") {
     waitForVoiceActivity(id, false, callback);
-  } else if (event == "IsSpeakingTrue") {
+  } else if (event == "isHumanSpeakingTrue") {
     waitForVoiceActivity(id, true, callback);
   }
 }
@@ -306,11 +304,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "MESSAGE",
         options: [
-          ["Happy", '"HAPPY"'],
-          ["Sad", '"SAD"'],
-          ["Angry", '"ANGRY"'],
-          ["Focused", '"FOCUSED"'],
-          ["Confused", '"CONFUSED"']
+          ["happy", '"HAPPY"'],
+          ["sad", '"SAD"'],
+          ["angry", '"ANGRY"'],
+          ["focused", '"FOCUSED"'],
+          ["confused", '"CONFUSED"']
         ]
       },
       {
@@ -328,15 +326,15 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "wait_for_event",
-    message0: "wait for event %1 %2 then %3",
+    type: "wait_for",
+    message0: "wait for %1 %2 then %3",
     args0: [
       {
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["FaceDirectionChanged", '"FaceDirectionChanged"'],
-          ["IsSpeakingChanged", '"IsSpeakingChanged"']
+          ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
+          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
         ]
       },
       {
@@ -361,12 +359,12 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["FaceDirectionCenter", '"FaceDirectionCenter"'],
-          ["FaceDirectionLeft", '"FaceDirectionLeft"'],
-          ["FaceDirectionRight", '"FaceDirectionRight"'],
-          ["NoFace", '"NoFace"'],
-          ["IsSpeakingFalse", '"IsSpeakingFalse"'],
-          ["IsSpeakingTrue", '"IsSpeakingTrue"']
+          ["humanFaceLookingAtCenter", '"humanFaceLookingAtCenter"'],
+          ["humanFaceLookingAtLeft", '"humanFaceLookingAtLeft"'],
+          ["humanFaceLookingAtRight", '"humanFaceLookingAtRight"'],
+          ["noHumanFaceFound", '"noHumanFaceFound"'],
+          ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
+          ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
         ]
       },
       {
@@ -385,8 +383,8 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
-// IMPORTANT!! callbacks are introduces local variables, which blockly does not
-//   usually allow; it might bring confusion in future
+//------------------------------------------------------------------------------
+// Code Generators
 
 Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   // Do while/until loop.
@@ -473,7 +471,7 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["wait_for_event"] = function(block) {
+Blockly.JavaScript["wait_for"] = function(block) {
   return check(block)
     ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
   event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
@@ -583,53 +581,28 @@ const stop = () => {
     _exit[_exit.length - 1] = true;
   }
   cancelActionGoals();
+  stopFollowingFace();
 };
 
 document.getElementById("run").onclick = () => {
-  var code = Blockly.JavaScript.workspaceToCode(editor);
+  const code = Blockly.JavaScript.workspaceToCode(editor);
   run(code);
 };
 
 document.getElementById("stop").onclick = stop;
 
-document.getElementById("run_instruction").onclick = () => {
-  fetch("/programs/instruction.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.log(code);
-      run(code);
-    });
+document.getElementById("download_js").onclick = () => {
+  const text = document.getElementById("js").innerText;
+  const a = document.createElement("a");
+  a.id = "js";
+  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
+  a.download = "program";
+  a.click();
 };
 
-document.getElementById("run_monologue").onclick = () => {
-  fetch("/programs/monologue.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code}})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_interview").onclick = () => {
-  fetch("/programs/interview.js")
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      var curCode = `(async () => {${code}})();`;
-      eval(curCode);
-    });
-};
-
-document.getElementById("run_js_file").onclick = e => {
+document.getElementById("run_js").onclick = e => {
   const filename = document.getElementById("filename").value;
-  console.log(filename);
+  console.debug(`filepath /programs/${filename}`);
   fetch(`/programs/${filename}`)
     .then(function(response) {
       return response.text();
@@ -638,15 +611,6 @@ document.getElementById("run_js_file").onclick = e => {
       console.debug(code);
       run(code);
     });
-};
-
-document.getElementById("download").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
 };
 
 document.getElementById("download_xml").onclick = () => {
