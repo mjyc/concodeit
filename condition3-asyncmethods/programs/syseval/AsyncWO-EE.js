@@ -5,8 +5,8 @@ var state;
 cancelActionGoals();
 // end start_program
 startFollowingFace();
-while (state != 'Left' && state != 'Right') {
+while (state != 'left' && state != 'left') {
   await sleep(0.1);
-  state = (await getState("faceDirection"));
+  state = (await getState("humanFaceDirection"));
 }
 setMessage(String('Bye now!'));

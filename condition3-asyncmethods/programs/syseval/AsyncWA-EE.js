@@ -5,10 +5,10 @@ var state, speak_state;
 cancelActionGoals();
 // end start_program
 startFollowingFace();
-while (state != 'Center' || speak_state) {
+while (state != 'center' || speak_state) {
   await sleep(0.1);
-  state = (await getState("faceDirection"));
-  speak_state = (await getState("isSpeaking"));
+  state = (await getState("humanFaceDirection"));
+  speak_state = (await getState("isHumanSpeaking"));
 }
 stopFollowingFace();
 sendActionGoal("SpeechSynthesisAction", String('Hello'));
