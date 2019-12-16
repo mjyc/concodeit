@@ -7,7 +7,7 @@ cancelActionGoals();
 startSaying(String('Hello there!'), (result) => {
   say_done = true;
 });
-waitUntil(String("FaceDirectionCenter"), () => {
+waitUntil(String("humanFaceLookingAtCenter"), () => {
   face_appear = true;
 });
 while (!say_done || !face_appear) {

@@ -4,10 +4,10 @@ var face_appear, no_speak;
 // beg start_program
 cancelActionGoals();
 // end start_program
-waitUntil(String("FaceDirectionCenter"), () => {
+waitUntil(String("humanFaceLookingAtCenter"), () => {
   face_appear = true;
 });
-waitUntil(String("IsSpeakingFalse"), () => {
+waitUntil(String("isHumanSpeakingFalse"), () => {
   no_speak = true;
 });
 while (!face_appear || !no_speak) {

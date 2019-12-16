@@ -7,7 +7,7 @@ cancelActionGoals();
 startSaying(String('Hello there, my name is Meebo. Goodbye now!'), (result) => {
   say_done = true;
 });
-waitUntil(String("NoFace"), () => {
+waitUntil(String("noHumanFaceFound"), () => {
   no_face = true;
 });
 while (!say_done && !no_face) {

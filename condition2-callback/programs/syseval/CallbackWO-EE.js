@@ -4,10 +4,10 @@ var look_left, look_right;
 // beg start_program
 cancelActionGoals();
 // end start_program
-waitUntil(String("FaceDirectionLeft"), () => {
+waitUntil(String("humanFaceLookingAtLeft"), () => {
   look_left = true;
 });
-waitUntil(String("FaceDirectionRight"), () => {
+waitUntil(String("humanFaceLookingAtRight"), () => {
   look_right = true;
 });
 while (!look_left && !look_right) {
