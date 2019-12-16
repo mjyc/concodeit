@@ -172,7 +172,7 @@ async function gesture(name) {
 
 async function waitForEvent(event) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "FaceDirectionChanged") {
+  if (event == "humanFaceDirectionChanged") {
     return await waitUntilFaceDirectionChanged(id);
   }
   return await waitUntilVADStateChanged(id);
@@ -354,8 +354,8 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["FaceDirectionChanged", '"FaceDirectionChanged"'],
-          ["IsSpeakingChanged", '"IsSpeakingChanged"']
+          ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
+          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
         ]
       }
     ],
