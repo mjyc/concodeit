@@ -275,16 +275,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_program",
-    message0: "start program %1 %2",
-    args0: [
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
+    message0: "start program",
+    nextStatement: null,
     colour: 290,
     tooltip: "",
     helpUrl: ""
@@ -570,10 +562,7 @@ Blockly.JavaScript["when"] = function(block) {
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
-  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
-  return stmtCode !== ""
-    ? `(() => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})();\n`
-    : "";
+  return "";
 };
 
 //------------------------------------------------------------------------------
