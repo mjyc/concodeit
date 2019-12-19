@@ -240,8 +240,16 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_program",
-    message0: "start program",
-    nextStatement: null,
+    message0: "start program %1 %2",
+    args0: [
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
     colour: 290,
     tooltip: "",
     helpUrl: ""
@@ -347,7 +355,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "when",
-    message0: "when %1",
+    message0: "when %1 %2 %3",
     args0: [
       {
         type: "field_dropdown",
@@ -362,9 +370,15 @@ Blockly.defineBlocksWithJsonArray([
           ["humanSpeaks", '"isHumanSpeakingFalse"'],
           ["humanStopsSpeaking", '"isHumanSpeakingTrue"']
         ]
+      },
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
       }
     ],
-    nextStatement: null,
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -513,21 +527,16 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
 };
 
 Blockly.JavaScript["when"] = function(block) {
-  const test = Blockly.JavaScript;
-  const code = Blockly.JavaScript.blockToCode(block.getNextBlock());
-  console.log("code", code);
-  return !!block.getNextBlock()
-    ? Blockly.JavaScript.blockToCode(block.getNextBlock())
+  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+  return stmtCode !== ""
+    ? `onEvent(${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
     : "";
-  // return check(block)
-  //   ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
-  // event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-  //   : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
-  return !!block.getNextBlock()
-    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
+  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+  return stmtCode !== ""
+    ? `(() => {\n${Blockly.JavaScript.statementToCode(block, "DO")}})();\n`
     : "";
 };
 
