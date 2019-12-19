@@ -346,7 +346,7 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "wait_for",
+    type: "when",
     message0: "when %1",
     args0: [
       {
@@ -354,31 +354,7 @@ Blockly.defineBlocksWithJsonArray([
         name: "SE",
         options: [
           ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
-          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
-        ]
-      }
-      // {
-      //   type: "input_dummy"
-      // },
-      // {
-      //   type: "input_statement",
-      //   name: "DO"
-      // }
-    ],
-    // previousStatement: null,
-    nextStatement: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_until",
-    message0: "when %1",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "SE",
-        options: [
+          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"'],
           ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
           ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
           ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
@@ -387,15 +363,7 @@ Blockly.defineBlocksWithJsonArray([
           ["humanStopsSpeaking", '"isHumanSpeakingTrue"']
         ]
       }
-      // {
-      //   type: "input_dummy"
-      // },
-      // {
-      //   type: "input_statement",
-      //   name: "DO"
-      // }
     ],
-    // previousStatement: null,
     nextStatement: null,
     colour: 210,
     tooltip: "",
@@ -484,7 +452,8 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
 function check(block) {
   return (
     block.getRootBlock().type === "start_program" ||
-    block.getRootBlock().type === "procedures_defnoreturn"
+    block.getRootBlock().type === "procedures_defnoreturn" ||
+    block.getRootBlock().type === "when"
   );
 }
 
@@ -543,20 +512,12 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
   //   : "";
 };
 
-Blockly.JavaScript["wait_for"] = function(block) {
-  return "";
+Blockly.JavaScript["when"] = function(block) {
+  return !!block.getNextBlock() ? "// when code here\n" : "";
   // return check(block)
   //   ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
   // event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
   //   : "";
-};
-
-Blockly.JavaScript["wait_until"] = function(block) {
-  return "";
-  //   return check(block)
-  //     ? `waitUntil(String(${block.getFieldValue("SE")}), () => {
-  // ${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-  //     : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
