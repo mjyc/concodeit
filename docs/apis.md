@@ -34,13 +34,18 @@ function getState(state: State): FaceDirection | IsSpeaking
 ## Callback API
 
 ```
-function startSleeping(duration: number, callback: function): void // durative
+function startSleeping(duration: number): void // durative
 function setMessage(message: string): void  // instantaneous
 function startFollowingFace(): void  // instantaneous
 function stopFollowingFace(): void  // instantaneous
-function startSaying(text: string, callback: function): void  // durative
-function startGesturing(name: string, callback: function): void  // durative
+function startSaying(text: string): void  // durative
+function startGesturing(name: string): void  // durative
 
+type ActionEvent {
+  sleepDone,
+  sayDone,
+  gestureDone
+}
 type Event {
   humanFaceDirectionChanged,
   isHumanSpeakingChanged,
@@ -55,7 +60,7 @@ type IsSpeakingChanged {
   speaking,
   notSpeaking,
 }
-function waitForEvent(event: Event, setResultTo: string, callback: function): FaceDirectionChanged | IsSpeakingChanged
+function waitForEvent(event: Event, setResultTo: string, callback: function): FaceDirectionChanged | IsSpeakingChanged | ActionEvent
 ```
 
 ## WaitFors API
