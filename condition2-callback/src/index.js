@@ -36,7 +36,7 @@ function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
-function sleep(sec, callback) {
+function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
