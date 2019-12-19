@@ -27,27 +27,9 @@
           <category name="Sensing" colour="210">
             <block type="wait_for">
               <field name="SE">"humanFaceDirectionChanged"</field>
-              <value name="DO">
-                <block type="set_message">
-                  <value name="MESSAGE">
-                    <block type="variables_get">
-                      <field name="VAR">event</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
             </block>
             <block type="wait_until">
               <field name="SE">"humanFaceLookingAtCenter"</field>
-              <value name="DO">
-                <block type="set_message">
-                  <value name="MESSAGE">
-                    <block type="text">
-                      <field name="TEXT">Hello there!</field>
-                    </block>
-                  </value>
-                </block>
-              </value>
             </block>
           </category>
           <category name="Action" colour="230">

@@ -254,7 +254,7 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "SE",
         check: "Number"
-      },
+      }
       // {
       //   type: "input_statement",
       //   name: "DO"
@@ -330,7 +330,7 @@ Blockly.defineBlocksWithJsonArray([
           ["focused", '"FOCUSED"'],
           ["confused", '"CONFUSED"']
         ]
-      },
+      }
       // {
       //   type: "input_dummy"
       // },
@@ -347,7 +347,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "wait_for",
-    message0: "wait for %1 %2 then %3",
+    message0: "when %1",
     args0: [
       {
         type: "field_dropdown",
@@ -356,16 +356,16 @@ Blockly.defineBlocksWithJsonArray([
           ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
           ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
         ]
-      },
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
       }
+      // {
+      //   type: "input_dummy"
+      // },
+      // {
+      //   type: "input_statement",
+      //   name: "DO"
+      // }
     ],
-    previousStatement: null,
+    // previousStatement: null,
     nextStatement: null,
     colour: 210,
     tooltip: "",
@@ -373,29 +373,29 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "wait_until",
-    message0: "wait until %1 %2 then %3",
+    message0: "when %1",
     args0: [
       {
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["humanFaceLookingAtCenter", '"humanFaceLookingAtCenter"'],
-          ["humanFaceLookingAtLeft", '"humanFaceLookingAtLeft"'],
-          ["humanFaceLookingAtRight", '"humanFaceLookingAtRight"'],
-          ["noHumanFaceFound", '"noHumanFaceFound"'],
-          ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
-          ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
+          ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
+          ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
+          ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
+          ["humanDisappears", '"noHumanFaceFound"'],
+          ["humanSpeaks", '"isHumanSpeakingFalse"'],
+          ["humanStopsSpeaking", '"isHumanSpeakingTrue"']
         ]
-      },
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
       }
+      // {
+      //   type: "input_dummy"
+      // },
+      // {
+      //   type: "input_statement",
+      //   name: "DO"
+      // }
     ],
-    previousStatement: null,
+    // previousStatement: null,
     nextStatement: null,
     colour: 210,
     tooltip: "",
@@ -544,17 +544,19 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
 };
 
 Blockly.JavaScript["wait_for"] = function(block) {
-  return check(block)
-    ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
-  event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-    : "";
+  return "";
+  // return check(block)
+  //   ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
+  // event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+  //   : "";
 };
 
 Blockly.JavaScript["wait_until"] = function(block) {
-  return check(block)
-    ? `waitUntil(String(${block.getFieldValue("SE")}), () => {
-${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-    : "";
+  return "";
+  //   return check(block)
+  //     ? `waitUntil(String(${block.getFieldValue("SE")}), () => {
+  // ${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+  //     : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
