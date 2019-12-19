@@ -40,9 +40,17 @@ function sleep(sec, callback) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
-const NOSE_ANGLE_THRESHOLD = 10;
 const eventHandles = {};
-function detectFaceDirectionChanged(id, callback) {
+
+function removeEventHandles() {
+  for (const key in eventHandles) {
+    const eventHandle = eventHandles[key];
+    eventHandle.stream.removeListener(eventHandle.listener);
+  }
+}
+
+const NOSE_ANGLE_THRESHOLD = 10;
+function onFaceDirectionChanged(id, callback) {
   let prevFaceDirection = null;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
@@ -61,7 +69,6 @@ function detectFaceDirectionChanged(id, callback) {
           return;
         }
         if (faceDirection === prevFaceDirection) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, faceDirection);
       }
     }
@@ -70,18 +77,29 @@ function detectFaceDirectionChanged(id, callback) {
   return id;
 }
 
-function detectVADChanged(id, callback) {
+function onVADChanged(id, callback) {
   eventHandles[id] = {
     stream: sources.VAD.drop(1),
     listener: {
       next: val => {
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, val);
       }
     }
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
   return id;
+}
+
+function when(id, eventName, callback) {
+  switch (eventName) {
+    case "humanFaceDirectionChanged":
+      onFaceDirectionChanged(id, callback);
+      return;
+    case "isHumanSpeakingChanged":
+      onVADChanged(id, callback);
+    default:
+      return;
+  }
 }
 
 function waitForFaceDirection(id, faceDirection, callback) {
@@ -527,9 +545,10 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
 };
 
 Blockly.JavaScript["when"] = function(block) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
   return stmtCode !== ""
-    ? `onEvent(${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
+    ? `when(${id}, ${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
     : "";
 };
 
@@ -617,6 +636,8 @@ const run = code => {
     _exit[_exit.length - 1] = true;
   }
   cancelActionGoals();
+  stopFollowingFace();
+  removeEventHandles();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -635,6 +656,7 @@ const stop = () => {
   }
   cancelActionGoals();
   stopFollowingFace();
+  removeEventHandles();
 };
 
 document.getElementById("run").onclick = () => {
