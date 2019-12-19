@@ -569,6 +569,7 @@ const run = code => {
     _exit[_exit.length - 1] = true;
   }
   cancelActionGoals();
+  stopFollowingFace();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
