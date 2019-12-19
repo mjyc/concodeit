@@ -41,7 +41,6 @@ function sleep(sec, callback) {
 }
 
 const eventHandles = {};
-
 function removeEventHandles() {
   for (const key in eventHandles) {
     const eventHandle = eventHandles[key];

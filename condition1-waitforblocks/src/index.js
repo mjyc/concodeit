@@ -46,8 +46,15 @@ function promisify2(f) {
   return promisify(f);
 }
 
-const NOSE_ANGLE_THRESHOLD = 10;
 const eventHandles = {};
+function removeEventHandles() {
+  for (const key in eventHandles) {
+    const eventHandle = eventHandles[key];
+    eventHandle.stream.removeListener(eventHandle.listener);
+  }
+}
+
+const NOSE_ANGLE_THRESHOLD = 10;
 function detectFaceDirectionChanged(id, callback) {
   let prevFaceDirection = null;
   eventHandles[id] = {
@@ -721,7 +728,9 @@ const run = code => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
+  removeEventHandles();
   cancelActionGoals();
+  stopFollowingFace();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -738,6 +747,7 @@ const stop = () => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
+  removeEventHandles();
   cancelActionGoals();
   stopFollowingFace();
 };
