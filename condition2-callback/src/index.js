@@ -7,7 +7,7 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
-require("util.promisify/shim");
+require("util.promisify/shim")();
 import { promisify } from "util";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
 
@@ -626,8 +626,12 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: _ => {} });
-sources.VAD.addListener({ next: _ => {} });
+const handle = setInterval(() => {
+  if (!sources) return;
+  sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+  sources.VAD.addListener({ next: _ => {} });
+  clearInterval(handle);
+});
 
 const _exit = [];
 

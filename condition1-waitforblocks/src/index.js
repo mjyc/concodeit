@@ -1,6 +1,6 @@
 import "./styles.css";
 
-require("util.promisify/shim");
+require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
@@ -707,8 +707,12 @@ const sources = initialize({
   }
 });
 
-sources.PoseDetection.events("poses").addListener({ next: _ => {} });
-sources.VAD.addListener({ next: _ => {} });
+const handle = setInterval(() => {
+  if (!sources) return;
+  sources.PoseDetection.events("poses").addListener({ next: _ => {} });
+  sources.VAD.addListener({ next: _ => {} });
+  clearInterval(handle);
+});
 
 const _exit = [];
 

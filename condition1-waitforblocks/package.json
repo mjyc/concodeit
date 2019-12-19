@@ -10,9 +10,8 @@
   "dependencies": {
     "cycle-robot-drivers-async": "0.0.5",
     "node-blockly": "1.0.36",
-    "roslib": "1.0.1",
     "tabletrobotface-userstudy": "0.0.5",
-    "util.promisify": "^1.0.0"
+    "util.promisify": "1.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
