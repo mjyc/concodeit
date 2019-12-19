@@ -126,6 +126,15 @@ function onVoiceActivity(id, voiceActivity, callback) {
   return id;
 }
 
+const actionCallbacks = {};
+["sleep", "SpeechSynthesisAction", "FacialExpressionAction"].map(actionName => (actionCallbacks[actionName] = []));
+
+function removeActionCallbacks() {
+  for (const key in actionCallbacks) {
+    actionCallbacks[key] = [];
+  }
+}
+
 function when(id, eventName, callback) {
   switch (eventName) {
     case "humanFaceDirectionChanged":
@@ -152,6 +161,15 @@ function when(id, eventName, callback) {
     case "isHumanSpeakingTrue":
       onVoiceActivity(id, true, callback);
       return;
+    case "sleepDone":
+      actionCallbacks["sleep"].push(callback);
+      return;
+    case "sayDone":
+      actionCallbacks["SpeechSynthesisAction"].push(callback);
+      return;
+    case "gestureDone":
+      actionCallbacks["FacialExpressionAction"].push(callback);
+      return;
     default:
       throw new Error("unknown eventName", eventName);
   }
@@ -161,8 +179,12 @@ function stopDetectChangeOrWait(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
-function startSleeping(duration, callback) {
-  setTimeout(callback, duration * 1000);
+function startSleeping(duration) {
+  setTimeout(() => {
+    for (const callback of actionCallbacks["sleep"]) {
+      callback();
+    }
+  }, duration * 1000);
 }
 
 function setMessage(message) {
@@ -177,16 +199,20 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
-function startSaying(text, callback) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
-    callback(result)
-  );
+function startSaying(text) {
+  sendActionGoalCallback("SpeechSynthesisAction", text, result => {
+    for (const callback of actionCallbacks["SpeechSynthesisAction"]) {
+      callback(result);
+    }
+  });
 }
 
-function startGesturing(gesture, callback) {
-  sendActionGoalCallback("FacialExpressionAction", gesture, result =>
-    callback(result)
-  );
+function startGesturing(gesture) {
+  sendActionGoalCallback("FacialExpressionAction", gesture, result => {
+    for (const callback of actionCallbacks["FacialExpressionAction"]) {
+      callback(result);
+    }
+  });
 }
 
 function waitForEvent(event, callback) {
@@ -395,7 +421,10 @@ Blockly.defineBlocksWithJsonArray([
           ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
           ["humanDisappears", '"noHumanFaceFound"'],
           ["humanSpeaks", '"isHumanSpeakingTrue"'],
-          ["humanStopsSpeaking", '"isHumanSpeakingFalse"']
+          ["humanStopsSpeaking", '"isHumanSpeakingFalse"'],
+          ["sleepDone", '"sleepDone"'],
+          ["sayDone", '"sayDone"'],
+          ["gestureDone", '"gestureDone"']
         ]
       },
       {
@@ -499,14 +528,13 @@ function check(block) {
 }
 
 Blockly.JavaScript["start_sleeping"] = function(block) {
-  return "";
-  // return check(block)
-  //   ? `startSleeping(${Blockly.JavaScript.valueToCode(
-  //       block,
-  //       "SE",
-  //       Blockly.JavaScript.ORDER_ATOMIC
-  //     )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-  //   : "";
+  return check(block)
+    ? `startSleeping(${Blockly.JavaScript.valueToCode(
+        block,
+        "SE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
 };
 
 Blockly.JavaScript["set_message"] = function(block) {
@@ -528,29 +556,21 @@ Blockly.JavaScript["stop_following_face"] = function(block) {
 };
 
 Blockly.JavaScript["start_saying"] = function(block) {
-  return "";
-  // return check(block)
-  //   ? `startSaying(String(${Blockly.JavaScript.valueToCode(
-  //       block,
-  //       "MESSAGE",
-  //       Blockly.JavaScript.ORDER_ATOMIC
-  //     )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-  //       block,
-  //       "DO"
-  //     )}});\n`
-  //   : "";
+  return check(block)
+    ? `startSaying(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
 };
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
-  return "";
-  // return check(block)
-  //   ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
-  //       "MESSAGE"
-  //     )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-  //       block,
-  //       "DO"
-  //     )}});\n`
-  //   : "";
+  return check(block)
+    ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
+        "MESSAGE"
+      )}));\n`
+    : "";
 };
 
 Blockly.JavaScript["when"] = function(block) {
@@ -641,9 +661,10 @@ const run = code => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
+  removeEventHandles();
+  removeActionCallbacks();
   cancelActionGoals();
   stopFollowingFace();
-  removeEventHandles();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -660,9 +681,10 @@ const stop = () => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
+  removeEventHandles();
+  removeActionCallbacks();
   cancelActionGoals();
   stopFollowingFace();
-  removeEventHandles();
 };
 
 document.getElementById("run").onclick = () => {
