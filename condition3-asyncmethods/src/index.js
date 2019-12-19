@@ -8,6 +8,7 @@ import {
   makeCancelGoal
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
+require("util.promisify/shim");
 import { promisify } from "util";
 
 //------------------------------------------------------------------------------
