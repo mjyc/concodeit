@@ -513,7 +513,12 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
 };
 
 Blockly.JavaScript["when"] = function(block) {
-  return !!block.getNextBlock() ? "// when code here\n" : "";
+  const test = Blockly.JavaScript;
+  const code = Blockly.JavaScript.blockToCode(block.getNextBlock());
+  console.log("code", code);
+  return !!block.getNextBlock()
+    ? Blockly.JavaScript.blockToCode(block.getNextBlock())
+    : "";
   // return check(block)
   //   ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
   // event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
