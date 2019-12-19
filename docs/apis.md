@@ -15,11 +15,11 @@ function isSayFinished(): boolean
 function isGestureFinished(): boolean
 
 type State {
-  faceDirection,
-  isSpeaking,
+  humanFaceDirection,
+  isHumanSpeaking,
 }
 type FaceDirection {
-  noFace,
+  noface,
   center,
   left,
   right,
@@ -30,12 +30,6 @@ type IsSpeaking {
 }
 function getState(state: State): FaceDirection | IsSpeaking
 ```
-
-<!--
-function setButtons(buttons: [string]): void
-lastClickedButton,
-function resetLastClickedButton(): void // set lastClickedButton to ""
--->
 
 ## Callback API
 
@@ -48,11 +42,11 @@ function startSaying(text: string, callback: function): void  // durative
 function startGesturing(name: string, callback: function): void  // durative
 
 type Event {
-  faceDirectionChanged,
-  isSpeakingChanged,
+  humanFaceDirectionChanged,
+  isHumanSpeakingChanged,
 }
 type FaceDirectionChanged {
-  none,
+  noface,
   center,
   left,
   right,
@@ -75,8 +69,8 @@ function say(message: string): void  // durative
 function gesture(name: string): void  // durative
 
 type Event {
-  faceDirectionChanged,
-  isSpeakingChanged,
+  humanFaceDirectionChanged,
+  isHumanSpeakingChanged,
 }
 type FaceDirectionChanged {
   noFace,
@@ -92,21 +86,4 @@ function waitForEvent(event: Event): FaceDirectionChanged | IsSpeakingChanged  /
 
 function waitForAll(subprogram1: function, subprogram2: function): [any]
 function waitForOne(subprogram1: function, subprogram2: function): any
-```
-
-## Notes
-
-1. For `startGesturing` or `gesture`, use:
-
-```
-sendActionGoal("FacialExpressionAction", "HAPPY") // "SAD", "ANGRY", "FOCUSED", "CONFUSED"
-sendActionGoalCallback("FacialExpressionAction", "HAPPY", callback)
-```
-
-2. For `isSpeaking` or `IsSpeakingChanged`, start by checking out the below functions:
-
-```
-await waitUntilVAD(); // waitFors
-detectVADChange(id, callback); // callback
-getVADState(id, callback); // async
 ```
