@@ -90,19 +90,7 @@ function onVADChanged(id, callback) {
   return id;
 }
 
-function when(id, eventName, callback) {
-  switch (eventName) {
-    case "humanFaceDirectionChanged":
-      onFaceDirectionChanged(id, callback);
-      return;
-    case "isHumanSpeakingChanged":
-      onVADChanged(id, callback);
-    default:
-      return;
-  }
-}
-
-function waitForFaceDirection(id, faceDirection, callback) {
+function onFaceDirection(id, faceDirection, callback) {
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -116,7 +104,6 @@ function waitForFaceDirection(id, faceDirection, callback) {
           ? "right"
           : "center";
         if (curFaceDirection !== faceDirection) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, null);
       }
     }
@@ -125,19 +112,49 @@ function waitForFaceDirection(id, faceDirection, callback) {
   return id;
 }
 
-function waitForVoiceActivity(id, voiceActivity, callback) {
+function onVoiceActivity(id, voiceActivity, callback) {
   eventHandles[id] = {
     stream: sources.VAD,
     listener: {
       next: val => {
         if (val !== voiceActivity) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, val);
       }
     }
   };
   eventHandles[id].stream.addListener(eventHandles[id].listener);
   return id;
+}
+
+function when(id, eventName, callback) {
+  switch (eventName) {
+    case "humanFaceDirectionChanged":
+      onFaceDirectionChanged(id, callback);
+      return;
+    case "isHumanSpeakingChanged":
+      onVADChanged(id, callback);
+      return;
+    case "noHumanFaceFound":
+      onFaceDirection(id, "noface", callback);
+      return;
+    case "humanFaceLookingAtRight":
+      onFaceDirection(id, "right", callback);
+      return;
+    case "humanFaceLookingAtLeft":
+      onFaceDirection(id, "left", callback);
+      return;
+    case "humanFaceLookingAtCenter":
+      onFaceDirection(id, "center", callback);
+      return;
+    case "isHumanSpeakingFalse":
+      onVoiceActivity(id, false, callback);
+      return;
+    case "isHumanSpeakingTrue":
+      onVoiceActivity(id, true, callback);
+      return;
+    default:
+      throw new Error("unknown eventName", eventName);
+  }
 }
 
 function stopDetectChangeOrWait(id) {
@@ -385,8 +402,8 @@ Blockly.defineBlocksWithJsonArray([
           ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
           ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
           ["humanDisappears", '"noHumanFaceFound"'],
-          ["humanSpeaks", '"isHumanSpeakingFalse"'],
-          ["humanStopsSpeaking", '"isHumanSpeakingTrue"']
+          ["humanSpeaks", '"isHumanSpeakingTrue"'],
+          ["humanStopsSpeaking", '"isHumanSpeakingFalse"']
         ]
       },
       {
