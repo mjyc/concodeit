@@ -247,18 +247,18 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "sleep",
-    message0: "sleep for %1 then %2",
+    type: "start_sleeping",
+    message0: "start sleeping for %1",
     args0: [
       {
         type: "input_value",
         name: "SE",
         check: "Number"
       },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
+      // {
+      //   type: "input_statement",
+      //   name: "DO"
+      // }
     ],
     previousStatement: null,
     nextStatement: null,
@@ -302,16 +302,12 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_saying",
-    message0: "start saying %1 then %2",
+    message0: "start saying %1",
     args0: [
       {
         type: "input_value",
         name: "MESSAGE",
         check: ["String", "Number"]
-      },
-      {
-        type: "input_statement",
-        name: "DO"
       }
     ],
     previousStatement: null,
@@ -322,7 +318,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_gesturing",
-    message0: "start gesturing %1 %2 then %3",
+    message0: "start gesturing %1",
     args0: [
       {
         type: "field_dropdown",
@@ -335,13 +331,13 @@ Blockly.defineBlocksWithJsonArray([
           ["confused", '"CONFUSED"']
         ]
       },
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
+      // {
+      //   type: "input_dummy"
+      // },
+      // {
+      //   type: "input_statement",
+      //   name: "DO"
+      // }
     ],
     previousStatement: null,
     nextStatement: null,
@@ -492,14 +488,15 @@ function check(block) {
   );
 }
 
-Blockly.JavaScript["sleep"] = function(block) {
-  return check(block)
-    ? `startSleeping(${Blockly.JavaScript.valueToCode(
-        block,
-        "SE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-    : "";
+Blockly.JavaScript["start_sleeping"] = function(block) {
+  return "";
+  // return check(block)
+  //   ? `startSleeping(${Blockly.JavaScript.valueToCode(
+  //       block,
+  //       "SE",
+  //       Blockly.JavaScript.ORDER_ATOMIC
+  //     )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+  //   : "";
 };
 
 Blockly.JavaScript["set_message"] = function(block) {
@@ -521,27 +518,29 @@ Blockly.JavaScript["stop_following_face"] = function(block) {
 };
 
 Blockly.JavaScript["start_saying"] = function(block) {
-  return check(block)
-    ? `startSaying(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
+  return "";
+  // return check(block)
+  //   ? `startSaying(String(${Blockly.JavaScript.valueToCode(
+  //       block,
+  //       "MESSAGE",
+  //       Blockly.JavaScript.ORDER_ATOMIC
+  //     )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+  //       block,
+  //       "DO"
+  //     )}});\n`
+  //   : "";
 };
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
-  return check(block)
-    ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
-        "MESSAGE"
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
-    : "";
+  return "";
+  // return check(block)
+  //   ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
+  //       "MESSAGE"
+  //     )}), (result) => {\n${Blockly.JavaScript.statementToCode(
+  //       block,
+  //       "DO"
+  //     )}});\n`
+  //   : "";
 };
 
 Blockly.JavaScript["wait_for"] = function(block) {
