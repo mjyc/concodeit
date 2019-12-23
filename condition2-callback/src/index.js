@@ -492,13 +492,7 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return (
-    "while (" +
-    argument0 +
-    ") {\n  await sleep(0.1);console.log('sleep');\n" +
-    branch +
-    "}\n"
-  );
+  return "while (" + argument0 + ") {\n  await sleep(0.1);\n" + branch + "}\n";
   return "";
 };
 
