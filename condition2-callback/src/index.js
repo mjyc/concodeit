@@ -126,7 +126,9 @@ function onVoiceActivity(id, voiceActivity, callback) {
 }
 
 const actionCallbacks = {};
-["sleep", "SpeechSynthesisAction", "FacialExpressionAction"].map(actionName => (actionCallbacks[actionName] = []));
+["sleep", "SpeechSynthesisAction", "FacialExpressionAction"].map(
+  actionName => (actionCallbacks[actionName] = [])
+);
 
 function removeActionCallbacks() {
   for (const key in actionCallbacks) {
@@ -212,32 +214,6 @@ function startGesturing(gesture) {
       callback(result);
     }
   });
-}
-
-function waitForEvent(event, callback) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceDirectionChanged") {
-    detectFaceDirectionChanged(id, callback);
-  } else if (event == "isHumanSpeakingChanged") {
-    detectVADChanged(id, callback);
-  }
-}
-
-function waitUntil(event, callback) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceLookingAtCenter") {
-    waitForFaceDirection(id, "center", callback);
-  } else if (event == "humanFaceLookingAtLeft") {
-    waitForFaceDirection(id, "left", callback);
-  } else if (event == "humanFaceLookingAtRight") {
-    waitForFaceDirection(id, "right", callback);
-  } else if (event == "noHumanFaceFound") {
-    waitForFaceDirection(id, "noface", callback);
-  } else if (event == "isHumanSpeakingFalse") {
-    waitForVoiceActivity(id, false, callback);
-  } else if (event == "isHumanSpeakingTrue") {
-    waitForVoiceActivity(id, true, callback);
-  }
 }
 
 //------------------------------------------------------------------------------
