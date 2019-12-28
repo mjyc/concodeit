@@ -10,38 +10,43 @@
 
 ## Social Robot Task Descriptions
 
-### Example
+### Singing (AA + WA)
 
-1. The robot should say "Brown bear, brown bear, what do you see?" and do the engage gesture. (AA + WA)
-2. When the robot is finished with 1., it should say "I see a red bird looking at me." and do the happy gesture. (AA + WA)
+1. On start, the robot should say "rain rain go away" and do "sad" gesture.
 
-### Interview
+2. When the robot finished saying "rain rain go away" and doing "sad" gesture, it should say "little johnny wants to play" and do "happy" gesture.
 
-1. The robot should display "What does a typical day look like for you?" and start waiting for the human to start speaking.
-2. If the human started speaking, it should start following the human's face, start waiting for the human to look to the center, and start waiting for the human to stop speaking. (AE + WA)
-3. When the robot is finished with 2., it should display "What sort of vacations do you like to take?" and start waiting for the human to start speaking.
-4. If the human started speaking, it should start following the human's face, start waiting for the human to look to the center, and start waiting for the human to stop speaking. (AE + WA)
-5. When the robot is finished with 4., it should display "We are done. Thank you."
+### Open-ended Q&A (EE + WA && EE + WO)
 
-### Instruction
+1. On start, the robot should start waiting for the human's face to appear and start waiting for the human to not speak. (EE + WA)
 
-1. The robot should say "Let's start from looking forward".
-2. When the robot is done with 1., it should start waiting for the human to look to the center.
-3. When the robot is finished with 2., it should say "and now slowly rotate to your right".
-4. When the robot is finished with 3., it should start waiting for the human to look to the left or right. (EE + WO)
-5. If the human looks to the left, it should play a warning sound and repeat 3. (AA + WA)
-6. If the human looks to the right, it should say "and now slowly rotate to your left"
-7. When the robot is finished with 6., it should start waiting for the human to look to the left or right. (EE + WO)
-8. If the human looks to the right, it should play a warning sound and repeat 6. (AA + WA)
-9. If the human looks to the left, it should say "You are done!"
+2. If the human's face appeared and the human stopped speaking, the robot should display "what does a typical day look like for you?", start waiting for the human to speak, and start waiting for the human's face to disappear. (EE + WO)
 
-### Monologue
+3. If the human started speaking, it should start following the human's face, start waiting for the human to stop speaking, and start waiting for the human's face to disappear. (EE + WO)
 
-1. The robot should display "Hello there!" and start waiting for the human's face to appear in its field of view. (AE + WO)
-2. If the face appears, the robot should display "My name is Meebo.", say "My name is Meebo.", do the happy gesture, and start waiting for the human's face to disappear in its field of view. (AE + WO)
-3. If the robot finished saying "My name is Meebo.", it should display "I'm made of a touch monitor and a robot arm.", say "I'm made of a touch monitor and a robot arm.", and start waiting for the human's face to disappear in its field of view. (AE + WO)
-4. If the robot finished saying "I'm made of a tablet display and a robot arm.", it should display "Nice to meet you." say "Nice to meet you.", do goodbye gesture, and start waiting for the human's face to disappear in its field of view. (AE + WO)
-5. If the face disappears after 3., 4. or 5., the robot should display "Goodbye!", say "Goodbye!", and do goodbye gesture.
+4. If the human stopped speaking, it should display "all done" and stop following the face.
+
+5. If the face disappears after 2., 3., the robot should display "bye".
+
+### Neck Exercise (AE + WA)
+
+1. On start, the robot should start waiting for the human to look to the center.
+
+2. If the human looked at the center, the robot should say "slowly rotate to your head to the right", start waiting for it to finish saying "slowly rotate to your head to the right", and start waiting for the human to look to the left or right. (AE + WA)
+
+3. If the robot is finished saying "slowly rotate to your head to the right" and the human looked at the right, the robot should say "great job".
+
+4. If the robot is finished saying "slowly rotate to your head to the right" and the human looked at the left, the robot should repeat 1.
+
+### Introduction (AE + WO)
+
+1. On start, the robot should start waiting for the human's face to appear in its field of view.
+
+2. If the human's face appeared, the robot should say "my name is meebo" and start waiting for the human's face to disappear in its field of view. (AE + WO)
+
+3. If the robot finished saying "my name is meebo", it should display "nice to meet you" and start waiting for the human's face to disappear in its field of view. (AE + WO)
+
+4. If the face disappears after 2., 3., the robot should say "bye".
 
 ### Notes
 
