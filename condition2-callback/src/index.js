@@ -89,6 +89,21 @@ function onVADChanged(id, callback) {
   return id;
 }
 
+function onFaceAppears(id, callback) {
+  eventHandles[id] = {
+    stream: sources.PoseDetection.events("poses"),
+    listener: {
+      next: poses => {
+        const features = extractFaceFeatures(poses);
+        const curFaceVisible = features.isVisible;
+        if (curFaceVisible) callback(null, null);
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
 function onFaceDirection(id, faceDirection, callback) {
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
@@ -146,6 +161,9 @@ function when(id, eventName, callback) {
       return;
     case "noHumanFaceFound":
       onFaceDirection(id, "noface", callback);
+      return;
+    case "humanFaceFound":
+      onFaceAppears(id, callback);
       return;
     case "humanFaceLookingAtRight":
       onFaceDirection(id, "right", callback);
@@ -402,6 +420,7 @@ Blockly.defineBlocksWithJsonArray([
           ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
           ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
           ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
+          ["humanAppears", '"humanFaceFound"'],
           ["humanDisappears", '"noHumanFaceFound"'],
           ["humanSpeaks", '"isHumanSpeakingTrue"'],
           ["humanStopsSpeaking", '"isHumanSpeakingFalse"'],
