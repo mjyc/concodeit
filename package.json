@@ -1,0 +1,8 @@
+{
+  "private": "true",
+  "scripts": {
+    "waitfors": "cd condition1-waitforblocks && npm start",
+    "callback": "cd condition1-waitforblocks && npm start",
+    "async": "cd condition1-asyncmethods && npm start"
+  }
+}
