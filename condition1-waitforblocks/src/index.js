@@ -807,6 +807,7 @@ if (mode === "study") {
     document.querySelector("#load_xml_label").remove();
     document.querySelector("#filename").remove();
     document.querySelector("#js_view").remove();
+    document.querySelector(".posenet").style.display = "none";
   };
 }
 
