@@ -10,7 +10,11 @@ import {
   makeCancelGoal
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
-import settings from "./settings.json";
+
+let settings = {};
+try {
+  settings = require("./settings.json");
+} catch (e) {}
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions

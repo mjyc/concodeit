@@ -1,8 +1,11 @@
 {
   "private": "true",
   "scripts": {
-    "waitfors": "cd condition1-waitforblocks && npm start",
-    "callback": "cd condition1-waitforblocks && npm start",
-    "async": "cd condition1-asyncmethods && npm start"
+    "waitfors": "cd condition1-waitforblocks && npm run start",
+    "callback": "cd condition1-waitforblocks && npm run start",
+    "async": "cd condition1-asyncmethods && npm run start",
+    "waitfors:study": "cd condition1-waitforblocks && npm run study",
+    "callback:study": "cd condition1-waitforblocks && npm run study",
+    "async:study": "cd condition1-asyncmethods && npm run study"
   }
 }
