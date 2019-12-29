@@ -708,10 +708,13 @@ document.getElementById("run_js").onclick = e => {
     });
 };
 
+let startTime = Date.now();
 document.getElementById("download_xml").onclick = () => {
   const workspace = Blockly.getMainWorkspace();
   const xml = Blockly.Xml.workspaceToDom(workspace);
-  const xmlText = Blockly.Xml.domToText(xml);
+  const xmlText =
+    Blockly.Xml.domToText(xml) +
+    `\n<!-- ${startTime} -->\n<!-- ${Date.now()} -->`;
   const a = document.createElement("a");
   a.id = "xml";
   a.href = "data:text/xml;charset=utf-8," + encodeURIComponent(xmlText);
