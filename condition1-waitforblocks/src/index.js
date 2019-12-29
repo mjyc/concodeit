@@ -710,8 +710,25 @@ const sources = initialize({
 
 const handle = setInterval(() => {
   if (!sources) return;
-  sources.PoseDetection.events("poses").addListener({ next: _ => {} });
-  sources.VAD.addListener({ next: _ => {} });
+  sources.PoseDetection.events("poses").addListener({
+    next: poses => {
+      const features = extractFaceFeatures(poses);
+      const faceDirection = !features.isVisible
+        ? "noface"
+        : features.noseAngle > NOSE_ANGLE_THRESHOLD
+        ? "left"
+        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
+        ? "right"
+        : "center";
+      document.querySelector("#isFaceVisible").innerText = features.isVisible;
+      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
+    }
+  });
+  sources.VAD.addListener({
+    next: val => {
+      document.querySelector("#isHumanSpeaking").innerText = val;
+    }
+  });
   clearInterval(handle);
 });
 

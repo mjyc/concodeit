@@ -541,9 +541,26 @@ const sources = initialize({
 const handle = setInterval(() => {
   if (!sources) return;
   poses$ = sources.PoseDetection.events("poses").startWith([]);
-  poses$.addListener({ next: _ => {} });
+  poses$.addListener({
+    next: poses => {
+      const features = extractFaceFeatures(poses);
+      const faceDirection = !features.isVisible
+        ? "noface"
+        : features.noseAngle > NOSE_ANGLE_THRESHOLD
+        ? "left"
+        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
+        ? "right"
+        : "center";
+      document.querySelector("#isFaceVisible").innerText = features.isVisible;
+      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
+    }
+  });
   VAD$ = sources.VAD;
-  VAD$.addListener({ next: _ => {} });
+  VAD$.addListener({
+    next: val => {
+      document.querySelector("#isHumanSpeaking").innerText = val;
+    }
+  });
   clearInterval(handle);
 });
 
