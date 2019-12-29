@@ -11,6 +11,7 @@ import {
   createStreamEventListener
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
+import settings from "./settings.json";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -794,6 +795,20 @@ document.getElementById("load_xml").onchange = e => {
   };
   reader.readAsText(xmlFile);
 };
+
+const mode = settings.mode || "devel";
+
+if (mode === "study") {
+  window.onload = () => {
+    document.querySelector("#download_js").remove();
+    document.querySelector("#run_js").remove();
+    document.querySelector("#load_xml").remove();
+    document.querySelector("#run_js_label").remove();
+    document.querySelector("#load_xml_label").remove();
+    document.querySelector("#filename").remove();
+    document.querySelector("#js_view").remove();
+  };
+}
 
 //------------------------------------------------------------------------------
 // Scratch
