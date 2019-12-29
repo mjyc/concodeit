@@ -10,10 +10,10 @@
     <button id="stop">Stop</button>
     <button id="download_js">Download as JS</button>
     <button id="run_js">Run JS</button>
-    <span><small>/programs/</small></span>
+    <span id="run_js_label"><small>/programs/</small></span>
     <input id="filename" type="text" value="" />
     <button id="download_xml">Download as XML</button>
-    <span><small>Load XML</small></span>
+    <span id="load_xml_label"><small>Load XML</small></span>
     <input id="load_xml" name="load" type="file" />
 
     <xml id="startBlocks" style="display:none">
@@ -347,14 +347,13 @@
           >
           </category>
         </xml>
+        <div id="js_view">
+          <p class="label">JS</p>
+          <pre id="js"></pre>
+        </div>
       </div>
-      <div>
-        <p class="label">JS</p>
-        <pre id="js"></pre>
-      </div>
+      <div id="app"></div>
     </div>
-
-    <div id="app"></div>
 
     <script src="src/index.js"></script>
   </body>

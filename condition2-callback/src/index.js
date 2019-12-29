@@ -1,5 +1,7 @@
 import "./styles.css";
 
+require("util.promisify/shim")();
+import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
   actionNames,
@@ -7,9 +9,8 @@ import {
   makeSendGoal,
   makeCancelGoal
 } from "cycle-robot-drivers-async";
-require("util.promisify/shim")();
-import { promisify } from "util";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
+import settings from "./settings.json";
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -713,6 +714,21 @@ document.getElementById("load_xml").onchange = e => {
   };
   reader.readAsText(xmlFile);
 };
+
+const mode = settings.mode || "devel";
+
+if (mode === "study") {
+  window.onload = () => {
+    document.querySelector("#download_js").remove();
+    document.querySelector("#run_js").remove();
+    document.querySelector("#load_xml").remove();
+    document.querySelector("#run_js_label").remove();
+    document.querySelector("#load_xml_label").remove();
+    document.querySelector("#filename").remove();
+    document.querySelector("#js_view").remove();
+    document.querySelector(".posenet").style.display = "none";
+  };
+}
 
 //------------------------------------------------------------------------------
 // Scratch

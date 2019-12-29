@@ -2,7 +2,7 @@
   "private": "true",
   "main": "index.html",
   "scripts": {
-    "prestart": "rm -rf dist/programs && mkdir -p dist && cp -r programs dist/",
+    "prestart": "rm -rf dist/programs && mkdir -p dist && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
     "start": "parcel index.html --open",
     "build": "parcel build index.html",
     "devel": "rm -rf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async"
