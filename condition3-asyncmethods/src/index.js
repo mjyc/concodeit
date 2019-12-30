@@ -471,9 +471,7 @@ Blockly.JavaScript["is_gesture_finished"] = function(block) {
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
-  return !!block.getNextBlock()
-    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
-    : "";
+  return "";
 };
 
 //------------------------------------------------------------------------------

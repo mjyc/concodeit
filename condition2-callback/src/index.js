@@ -36,13 +36,20 @@ function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
-function sleep(sec, callback) {
+function sleep(sec) {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
 }
 
-const NOSE_ANGLE_THRESHOLD = 10;
 const eventHandles = {};
-function detectFaceDirectionChanged(id, callback) {
+function removeEventHandles() {
+  for (const key in eventHandles) {
+    const eventHandle = eventHandles[key];
+    eventHandle.stream.removeListener(eventHandle.listener);
+  }
+}
+
+const NOSE_ANGLE_THRESHOLD = 10;
+function onFaceDirectionChanged(id, callback) {
   let prevFaceDirection = null;
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
@@ -61,7 +68,6 @@ function detectFaceDirectionChanged(id, callback) {
           return;
         }
         if (faceDirection === prevFaceDirection) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, faceDirection);
       }
     }
@@ -70,12 +76,11 @@ function detectFaceDirectionChanged(id, callback) {
   return id;
 }
 
-function detectVADChanged(id, callback) {
+function onVADChanged(id, callback) {
   eventHandles[id] = {
     stream: sources.VAD.drop(1),
     listener: {
       next: val => {
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, val);
       }
     }
@@ -84,7 +89,22 @@ function detectVADChanged(id, callback) {
   return id;
 }
 
-function waitForFaceDirection(id, faceDirection, callback) {
+function onFaceAppears(id, callback) {
+  eventHandles[id] = {
+    stream: sources.PoseDetection.events("poses"),
+    listener: {
+      next: poses => {
+        const features = extractFaceFeatures(poses);
+        const curFaceVisible = features.isVisible;
+        if (curFaceVisible) callback(null, null);
+      }
+    }
+  };
+  eventHandles[id].stream.addListener(eventHandles[id].listener);
+  return id;
+}
+
+function onFaceDirection(id, faceDirection, callback) {
   eventHandles[id] = {
     stream: sources.PoseDetection.events("poses"),
     listener: {
@@ -98,7 +118,6 @@ function waitForFaceDirection(id, faceDirection, callback) {
           ? "right"
           : "center";
         if (curFaceDirection !== faceDirection) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, null);
       }
     }
@@ -107,13 +126,12 @@ function waitForFaceDirection(id, faceDirection, callback) {
   return id;
 }
 
-function waitForVoiceActivity(id, voiceActivity, callback) {
+function onVoiceActivity(id, voiceActivity, callback) {
   eventHandles[id] = {
     stream: sources.VAD,
     listener: {
       next: val => {
         if (val !== voiceActivity) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
         callback(null, val);
       }
     }
@@ -122,12 +140,70 @@ function waitForVoiceActivity(id, voiceActivity, callback) {
   return id;
 }
 
+const actionCallbacks = {};
+["sleep", "SpeechSynthesisAction", "FacialExpressionAction"].map(
+  actionName => (actionCallbacks[actionName] = [])
+);
+
+function removeActionCallbacks() {
+  for (const key in actionCallbacks) {
+    actionCallbacks[key] = [];
+  }
+}
+
+function when(id, eventName, callback) {
+  switch (eventName) {
+    case "humanFaceDirectionChanged":
+      onFaceDirectionChanged(id, callback);
+      return;
+    case "isHumanSpeakingChanged":
+      onVADChanged(id, callback);
+      return;
+    case "noHumanFaceFound":
+      onFaceDirection(id, "noface", callback);
+      return;
+    case "humanFaceFound":
+      onFaceAppears(id, callback);
+      return;
+    case "humanFaceLookingAtRight":
+      onFaceDirection(id, "right", callback);
+      return;
+    case "humanFaceLookingAtLeft":
+      onFaceDirection(id, "left", callback);
+      return;
+    case "humanFaceLookingAtCenter":
+      onFaceDirection(id, "center", callback);
+      return;
+    case "isHumanSpeakingFalse":
+      onVoiceActivity(id, false, callback);
+      return;
+    case "isHumanSpeakingTrue":
+      onVoiceActivity(id, true, callback);
+      return;
+    case "sleepDone":
+      actionCallbacks["sleep"].push(callback);
+      return;
+    case "sayDone":
+      actionCallbacks["SpeechSynthesisAction"].push(callback);
+      return;
+    case "gestureDone":
+      actionCallbacks["FacialExpressionAction"].push(callback);
+      return;
+    default:
+      throw new Error("unknown eventName", eventName);
+  }
+}
+
 function stopDetectChangeOrWait(id) {
   eventHandles[id].stream.removeListener(eventHandles[id].listener);
 }
 
-function startSleeping(duration, callback) {
-  setTimeout(callback, duration * 1000);
+function startSleeping(duration) {
+  setTimeout(() => {
+    for (const callback of actionCallbacks["sleep"]) {
+      callback();
+    }
+  }, duration * 1000);
 }
 
 function setMessage(message) {
@@ -142,42 +218,20 @@ function stopFollowingFace() {
   sources.followFace.shamefullySendNext(false);
 }
 
-function startSaying(text, callback) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, result =>
-    callback(result)
-  );
+function startSaying(text) {
+  sendActionGoalCallback("SpeechSynthesisAction", text, result => {
+    for (const callback of actionCallbacks["SpeechSynthesisAction"]) {
+      callback(result);
+    }
+  });
 }
 
-function startGesturing(gesture, callback) {
-  sendActionGoalCallback("FacialExpressionAction", gesture, result =>
-    callback(result)
-  );
-}
-
-function waitForEvent(event, callback) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceDirectionChanged") {
-    detectFaceDirectionChanged(id, callback);
-  } else if (event == "isHumanSpeakingChanged") {
-    detectVADChanged(id, callback);
-  }
-}
-
-function waitUntil(event, callback) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceLookingAtCenter") {
-    waitForFaceDirection(id, "center", callback);
-  } else if (event == "humanFaceLookingAtLeft") {
-    waitForFaceDirection(id, "left", callback);
-  } else if (event == "humanFaceLookingAtRight") {
-    waitForFaceDirection(id, "right", callback);
-  } else if (event == "noHumanFaceFound") {
-    waitForFaceDirection(id, "noface", callback);
-  } else if (event == "isHumanSpeakingFalse") {
-    waitForVoiceActivity(id, false, callback);
-  } else if (event == "isHumanSpeakingTrue") {
-    waitForVoiceActivity(id, true, callback);
-  }
+function startGesturing(gesture) {
+  sendActionGoalCallback("FacialExpressionAction", gesture, result => {
+    for (const callback of actionCallbacks["FacialExpressionAction"]) {
+      callback(result);
+    }
+  });
 }
 
 //------------------------------------------------------------------------------
@@ -240,25 +294,33 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_program",
-    message0: "start program",
-    nextStatement: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "sleep",
-    message0: "sleep for %1 then %2",
+    message0: "start program %1 %2",
     args0: [
       {
-        type: "input_value",
-        name: "SE",
-        check: "Number"
+        type: "input_dummy"
       },
       {
         type: "input_statement",
         name: "DO"
       }
+    ],
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "start_sleeping",
+    message0: "start sleeping for %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "SE",
+        check: "Number"
+      }
+      // {
+      //   type: "input_statement",
+      //   name: "DO"
+      // }
     ],
     previousStatement: null,
     nextStatement: null,
@@ -302,16 +364,12 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_saying",
-    message0: "start saying %1 then %2",
+    message0: "start saying %1",
     args0: [
       {
         type: "input_value",
         name: "MESSAGE",
         check: ["String", "Number"]
-      },
-      {
-        type: "input_statement",
-        name: "DO"
       }
     ],
     previousStatement: null,
@@ -322,7 +380,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "start_gesturing",
-    message0: "start gesturing %1 %2 then %3",
+    message0: "start gesturing %1",
     args0: [
       {
         type: "field_dropdown",
@@ -334,14 +392,14 @@ Blockly.defineBlocksWithJsonArray([
           ["focused", '"FOCUSED"'],
           ["confused", '"CONFUSED"']
         ]
-      },
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
       }
+      // {
+      //   type: "input_dummy"
+      // },
+      // {
+      //   type: "input_statement",
+      //   name: "DO"
+      // }
     ],
     previousStatement: null,
     nextStatement: null,
@@ -350,15 +408,25 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "wait_for",
-    message0: "wait for %1 %2 then %3",
+    type: "when",
+    message0: "when %1 %2 %3",
     args0: [
       {
         type: "field_dropdown",
         name: "SE",
         options: [
           ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
-          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
+          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"'],
+          ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
+          ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
+          ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
+          ["humanAppears", '"humanFaceFound"'],
+          ["humanDisappears", '"noHumanFaceFound"'],
+          ["humanSpeaks", '"isHumanSpeakingTrue"'],
+          ["humanStopsSpeaking", '"isHumanSpeakingFalse"'],
+          ["sleepDone", '"sleepDone"'],
+          ["sayDone", '"sayDone"'],
+          ["gestureDone", '"gestureDone"']
         ]
       },
       {
@@ -369,38 +437,6 @@ Blockly.defineBlocksWithJsonArray([
         name: "DO"
       }
     ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_until",
-    message0: "wait until %1 %2 then %3",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "SE",
-        options: [
-          ["humanFaceLookingAtCenter", '"humanFaceLookingAtCenter"'],
-          ["humanFaceLookingAtLeft", '"humanFaceLookingAtLeft"'],
-          ["humanFaceLookingAtRight", '"humanFaceLookingAtRight"'],
-          ["noHumanFaceFound", '"noHumanFaceFound"'],
-          ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
-          ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
-        ]
-      },
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -475,30 +511,25 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return (
-    "while (" +
-    argument0 +
-    ") {\n  await sleep(0.1);console.log('sleep');\n" +
-    branch +
-    "}\n"
-  );
+  return "while (" + argument0 + ") {\n  await sleep(0.1);\n" + branch + "}\n";
   return "";
 };
 
 function check(block) {
   return (
     block.getRootBlock().type === "start_program" ||
-    block.getRootBlock().type === "procedures_defnoreturn"
+    block.getRootBlock().type === "procedures_defnoreturn" ||
+    block.getRootBlock().type === "when"
   );
 }
 
-Blockly.JavaScript["sleep"] = function(block) {
+Blockly.JavaScript["start_sleeping"] = function(block) {
   return check(block)
     ? `startSleeping(${Blockly.JavaScript.valueToCode(
         block,
         "SE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}, _ => {\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+      )});\n`
     : "";
 };
 
@@ -526,10 +557,7 @@ Blockly.JavaScript["start_saying"] = function(block) {
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
+      )}));\n`
     : "";
 };
 
@@ -537,30 +565,25 @@ Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
     ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
         "MESSAGE"
-      )}), (result) => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}});\n`
+      )}));\n`
     : "";
 };
 
-Blockly.JavaScript["wait_for"] = function(block) {
-  return check(block)
-    ? `waitForEvent(String(${block.getFieldValue("SE")}), async (err, res) => {
-  event = res;\n${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
-    : "";
-};
-
-Blockly.JavaScript["wait_until"] = function(block) {
-  return check(block)
-    ? `waitUntil(String(${block.getFieldValue("SE")}), () => {
-${Blockly.JavaScript.statementToCode(block, "DO")}});\n`
+Blockly.JavaScript["when"] = function(block) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+  return stmtCode !== ""
+    ? `when(${id}, ${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
     : "";
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
-  return !!block.getNextBlock()
-    ? `// beg start_program\ncancelActionGoals();\n// end start_program\n`
+  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+  return stmtCode !== ""
+    ? `(async () => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}})();\n`
     : "";
 };
 
@@ -640,7 +663,10 @@ const run = code => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
+  removeEventHandles();
+  removeActionCallbacks();
   cancelActionGoals();
+  stopFollowingFace();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -657,6 +683,8 @@ const stop = () => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
+  removeEventHandles();
+  removeActionCallbacks();
   cancelActionGoals();
   stopFollowingFace();
 };
