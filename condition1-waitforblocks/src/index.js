@@ -11,7 +11,11 @@ import {
   createStreamEventListener
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
-import settings from "./settings.json";
+
+let settings = {};
+try {
+  settings = require("./settings.json");
+} catch (e) {}
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -717,8 +721,25 @@ const sources = initialize({
 
 const handle = setInterval(() => {
   if (!sources) return;
-  sources.PoseDetection.events("poses").addListener({ next: _ => {} });
-  sources.VAD.addListener({ next: _ => {} });
+  sources.PoseDetection.events("poses").addListener({
+    next: poses => {
+      const features = extractFaceFeatures(poses);
+      const faceDirection = !features.isVisible
+        ? "noface"
+        : features.noseAngle > NOSE_ANGLE_THRESHOLD
+        ? "left"
+        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
+        ? "right"
+        : "center";
+      document.querySelector("#isFaceVisible").innerText = features.isVisible;
+      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
+    }
+  });
+  sources.VAD.addListener({
+    next: val => {
+      document.querySelector("#isHumanSpeaking").innerText = val;
+    }
+  });
   clearInterval(handle);
 });
 
@@ -782,10 +803,13 @@ document.getElementById("run_js").onclick = e => {
     });
 };
 
+let startTime = Date.now();
 document.getElementById("download_xml").onclick = () => {
   const workspace = Blockly.getMainWorkspace();
   const xml = Blockly.Xml.workspaceToDom(workspace);
-  const xmlText = Blockly.Xml.domToText(xml);
+  const xmlText =
+    Blockly.Xml.domToText(xml) +
+    `\n<!-- ${startTime} -->\n<!-- ${Date.now()} -->`;
   const a = document.createElement("a");
   a.id = "xml";
   a.href = "data:text/xml;charset=utf-8," + encodeURIComponent(xmlText);

@@ -1,5 +1,7 @@
 import "./styles.css";
 
+require("util.promisify/shim")();
+import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
   actionNames,
@@ -8,8 +10,11 @@ import {
   makeCancelGoal
 } from "cycle-robot-drivers-async";
 import { extractFaceFeatures } from "tabletrobotface-userstudy";
-require("util.promisify/shim")();
-import { promisify } from "util";
+
+let settings = {};
+try {
+  settings = require("./settings.json");
+} catch (e) {}
 
 //------------------------------------------------------------------------------
 // Helper Function Definitions
@@ -538,9 +543,26 @@ const sources = initialize({
 const handle = setInterval(() => {
   if (!sources) return;
   poses$ = sources.PoseDetection.events("poses").startWith([]);
-  poses$.addListener({ next: _ => {} });
+  poses$.addListener({
+    next: poses => {
+      const features = extractFaceFeatures(poses);
+      const faceDirection = !features.isVisible
+        ? "noface"
+        : features.noseAngle > NOSE_ANGLE_THRESHOLD
+        ? "left"
+        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
+        ? "right"
+        : "center";
+      document.querySelector("#isFaceVisible").innerText = features.isVisible;
+      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
+    }
+  });
   VAD$ = sources.VAD;
-  VAD$.addListener({ next: _ => {} });
+  VAD$.addListener({
+    next: val => {
+      document.querySelector("#isHumanSpeaking").innerText = val;
+    }
+  });
   clearInterval(handle);
 });
 
@@ -617,10 +639,13 @@ document.getElementById("run_js").onclick = e => {
     });
 };
 
+let startTime = Date.now();
 document.getElementById("download_xml").onclick = () => {
   const workspace = Blockly.getMainWorkspace();
   const xml = Blockly.Xml.workspaceToDom(workspace);
-  const xmlText = Blockly.Xml.domToText(xml);
+  const xmlText =
+    Blockly.Xml.domToText(xml) +
+    `\n<!-- ${startTime} -->\n<!-- ${Date.now()} -->`;
   const a = document.createElement("a");
   a.id = "xml";
   a.href = "data:text/xml;charset=utf-8," + encodeURIComponent(xmlText);
@@ -640,6 +665,21 @@ document.getElementById("load_xml").onchange = e => {
   };
   reader.readAsText(xmlFile);
 };
+
+const mode = settings.mode || "devel";
+
+if (mode === "study") {
+  window.onload = () => {
+    document.querySelector("#download_js").remove();
+    document.querySelector("#run_js").remove();
+    document.querySelector("#load_xml").remove();
+    document.querySelector("#run_js_label").remove();
+    document.querySelector("#load_xml_label").remove();
+    document.querySelector("#filename").remove();
+    document.querySelector("#js_view").remove();
+    document.querySelector(".posenet").style.display = "none";
+  };
+}
 
 //------------------------------------------------------------------------------
 // Scratch
