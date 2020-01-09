@@ -568,9 +568,7 @@ Blockly.JavaScript["start_saying"] = function(block) {
 
 Blockly.JavaScript["start_gesturing"] = function(block) {
   return check(block)
-    ? `sendActionGoalCallback("FacialExpressionAction", String(${block.getFieldValue(
-        "MESSAGE"
-      )}));\n`
+    ? `startGesturing(String(${block.getFieldValue("MESSAGE")}));\n`
     : "";
 };
 
