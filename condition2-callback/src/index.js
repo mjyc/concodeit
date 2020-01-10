@@ -73,6 +73,7 @@ function onFaceDirectionChanged(id, callback) {
           return;
         }
         if (faceDirection === prevFaceDirection) return;
+        prevFaceDirection = faceDirection;
         callback(null, faceDirection);
       }
     }
@@ -123,6 +124,7 @@ function onFaceDirection(id, faceDirection, callback) {
           ? "right"
           : "center";
         if (curFaceDirection !== faceDirection) return;
+        curFaceDirection = faceDirection;
         callback(null, null);
       }
     }
