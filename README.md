@@ -16,6 +16,6 @@ npm run
 
 # Demos
 
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/codesandbox/condition1-waitforblocks
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/codesandbox/condition2-callback
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/codesandbox/condition3-asyncmethods
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/condition1-waitforblocks
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/condition2-callback
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/condition3-asyncmethods
