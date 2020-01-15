@@ -1,19 +1,28 @@
-var say_done, gesture_done;
+var alreadyDone, gestureDone, sayDone;
 
-
-// beg start_program
-cancelActionGoals();
-// end start_program
-startSaying(String('Hello there!'), (result) => {
-  say_done = true;
-});
-sendActionGoalCallback("FacialExpressionAction", String("HAPPY"), (result) => {
-  gesture_done = true;
-});
-while (!say_done || !gesture_done) {
-  await sleep(0.1);console.log('sleep');
+/**
+ * Describe this function...
+ */
+function finish() {
+  if (!alreadyDone && sayDone && gestureDone) {
+    startSaying(String('My name is Meebo'));
+    startGesturing(String("HAPPY"));
+    alreadyDone = true;
+  }
 }
-startSaying(String('My name is Meebo'), (result) => {
-});
-sendActionGoalCallback("FacialExpressionAction", String("ANGRY"), (result) => {
-});
+
+
+(async () => {
+  alreadyDone = false;
+  startSaying(String('Hello there!'));
+  startGesturing(String("HAPPY"));
+})();
+
+when(91118398, "gestureDone", (res, err) => {
+  gestureDone = true;
+  finish();
+})
+when(50201359, "sayDone", (res, err) => {
+  sayDone = true;
+  finish();
+})

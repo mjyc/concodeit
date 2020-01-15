@@ -1,16 +1,23 @@
-var look_left, look_right;
+var alreadyDone;
 
-
-// beg start_program
-cancelActionGoals();
-// end start_program
-waitUntil(String("humanFaceLookingAtLeft"), () => {
-  look_left = true;
-});
-waitUntil(String("humanFaceLookingAtRight"), () => {
-  look_right = true;
-});
-while (!look_left && !look_right) {
-  await sleep(0.1);console.log('sleep');
+/**
+ * Describe this function...
+ */
+function finish() {
+  if (!alreadyDone) {
+    startSaying(String('Bye now!'));
+    alreadyDone = true;
+  }
 }
-setMessage(String('Bye now!'));
+
+
+(async () => {
+  alreadyDone = false;
+})();
+
+when(36142940, "humanFaceLookingAtLeft", (res, err) => {
+  finish();
+})
+when(18288486, "humanFaceLookingAtRight", (res, err) => {
+  finish();
+})

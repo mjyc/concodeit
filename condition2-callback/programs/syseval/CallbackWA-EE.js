@@ -1,17 +1,25 @@
-var face_appear, no_speak;
+var alreadyDone, doneSpeaking, lookingAtCenter;
 
-
-// beg start_program
-cancelActionGoals();
-// end start_program
-waitUntil(String("humanFaceLookingAtCenter"), () => {
-  face_appear = true;
-});
-waitUntil(String("isHumanSpeakingFalse"), () => {
-  no_speak = true;
-});
-while (!face_appear || !no_speak) {
-  await sleep(0.1);console.log('sleep');
+/**
+ * Describe this function...
+ */
+function finish() {
+  if (!alreadyDone && lookingAtCenter && doneSpeaking) {
+    startSaying(String('Hello'));
+    alreadyDone = true;
+  }
 }
-startSaying(String('Hello'), (result) => {
-});
+
+
+(async () => {
+  alreadyDone = false;
+})();
+
+when(45859501, "isHumanSpeakingFalse", (res, err) => {
+  doneSpeaking = true;
+  finish();
+})
+when(79396169, "humanFaceLookingAtCenter", (res, err) => {
+  lookingAtCenter = true;
+  finish();
+})

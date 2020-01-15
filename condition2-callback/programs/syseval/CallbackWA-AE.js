@@ -1,17 +1,26 @@
-var say_done, face_appear;
+var alreadyDone, lookingCenter, sayDone;
 
-
-// beg start_program
-cancelActionGoals();
-// end start_program
-startSaying(String('Hello there!'), (result) => {
-  say_done = true;
-});
-waitUntil(String("humanFaceLookingAtCenter"), () => {
-  face_appear = true;
-});
-while (!say_done || !face_appear) {
-  await sleep(0.1);console.log('sleep');
+/**
+ * Describe this function...
+ */
+function finish() {
+  if (!alreadyDone && lookingCenter && sayDone) {
+    startSaying(String('Nice to meet you'));
+    alreadyDone = true;
+  }
 }
-startSaying(String('Nice to meet you!'), (result) => {
-});
+
+
+(async () => {
+  alreadyDone = false;
+  startSaying(String('Hello there!'));
+})();
+
+when(72768791, "humanFaceLookingAtCenter", (res, err) => {
+  lookingCenter = true;
+  finish();
+})
+when(34295151, "sayDone", (res, err) => {
+  sayDone = true;
+  finish();
+})

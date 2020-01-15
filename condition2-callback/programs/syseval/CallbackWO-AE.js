@@ -1,16 +1,24 @@
-var say_done, no_face;
+var alreadyDone;
 
-
-// beg start_program
-cancelActionGoals();
-// end start_program
-startSaying(String('Hello there, my name is Meebo. Goodbye now!'), (result) => {
-  say_done = true;
-});
-waitUntil(String("noHumanFaceFound"), () => {
-  no_face = true;
-});
-while (!say_done && !no_face) {
-  await sleep(0.1);console.log('sleep');
+/**
+ * Describe this function...
+ */
+function finish() {
+  if (!alreadyDone) {
+    startSaying(String('On standby'));
+    alreadyDone = true;
+  }
 }
-setMessage(String('On standby'));
+
+
+(async () => {
+  alreadyDone = false;
+  startSaying(String('Hello there, my name is Meebo. Goodbye now!'));
+})();
+
+when(80338303, "sayDone", (res, err) => {
+  finish();
+})
+when(22871058, "noHumanFaceFound", (res, err) => {
+  finish();
+})

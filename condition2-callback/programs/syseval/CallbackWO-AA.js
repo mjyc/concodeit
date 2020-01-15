@@ -1,17 +1,25 @@
-var say_done, sleep_done;
+var alreadyDone;
 
-
-// beg start_program
-cancelActionGoals();
-// end start_program
-startSaying(String('Hello'), (result) => {
-  say_done = true;
-});
-startSleeping(3, _ => {
-  sleep_done = true;
-});
-while (!say_done && !sleep_done) {
-  await sleep(0.1);console.log('sleep');
+/**
+ * Describe this function...
+ */
+function finish() {
+  if (!alreadyDone) {
+    startSaying(String('Timed out'));
+    alreadyDone = true;
+  }
 }
-startSaying(String('Timed out'), (result) => {
-});
+
+
+(async () => {
+  alreadyDone = false;
+  startSaying(String('Hello'));
+  startSleeping(3);
+})();
+
+when(56626658, "sayDone", (res, err) => {
+  finish();
+})
+when(77385923, "sleepDone", (res, err) => {
+  finish();
+})
