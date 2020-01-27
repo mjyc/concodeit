@@ -69,61 +69,26 @@ function main(sources) {
       })
   );
 
-  // TODO: automatically generate the below
-  return {
-    tabletFace: tabletFace$,
-    FacialExpressionAction: {
-      goal: goals$
-        .filter(goals => goals.type === "FacialExpressionAction")
-        .map(goals => goals.value),
-      cancel: cancels$
-        .filter(cancels => cancels.type === "FacialExpressionAction")
-        .map(cancels => cancels.value)
+  return Object.assign(
+    {
+      tabletFace: tabletFace$
     },
-    RobotSpeechbubbleAction: {
-      goal: goals$
-        .filter(goals => goals.type === "RobotSpeechbubbleAction")
-        .map(goals => goals.value),
-      cancel: cancels$
-        .filter(cancels => cancels.type === "RobotSpeechbubbleAction")
-        .map(cancels => cancels.value)
-    },
-    HumanSpeechbubbleAction: {
-      goal: goals$
-        .filter(goals => goals.type === "HumanSpeechbubbleAction")
-        .map(goals => goals.value),
-      cancel: cancels$
-        .filter(cancels => cancels.type === "HumanSpeechbubbleAction")
-        .map(cancels => cancels.value)
-    },
-    AudioPlayerAction: {
-      goal: goals$
-        .filter(goals => goals.type === "AudioPlayerAction")
-        .map(goals => goals.value),
-      cancel: cancels$
-        .filter(cancels => cancels.type === "AudioPlayerAction")
-        .map(cancels => cancels.value)
-    },
-    SpeechSynthesisAction: {
-      goal: goals$
-        .filter(goals => goals.type === "SpeechSynthesisAction")
-        .map(goals => goals.value),
-      cancel: cancels$
-        .filter(cancels => cancels.type === "SpeechSynthesisAction")
-        .map(cancels => cancels.value)
-    },
-    SpeechRecognitionAction: {
-      goal: goals$
-        .filter(goals => goals.type === "SpeechRecognitionAction")
-        .map(goals => goals.value),
-      cancel: cancels$
-        .filter(cancels => cancels.type === "SpeechRecognitionAction")
-        .map(cancels => cancels.value)
-    }
-  };
+    actionNames.reduce((prev, actionName) => {
+      prev[actionName] = {
+        goal: goals$
+          .filter(goals => goals.type === actionName)
+          .map(goals => goals.value),
+        cancel: cancels$
+          .filter(cancels => cancels.type === actionName)
+          .map(cancels => cancels.value)
+      };
+      return prev;
+    }, {})
+  );
 }
 
 let sources;
+let sinks;
 
 export function initialize(options = {}) {
   if (typeof options.container === "undefined") {
@@ -133,7 +98,8 @@ export function initialize(options = {}) {
     s => {
       s.followFace = xs.create();
       sources = s;
-      return main(s);
+      sinks = main(s);
+      return sinks;
     },
     {
       DOM: makeDOMDriver(options.container),
@@ -145,25 +111,10 @@ export function initialize(options = {}) {
   return sources;
 }
 
-export function initializeMock(options = {}) {
-  return {};
-  // if (typeof options.container === "undefined") {
-  //   options.container = document.body.getElementsByTagName("div")[0];
-  // }
-  // runTabletRobotFaceApp(
-  //   s => {
-  //     s.followFace = xs.create();
-  //     sources = s;
-  //     return main(s);
-  //   },
-  //   {
-  //     DOM: makeDOMDriver(options.container),
-  //     TabletFace: makeTabletFaceDriver(options.TabletFace),
-  //     VAD: makeVADDriver()
-  //   },
-  //   options
-  // );
-  // return sources;
+export function mockInitialize({ mockSources = {} } = {}) {
+  sources = mockSources;
+  sinks = main(sources);
+  return { sources, sinks };
 }
 
 export function makeSendGoal(actionName) {

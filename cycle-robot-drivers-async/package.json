@@ -1,13 +1,13 @@
 {
   "name": "cycle-robot-drivers-async",
   "version": "0.0.6",
-  "description": "cycle-robot-drivers with async callbacks",
+  "description": "cycle-robot-drivers without FRP",
   "main": "dist/index.js",
   "source": "src/index.js",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "test": "jest"
+    "test": "npx jest --env=./test/custom-test-env.js"
   },
   "dependencies": {
     "@cycle-robot-drivers/action": "1.0.1",
