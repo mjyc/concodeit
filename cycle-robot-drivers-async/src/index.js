@@ -69,6 +69,7 @@ function main(sources) {
       })
   );
 
+  // TODO: automatically generate the below
   return {
     tabletFace: tabletFace$,
     FacialExpressionAction: {
@@ -142,6 +143,27 @@ export function initialize(options = {}) {
     options
   );
   return sources;
+}
+
+export function initializeMock(options = {}) {
+  return {};
+  // if (typeof options.container === "undefined") {
+  //   options.container = document.body.getElementsByTagName("div")[0];
+  // }
+  // runTabletRobotFaceApp(
+  //   s => {
+  //     s.followFace = xs.create();
+  //     sources = s;
+  //     return main(s);
+  //   },
+  //   {
+  //     DOM: makeDOMDriver(options.container),
+  //     TabletFace: makeTabletFaceDriver(options.TabletFace),
+  //     VAD: makeVADDriver()
+  //   },
+  //   options
+  // );
+  // return sources;
 }
 
 export function makeSendGoal(actionName) {
