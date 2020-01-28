@@ -1,21 +1,22 @@
-# ConCodeIt
+# ConCodeIt!
 
-A [Blockly](https://developers.google.com/blockly/) wrapper for robotics programs. For now, it is integrated with [cycle-robot-drivers](https://github.com/mjyc/cycle-robot-drivers) but we hope to integrate with other robot frameworks such as [ROS](http://wiki.ros.org).
+A visual programming for authoring interactive programs.
+ConCodeIt! is built with [Blockly](https://developers.google.com/blockly/) and is integrated with [cycle-robot-drivers](https://github.com/mjyc/cycle-robot-drivers).
 
-ConCodeIt stands for "concurrent" [CodeIt](https://github.com/hcrlab/code_it) and is built to help novice programmers with creating reactive, interactive robot programs easy for novice users.
+ConCodeIt stands for "concurrent" [CodeIt](https://github.com/hcrlab/code_it) and is built to help novice programmers with creating reactive, interactive robot programs easy for novice programmers.
 
-# Getting started
+## Getting Started
 
 There are three versions of ConCodeIt. To run the the first version, do
 
 ```
-cd condition1-waitforblocks  # or condition2-callback or condition2-asyncmethods
+cd waitfor  # or callback or async
 npm install
 npm run
 ```
 
-# Demos
+## Demo
 
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/condition1-waitforblocks
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/condition2-callback
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/condition3-asyncmethods
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/waitfor
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/callback
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/async
