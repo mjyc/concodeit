@@ -7,7 +7,7 @@
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "test": "npx jest --env=./test/custom-test-env.js"
+    "test": "npx jest --env=./custom_test_env.js"
   },
   "author": "Michael Jae-Yoon Chung",
   "license": "MIT",

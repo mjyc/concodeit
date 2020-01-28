@@ -1,10 +1,4 @@
-import {
-  actionNames,
-  initialize,
-  makeSendGoal,
-  makeCancelGoal,
-  createStreamEventListener
-} from "cycle-robot-drivers-async";
+const { sendActionGoal } = require("cycle-robot-drivers-async");
 
 const say = text => {
   return sendActionGoal("SpeechSynthesisAction", String(message));
@@ -58,4 +52,6 @@ const say = text => {
 //   });
 // };
 
-module.export = {};
+module.export = {
+  say
+};
