@@ -36,17 +36,8 @@ const waitForAll = subprogs => {
   return Promise.race(subprogs);
 };
 
-// const waitForEventHandles = {
-//   speechDetected: null,
-//   buttonPressed: null,
-// }
 const waitForEvent = eventName => {
   return robot.once(eventName);
-  // // waitForEvent
-  // waitForEvent2(sources.HumanSpeechbubbleAction.result, (err, val) => {
-  //   // err, val;
-  //   return;
-  // })
 };
 
 module.exports = {

@@ -188,6 +188,9 @@ const onceHandles = {};
 
 export let robot = {
   once: eventName => {
+    if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
+      throw new Error(`Invalid input "eventName" ${eventName}`);
+    }
     const id = Math.floor(Math.random() * Math.pow(10, 8));
 
     // TODO: create if & else based on eventName
