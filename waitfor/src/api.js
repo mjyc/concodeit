@@ -30,11 +30,11 @@ const displayButton = (buttons, duration) => {
 };
 
 const waitForOne = subprogs => {
-  return Promise.all(subprogs);
+  return Promise.race(subprogs);
 };
 
 const waitForAll = subprogs => {
-  return Promise.race(subprogs);
+  return Promise.all(subprogs);
 };
 
 const waitForEvent = eventName => {

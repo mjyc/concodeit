@@ -357,7 +357,7 @@ Blockly.JavaScript["wait_for_event"] = function(block) {
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
   return check(block)
-    ? `await waitForAll(${[0, 1]
+    ? `await waitForAll([${[0, 1]
         .map(
           i =>
             `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
@@ -365,7 +365,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
               `DO${i}`
             )}  cb(null, null);\n})()`
         )
-        .join(", ")});\n`
+        .join(", ")}]);\n`
     : "";
 };
 
@@ -374,7 +374,7 @@ const _stop = [];
 Blockly.JavaScript["wait_for_one"] = function(block) {
   const id = block.id;
   return check(block)
-    ? `_stop["${id}"] = false;\nawait waitForOne(${[0, 1]
+    ? `_stop["${id}"] = false;\nawait waitForOne([${[0, 1]
         .map(
           i =>
             `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
@@ -385,7 +385,7 @@ Blockly.JavaScript["wait_for_one"] = function(block) {
               `; if (_stop["${block.id}"]) return;\n`
             )}  cb(null, null);\n})()`
         )
-        .join(", ")});\n_stop["${block.id}"] = true;\n`
+        .join(", ")}]);\n_stop["${block.id}"] = true;\n`
     : "";
 };
 
@@ -447,6 +447,9 @@ const _exit = [1];
 function stop() {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
+  }
+  for (const key in _stop) {
+    _stop[key] = true;
   }
   off();
   cancelActionGoals();
