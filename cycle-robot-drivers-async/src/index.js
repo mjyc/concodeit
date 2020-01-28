@@ -183,3 +183,38 @@ export function sendActionGoal(actionName, goal) {
     );
   })(goal);
 }
+
+const onceHandles = {};
+
+export let robot = {
+  once: eventName => {
+    const id = Math.floor(Math.random() * Math.pow(10, 8));
+
+    // TODO: create if & else based on eventName
+    const stream = sources.HumanSpeechbubbleAction.result;
+    const eventPred = result => {
+      return result.status.status === "SUCCEEDED";
+    };
+    const eventHandler = (val, cb) => {
+      onceHandles[id].stream.removeListener(onceHandles[id].listener);
+      cb(null, val.result);
+    };
+
+    onceHandles[id] = {
+      listener: null,
+      stream,
+      stop: () => {
+        onceHandles[id].stream.removeListener(onceHandles[id].listener);
+      }
+    };
+
+    return promisify((pred, handler, cb) => {
+      onceHandles[id].listener = {
+        next: val => {
+          if (pred(val)) handler(val, cb);
+        }
+      };
+      onceHandles[id].stream.addListener(onceHandles[id].listener);
+    })(eventPred, eventHandler);
+  }
+};

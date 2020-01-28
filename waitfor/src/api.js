@@ -1,6 +1,6 @@
 require("util.promisify/shim")();
 const { promisify } = require("util");
-const { sendActionGoal } = require("cycle-robot-drivers-async");
+const { sendActionGoal, robot } = require("cycle-robot-drivers-async");
 
 const sleep = duration => {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(duration);
@@ -28,50 +28,34 @@ const displayButton = (buttons, duration) => {
   ]).then(() => null);
 };
 
-// const waitForOne = subprogs => {};
+const waitForOne = subprogs => {
+  return Promise.all(subprogs);
+};
 
-// const waitForAll = subprogs => {};
+const waitForAll = subprogs => {
+  return Promise.race(subprogs);
+};
 
-// // const waitForEventHandles = {
-// //   speechDetected: null,
-// //   buttonPressed: null,
-// // }
-// const waitForEvent = (eventName) => {
-//   // can it wait for action results? yes it should, test it.
-//   // speechDetected
-//   // buttonPressed
-//   // consider using ID
-//   if (waitForEventHandles[eventName]) {
-//     waitForEventHandles[eventName].stream.removeListener(eventHandles[id].listener);
-//   }
-//   // sources.DOM.events().
-//   return promisify((pred, cb) => {
-//     eventHandles[id].listener = createStreamEventListener(
-//       poses => {
-//         const faceFeatures = extractFaceFeatures(poses);
-//         return pred(
-//           !faceFeatures.isVisible
-//             ? "noface"
-//             : faceFeatures.noseAngle < -NOSE_ANGLE_THRESHOLD
-//             ? "right"
-//             : faceFeatures.noseAngle > NOSE_ANGLE_THRESHOLD
-//             ? "left"
-//             : "center"
-//         );
-//       },
-//       (err, val) => {
-//         eventHandles[id].stream.removeListener(eventHandles[id].listener);
-//         cb(err, direction);
-//       }
-//     );
-//     eventHandles[id].stream.addListener(eventHandles[id].listener);
-//   });
-// };
+// const waitForEventHandles = {
+//   speechDetected: null,
+//   buttonPressed: null,
+// }
+const waitForEvent = eventName => {
+  return robot.once(eventName);
+  // // waitForEvent
+  // waitForEvent2(sources.HumanSpeechbubbleAction.result, (err, val) => {
+  //   // err, val;
+  //   return;
+  // })
+};
 
 module.exports = {
   sleep,
   say,
   express,
   displayText,
-  displayButton
+  displayButton,
+  waitForOne,
+  waitForAll,
+  waitForEvent
 };
