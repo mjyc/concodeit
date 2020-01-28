@@ -205,11 +205,9 @@ export function once(eventName) {
       ? sinks.speechDetected
       : sources.HumanSpeechbubbleAction.result
           .filter(result => {
-            console.error(result);
             return result.status.status === "SUCCEEDED";
           })
           .map(r => {
-            console.error(r);
             return r.result;
           });
   const eventHandler = (val, cb) => {

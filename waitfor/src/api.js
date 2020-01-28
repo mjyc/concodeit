@@ -1,6 +1,6 @@
 require("util.promisify/shim")();
 const { promisify } = require("util");
-const { sendActionGoal, robot } = require("cycle-robot-drivers-async");
+const { sendActionGoal, once } = require("cycle-robot-drivers-async");
 
 const sleep = duration => {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(duration);
@@ -37,7 +37,7 @@ const waitForAll = subprogs => {
 };
 
 const waitForEvent = eventName => {
-  return robot.once(eventName);
+  return once(eventName);
 };
 
 module.exports = {

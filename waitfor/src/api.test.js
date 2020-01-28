@@ -5,6 +5,7 @@ console.warn = jest.fn(); // hide webgl outputs
 
 const xs = require("xstream").default;
 const { mockTimeSource } = require("@cycle/time");
+const { mockDOMSource } = require("@cycle/dom");
 const { actionNames, mockInitialize } = require("cycle-robot-drivers-async");
 const {
   sleep,
@@ -21,7 +22,13 @@ test("say", async () => {
   // setup main
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
-      {},
+      {
+        DOM: mockDOMSource({
+          ".speech": {
+            keypress: xs.never()
+          }
+        })
+      },
       {
         PoseDetection: {
           events: () => xs.create()
@@ -60,7 +67,13 @@ test("express", async () => {
   // setup main
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
-      {},
+      {
+        DOM: mockDOMSource({
+          ".speech": {
+            keypress: xs.never()
+          }
+        })
+      },
       {
         PoseDetection: {
           events: () => xs.create()
@@ -99,7 +112,13 @@ test("displayText", async () => {
   // setup main
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
-      {},
+      {
+        DOM: mockDOMSource({
+          ".speech": {
+            keypress: xs.never()
+          }
+        })
+      },
       {
         PoseDetection: {
           events: () => xs.create()
@@ -138,7 +157,13 @@ test("displayButton", async () => {
   // setup main
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
-      {},
+      {
+        DOM: mockDOMSource({
+          ".speech": {
+            keypress: xs.never()
+          }
+        })
+      },
       {
         PoseDetection: {
           events: () => xs.create()
@@ -177,7 +202,13 @@ test("waitForEvent - buttonPressed", async () => {
   // setup main
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
-      {},
+      {
+        DOM: mockDOMSource({
+          ".speech": {
+            keypress: xs.never()
+          }
+        })
+      },
       {
         PoseDetection: {
           events: () => xs.create()
