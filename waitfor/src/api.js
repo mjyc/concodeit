@@ -1,10 +1,12 @@
 const { sendActionGoal } = require("cycle-robot-drivers-async");
 
 const say = text => {
-  return sendActionGoal("SpeechSynthesisAction", String(message));
+  return sendActionGoal("SpeechSynthesisAction", String(text));
 };
 
-// const express = expression => {};
+const express = expression => {
+  return sendActionGoal("FacialExpressionAction", String(expression));
+};
 
 // const displayText = (text, duration) => {}; //
 
@@ -52,6 +54,7 @@ const say = text => {
 //   });
 // };
 
-module.export = {
-  say
+module.exports = {
+  say,
+  express
 };

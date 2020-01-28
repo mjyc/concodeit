@@ -1,3 +1,5 @@
+require("util.promisify/shim")();
+import { promisify } from "util";
 import xs from "xstream";
 import sampleCombine from "xstream/extra/sampleCombine";
 import { makeDOMDriver } from "@cycle/dom";
@@ -162,14 +164,22 @@ export function createStreamEventListener(predicate, callback) {
   };
 }
 
+export let sendActionGoalHandles = actionNames.reduce((prev, actionName) => {
+  prev[actionName] = null;
+  return prev;
+}, {});
+
 export function sendActionGoal(actionName, goal) {
   return promisify((g, callback) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (!err && val.status.status === "SUCCEEDED") {
-        callback(null, val.result);
-      } else {
-        callback(null, null);
+    sendActionGoalHandles[actionName] = makeSendGoal(actionName)(
+      g,
+      (err, val) => {
+        if (!err && val.status.status === "SUCCEEDED") {
+          callback(null, val.result);
+        } else {
+          callback(null, null);
+        }
       }
-    });
+    );
   })(goal);
 }
