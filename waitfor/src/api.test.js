@@ -6,7 +6,7 @@ console.warn = jest.fn(); // hide webgl outputs
 const xs = require("xstream").default;
 const { mockTimeSource } = require("@cycle/time");
 const { actionNames, mockInitialize } = require("cycle-robot-drivers-async");
-const { say, express } = require("./api");
+const { say, express, displayText } = require("./api");
 
 test("say", async () => {
   const Time = mockTimeSource();
@@ -86,41 +86,41 @@ test("express", async () => {
   expect(actual).toBe(expected);
 });
 
-// test("displayText", async () => {
-//   const Time = mockTimeSource();
+test("displayText", async () => {
+  const Time = mockTimeSource();
 
-//   // setup main
-//   const { sources, sinks } = mockInitialize({
-//     mockSources: Object.assign(
-//       {},
-//       {
-//         PoseDetection: {
-//           events: () => xs.create()
-//         }
-//       },
-//       actionNames.reduce((prev, actionName) => {
-//         prev[actionName] = {
-//           status: xs.create(),
-//           result: xs.create()
-//         };
-//         return prev;
-//       }, {})
-//     )
-//   });
+  // setup main
+  const { sources, sinks } = mockInitialize({
+    mockSources: Object.assign(
+      {},
+      {
+        PoseDetection: {
+          events: () => xs.create()
+        }
+      },
+      actionNames.reduce((prev, actionName) => {
+        prev[actionName] = {
+          status: xs.create(),
+          result: xs.create()
+        };
+        return prev;
+      }, {})
+    )
+  });
 
-//   sinks.HumanSpeechbubbleAction.goal.addListener({
-//     next: goal => {
-//       sources.HumanSpeechbubbleAction.result.shamefullySendNext({
-//         status: {
-//           goal_id: goal.goal_id,
-//           status: "SUCCEEDED"
-//         },
-//         result: goal.goal
-//       });
-//     }
-//   });
+  sinks.HumanSpeechbubbleAction.goal.addListener({
+    next: goal => {
+      sources.HumanSpeechbubbleAction.result.shamefullySendNext({
+        status: {
+          goal_id: goal.goal_id,
+          status: "SUCCEEDED"
+        },
+        result: null
+      });
+    }
+  });
 
-//   const expected = "HAPPY";
-//   const actual = await express(expected);
-//   expect(actual).toBe(expected);
-// });
+  const expected = null;
+  const actual = await displayText("Hello world!", 0.1);
+  expect(actual).toBe(expected);
+});

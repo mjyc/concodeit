@@ -1,3 +1,5 @@
+require("util.promisify/shim")();
+const { promisify } = require("util");
 const { sendActionGoal } = require("cycle-robot-drivers-async");
 
 const sleep = duration => {
@@ -14,9 +16,9 @@ const express = expression => {
 
 const displayText = (text, duration) => {
   return Promise.race([
-    sendActionGoal("HumanSpeechbubbleAction", String(expression)),
+    sendActionGoal("HumanSpeechbubbleAction", String(text)),
     sleep(duration)
-  ]);
+  ]).then(() => null);
 };
 
 // const displayButton = (buttons, duration) => {
