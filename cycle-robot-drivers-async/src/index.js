@@ -2,7 +2,7 @@ require("util.promisify/shim")();
 import { promisify } from "util";
 import xs from "xstream";
 import sampleCombine from "xstream/extra/sampleCombine";
-import { makeDOMDriver } from "@cycle/dom";
+import { div, label, input, makeDOMDriver } from "@cycle/dom";
 import { makeTabletFaceDriver } from "@cycle-robot-drivers/screen";
 import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
 import {
@@ -70,10 +70,23 @@ function main(sources) {
         }
       })
   );
+  // fake speech input
+  const speechDetected$ = sources.DOM.select(".speech")
+    .events("keypress")
+    .filter(ev => ev.key === "Enter")
+    .map(ev => ev.target.value);
+  const vdom$ = xs.of(
+    div([
+      label("type and press enter:"),
+      input(".speech", { attr: { type: "text" } })
+    ])
+  );
 
   return Object.assign(
     {
-      tabletFace: tabletFace$
+      tabletFace: tabletFace$,
+      speechDetected: speechDetected$,
+      dom: vdom$
     },
     actionNames.reduce((prev, actionName) => {
       prev[actionName] = {
@@ -95,6 +108,9 @@ let sinks;
 export function initialize(options = {}) {
   if (typeof options.container === "undefined") {
     options.container = document.body.getElementsByTagName("div")[0];
+  }
+  if (typeof options.hidePoseViz === "undefined") {
+    options.hidePoseViz = true;
   }
   runTabletRobotFaceApp(
     s => {
@@ -156,14 +172,6 @@ export function makeCancelGoal(actionName) {
   };
 }
 
-export function createStreamEventListener(predicate, callback) {
-  return {
-    next: val => {
-      if (predicate(val)) callback(null, val);
-    }
-  };
-}
-
 export let sendActionGoalHandles = actionNames.reduce((prev, actionName) => {
   prev[actionName] = null;
   return prev;
@@ -186,38 +194,44 @@ export function sendActionGoal(actionName, goal) {
 
 const onceHandles = {};
 
-export let robot = {
-  once: eventName => {
-    if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
-      throw new Error(`Invalid input "eventName" ${eventName}`);
-    }
-    const id = Math.floor(Math.random() * Math.pow(10, 8));
+export function once(eventName) {
+  if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
+    throw new Error(`Invalid input "eventName" ${eventName}`);
+  }
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
 
-    // TODO: create if & else based on eventName
-    const stream = sources.HumanSpeechbubbleAction.result;
-    const eventPred = result => {
-      return result.status.status === "SUCCEEDED";
-    };
-    const eventHandler = (val, cb) => {
+  const stream =
+    eventName === "speechDetected"
+      ? sinks.speechDetected
+      : sources.HumanSpeechbubbleAction.result
+          .filter(result => {
+            console.error(result);
+            return result.status.status === "SUCCEEDED";
+          })
+          .map(r => {
+            console.error(r);
+            return r.result;
+          });
+  const eventHandler = (val, cb) => {
+    onceHandles[id].stream.removeListener(onceHandles[id].listener);
+    cb(null, val.result);
+  };
+
+  onceHandles[id] = {
+    listener: null,
+    stream,
+    stop: () => {
       onceHandles[id].stream.removeListener(onceHandles[id].listener);
-      cb(null, val.result);
-    };
+    }
+  };
 
-    onceHandles[id] = {
-      listener: null,
-      stream,
-      stop: () => {
+  return promisify(cb => {
+    onceHandles[id].listener = {
+      next: val => {
         onceHandles[id].stream.removeListener(onceHandles[id].listener);
+        cb(null, val);
       }
     };
-
-    return promisify((pred, handler, cb) => {
-      onceHandles[id].listener = {
-        next: val => {
-          if (pred(val)) handler(val, cb);
-        }
-      };
-      onceHandles[id].stream.addListener(onceHandles[id].listener);
-    })(eventPred, eventHandler);
-  }
-};
+    onceHandles[id].stream.addListener(onceHandles[id].listener);
+  })();
+}
