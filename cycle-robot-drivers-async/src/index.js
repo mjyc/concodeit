@@ -161,3 +161,15 @@ export function createStreamEventListener(predicate, callback) {
     }
   };
 }
+
+export function sendActionGoal(actionName, goal) {
+  return promisify((g, callback) => {
+    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
+      if (!err && val.status.status === "SUCCEEDED") {
+        callback(null, val.result);
+      } else {
+        callback(null, null);
+      }
+    });
+  })(goal);
+}

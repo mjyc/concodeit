@@ -6,33 +6,21 @@ import {
   createStreamEventListener
 } from "cycle-robot-drivers-async";
 
-// function sendActionGoal(actionName, goal) {
-//   return promisify((g, callback) => {
-//     handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-//       if (!err && val.status.status === "SUCCEEDED") {
-//         callback(null, val.result);
-//       } else {
-//         callback(null, null);
-//       }
-//     });
-//   })(goal);
-// }
-
 const say = text => {
   return sendActionGoal("SpeechSynthesisAction", String(message));
 };
 
-const express = expression => {};
+// const express = expression => {};
 
-const displayText = (text, duration) => {}; //
+// const displayText = (text, duration) => {}; //
 
-const displayButton = (buttons, duration) => {};
+// const displayButton = (buttons, duration) => {};
 
-const sleep = duration => {};
+// const sleep = duration => {};
 
-const waitForOne = subprogs => {};
+// const waitForOne = subprogs => {};
 
-const waitForAll = subprogs => {};
+// const waitForAll = subprogs => {};
 
 // // const waitForEventHandles = {
 // //   speechDetected: null,
