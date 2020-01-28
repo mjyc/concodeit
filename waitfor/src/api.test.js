@@ -6,7 +6,7 @@ console.warn = jest.fn(); // hide webgl outputs
 const xs = require("xstream").default;
 const { mockTimeSource } = require("@cycle/time");
 const { actionNames, mockInitialize } = require("cycle-robot-drivers-async");
-const { say, express, displayText } = require("./api");
+const { say, express, displayText, displayButton } = require("./api");
 
 test("say", async () => {
   const Time = mockTimeSource();
@@ -108,9 +108,9 @@ test("displayText", async () => {
     )
   });
 
-  sinks.HumanSpeechbubbleAction.goal.addListener({
+  sinks.RobotSpeechbubbleAction.goal.addListener({
     next: goal => {
-      sources.HumanSpeechbubbleAction.result.shamefullySendNext({
+      sources.RobotSpeechbubbleAction.result.shamefullySendNext({
         status: {
           goal_id: goal.goal_id,
           status: "SUCCEEDED"
@@ -122,5 +122,44 @@ test("displayText", async () => {
 
   const expected = null;
   const actual = await displayText("Hello world!", 0.1);
+  expect(actual).toBe(expected);
+});
+
+test("displayButton", async () => {
+  const Time = mockTimeSource();
+
+  // setup main
+  const { sources, sinks } = mockInitialize({
+    mockSources: Object.assign(
+      {},
+      {
+        PoseDetection: {
+          events: () => xs.create()
+        }
+      },
+      actionNames.reduce((prev, actionName) => {
+        prev[actionName] = {
+          status: xs.create(),
+          result: xs.create()
+        };
+        return prev;
+      }, {})
+    )
+  });
+
+  sinks.HumanSpeechbubbleAction.goal.addListener({
+    next: goal => {
+      sources.HumanSpeechbubbleAction.result.shamefullySendNext({
+        status: {
+          goal_id: goal.goal_id,
+          status: "SUCCEEDED"
+        },
+        result: goal.goal[0]
+      });
+    }
+  });
+
+  const expected = null;
+  const actual = await displayButton(["Blue", "Red"], 1);
   expect(actual).toBe(expected);
 });

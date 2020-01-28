@@ -16,16 +16,17 @@ const express = expression => {
 
 const displayText = (text, duration) => {
   return Promise.race([
-    sendActionGoal("HumanSpeechbubbleAction", String(text)),
+    sendActionGoal("RobotSpeechbubbleAction", String(text)),
     sleep(duration)
   ]).then(() => null);
 };
 
-// const displayButton = (buttons, duration) => {
-
-// };
-
-// const sleep = duration => {};
+const displayButton = (buttons, duration) => {
+  return Promise.race([
+    sendActionGoal("HumanSpeechbubbleAction", buttons),
+    sleep(duration)
+  ]).then(() => null);
+};
 
 // const waitForOne = subprogs => {};
 
@@ -71,5 +72,6 @@ module.exports = {
   sleep,
   say,
   express,
-  displayText
+  displayText,
+  displayButton
 };
