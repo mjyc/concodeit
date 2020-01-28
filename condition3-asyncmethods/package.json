@@ -1,13 +1,15 @@
 {
   "private": "true",
+  "name": "concodeit-async",
   "main": "index.html",
   "scripts": {
     "prestart": "rm -rf dist/programs && mkdir -p dist && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
     "start": "parcel index.html --open",
     "build": "parcel build index.html",
-    "devel": "rm -rf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async && echo '{\"mode\": \"devel\"}' > src/settings.json && npm run start",
-    "study": "echo '{\"mode\": \"study\"}' > src/settings.json && npm run start"
+    "devel": "rm -rf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async",
   },
+  "author": "Michael Jae-Yoon Chung",
+  "license": "MIT",
   "dependencies": {
     "cycle-robot-drivers-async": "0.0.6",
     "node-blockly": "1.0.36",

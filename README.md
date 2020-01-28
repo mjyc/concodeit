@@ -3,7 +3,7 @@
 A visual programming for authoring interactive programs.
 ConCodeIt! is built with [Blockly](https://developers.google.com/blockly/) and is integrated with [cycle-robot-drivers](https://github.com/mjyc/cycle-robot-drivers).
 
-ConCodeIt stands for "concurrent" [CodeIt](https://github.com/hcrlab/code_it) and is built to help novice programmers with creating reactive, interactive robot programs easy for novice programmers.
+ConCodeIt stands for "concurrent" [CodeIt](https://github.com/hcrlab/code_it) and aims to make creating reactive, interactive robot programs easy for novice programmers.
 
 ## Getting Started
 

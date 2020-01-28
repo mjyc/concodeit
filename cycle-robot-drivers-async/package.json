@@ -9,6 +9,8 @@
     "dev": "microbundle watch",
     "test": "npx jest --env=./test/custom-test-env.js"
   },
+  "author": "Michael Jae-Yoon Chung",
+  "license": "MIT",
   "dependencies": {
     "@cycle-robot-drivers/action": "1.0.1",
     "@cycle-robot-drivers/run": "1.0.25",
