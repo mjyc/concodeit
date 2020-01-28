@@ -192,6 +192,15 @@ export function sendActionGoal(actionName, goal) {
   })(goal);
 }
 
+export function cancelActionGoal(actionName) {
+  if (sendActionGoalHandles[actionName])
+    makeCancelGoal(actionName)(sendActionGoalHandles[actionName]);
+}
+
+export function cancelActionGoals() {
+  actionNames.map(actionName => cancelActionGoal(actionName));
+}
+
 const onceHandles = {};
 
 export function once(eventName) {
@@ -216,6 +225,7 @@ export function once(eventName) {
   };
 
   onceHandles[id] = {
+    id,
     listener: null,
     stream,
     stop: () => {
@@ -232,4 +242,17 @@ export function once(eventName) {
     };
     onceHandles[id].stream.addListener(onceHandles[id].listener);
   })();
+}
+
+export function off(onceHandle) {
+  if (typeof onceHandle === "undefined") {
+    for (const key in onceHandles) {
+      onceHandle = onceHandles[key];
+      onceHandle.stream.removeListener(onceHandle.listener);
+      delete onceHandles[onceHandle.id];
+    }
+  } else {
+    onceHandle.stream.removeListener(onceHandle.listener);
+    delete onceHandles[onceHandle.id];
+  }
 }

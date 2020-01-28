@@ -20,17 +20,14 @@
       <div id="editor" style="height:480px;width:800px"></div>
       <xml id="toolbox" style="display: none">
         <category name="Sensing" colour="210">
-          <!-- <block type="variables_set">
-            <field name="VAR">result</field>
+          <block type="variables_set">
+            <field name="VAR">value</field>
             <value name="VALUE">
               <block type="wait_for_event">
-                <field name="SE">"FaceDirectionChanged"</field>
+                <field name="SE">"speechDetected"</field>
               </block>
             </value>
           </block>
-          <block type="wait_until">
-            <field name="SE">"humanFaceLookingAtCenter"</field>
-          </block> -->
         </category>
         <category name="Action" colour="230">
           <block type="sleep">
@@ -40,44 +37,31 @@
               </block>
             </value>
           </block>
-          <!-- <block type="variables_set">
-            <field name="VAR">result</field>
-            <value name="VALUE">
-              <block type="set_message">
-                <value name="MESSAGE">
-                  <block type="text">
-                    <field name="TEXT">Hello there!</field>
-                  </block>
-                </value>
+          <block type="display_text">
+            <value name="TEXT">
+              <block type="text">
+                <field name="TEXT">Hello there!</field>
+              </block>
+            </value>
+            <value name="DURATION">
+              <block type="math_number">
+                <field name="NUM">3</field>
               </block>
             </value>
           </block>
-          <block type="start_following_face"></block>
-          <block type="stop_following_face"></block>
-          <block type="variables_set">
-            <field name="VAR">result</field>
-            <value name="VALUE">
-              <block type="say">
-                <value name="MESSAGE">
-                  <block type="text">
-                    <field name="TEXT">Hi!</field>
-                  </block>
-                </value>
+          <block type="say">
+            <value name="TEXT">
+              <block type="text">
+                <field name="TEXT">Hi!</field>
               </block>
             </value>
           </block>
-          <block type="variables_set">
-            <field name="VAR">result</field>
-            <value name="VALUE">
-              <block type="gesture"></block>
-            </value>
-          </block> -->
+          <block type="express"></block>
         </category>
-        <!-- <category name="Concurrent" colour="290">
+        <category name="Concurrency" colour="290">
           <block type="wait_for_all"></block>
           <block type="wait_for_one"></block>
-          <block type="done"></block>
-        </category> -->
+        </category>
         <category name="Program control " colour="290">
           <block type="start_program"></block>
         </category>

@@ -4,21 +4,22 @@ require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import { initialize } from "cycle-robot-drivers-async";
+const { cancelActionGoals, off } = require("cycle-robot-drivers-async");
+const {
+  sleep,
+  say,
+  express,
+  displayText,
+  displayButton,
+  waitForOne,
+  waitForAll,
+  waitForEvent
+} = require("./api");
 
 let settings = {};
 try {
   settings = require("./settings.json");
 } catch (e) {}
-
-//------------------------------------------------------------------------------
-// Helper Function Definitions
-
-const handles = {};
-
-// HACK to make promisify in eval; used by wait_for_all and wait_for_one
-function promisify2(f) {
-  return promisify(f);
-}
 
 //------------------------------------------------------------------------------
 // Blockly Definitions
@@ -96,15 +97,22 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_text",
-    message0: "display text %1",
+    message0: "display text %1 %2",
     args0: [
       {
         type: "input_value",
-        name: "MESSAGE",
+        name: "TEXT",
         check: ["String", "Number"]
+      },
+      {
+        type: "input_value",
+        name: "DURATION",
+        check: ["Number"]
       }
     ],
-    output: "Action",
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -115,11 +123,12 @@ Blockly.defineBlocksWithJsonArray([
     args0: [
       {
         type: "input_value",
-        name: "MESSAGE",
+        name: "TEXT",
         check: ["String", "Number"]
       }
     ],
-    output: "Action",
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -130,7 +139,7 @@ Blockly.defineBlocksWithJsonArray([
     args0: [
       {
         type: "field_dropdown",
-        name: "MESSAGE",
+        name: "EXPRESSION",
         options: [
           ["happy", '"HAPPY"'],
           ["sad", '"SAD"'],
@@ -140,7 +149,8 @@ Blockly.defineBlocksWithJsonArray([
         ]
       }
     ],
-    output: "Action",
+    previousStatement: null,
+    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -153,8 +163,8 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
-          ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
-          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"']
+          ["speechDetected", '"speechDetected"'],
+          ["buttonPressed", '"buttonPressed"']
         ]
       }
     ],
@@ -309,59 +319,48 @@ Blockly.JavaScript["sleep"] = function(block) {
 };
 
 Blockly.JavaScript["display_text"] = function(block) {
-  return "";
-  const code = check(block)
-    ? `await setMessage(${Blockly.JavaScript.valueToCode(
+  return check(block)
+    ? `await displayText(${Blockly.JavaScript.valueToCode(
         block,
-        "MESSAGE",
+        "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
-      )})`
+      )}, ${Blockly.JavaScript.valueToCode(
+        block,
+        "DURATION",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
     : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["say"] = function(block) {
-  return "";
-  const code = check(block)
+  return check(block)
     ? `await say(${Blockly.JavaScript.valueToCode(
         block,
-        "MESSAGE",
+        "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
-      )})`
+      )});\n`
     : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["express"] = function(block) {
-  return "";
-  const code = check(block)
-    ? `await express(${block.getFieldValue("MESSAGE")})`
+  return check(block)
+    ? `await express(${block.getFieldValue("EXPRESSION")});\n`
     : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["wait_for_event"] = function(block) {
-  return "";
   const code = check(block)
     ? `await waitForEvent(String(${block.getFieldValue("SE")}))`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-Blockly.JavaScript["wait_until"] = function(block) {
-  return "";
-  return check(block)
-    ? `await waitForSpecificEvent(String(${block.getFieldValue("SE")}));\n`
-    : "";
-};
-
 Blockly.JavaScript["wait_for_all"] = function(block) {
-  return "";
   return check(block)
     ? `await waitForAll(${[0, 1]
         .map(
           i =>
-            `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
+            `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
               block,
               `DO${i}`
             )}  cb(null, null);\n})()`
@@ -371,14 +370,14 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
 };
 
 const _stop = [];
+
 Blockly.JavaScript["wait_for_one"] = function(block) {
-  return "";
   const id = block.id;
   return check(block)
     ? `_stop["${id}"] = false;\nawait waitForOne(${[0, 1]
         .map(
           i =>
-            `promisify2(async cb => {\n${Blockly.JavaScript.statementToCode(
+            `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
               block,
               `DO${i}`
             ).replace(
@@ -406,7 +405,7 @@ function render(element, toolbox) {
   editor = Blockly.inject(element, {
     toolbox: document.getElementById(toolbox)
   });
-  Blockly.Xml.domToWorkspace(Blockly.Xml.workspaceToDom(editor), editor);
+  Blockly.Xml.domToWorkspace(document.getElementById("startBlocks"), editor);
   editor.addChangeListener(() =>
     console.log(Blockly.JavaScript.workspaceToCode(editor))
   );
@@ -443,16 +442,19 @@ const sources = initialize({
   }
 });
 
-const _exit = [];
+const _exit = [1];
 
-function run(code) {
-  // stop previously ran code
+function stop() {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
-  // removeEventHandles();
-  // cancelActionGoals();
-  // stopFollowingFace();
+  off();
+  cancelActionGoals();
+}
+
+function run(code) {
+  // stop previously ran code
+  stop();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -462,17 +464,26 @@ function run(code) {
 (async () => {
 await sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
-  eval(wrapped);
-}
 
-const stop = () => {
-  if (_exit.length > 0) {
-    _exit[_exit.length - 1] = true;
-  }
-  // removeEventHandles();
-  // cancelActionGoals();
-  // stopFollowingFace();
-};
+  (code =>
+    Function(
+      '"use strict";return (function(promisify, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne) {' +
+        code +
+        "})"
+    )()(
+      promisify,
+      _stop,
+      _exit,
+      say,
+      express,
+      sleep,
+      displayText,
+      displayButton,
+      waitForEvent,
+      waitForAll,
+      waitForOne
+    ))(wrapped);
+}
 
 document.getElementById("run").onclick = () => {
   const code = Blockly.JavaScript.workspaceToCode(editor);
@@ -507,10 +518,3 @@ document.getElementById("load_xml").onchange = e => {
   };
   reader.readAsText(xmlFile);
 };
-
-//------------------------------------------------------------------------------
-// Scratch
-console.error("==================started");
-(async () => {
-  console.log("started");
-})();
