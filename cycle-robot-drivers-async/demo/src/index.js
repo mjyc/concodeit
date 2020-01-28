@@ -1,10 +1,6 @@
 import "./styles.css";
 
-import {
-  initialize,
-  makeSendGoal,
-  makeCancelGoal
-} from "cycle-robot-drivers-async";
+import { initialize, makeSendGoal } from "cycle-robot-drivers-async";
 import { promisify } from "util";
 
 initialize();
@@ -26,6 +22,5 @@ const sendHumanSpeechbubbleActionGoal = promisify(
     sendRobotSpeechbubbleActionGoal("Hello"),
     sendHumanSpeechbubbleActionGoal(["Hi"])
   ]);
-  makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
   console.log(outputs);
 })();
