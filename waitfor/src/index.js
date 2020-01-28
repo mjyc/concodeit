@@ -3,14 +3,7 @@ import "./styles.css";
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import {
-  actionNames,
-  initialize,
-  makeSendGoal,
-  makeCancelGoal,
-  createStreamEventListener
-} from "cycle-robot-drivers-async";
-import { extractFaceFeatures } from "tabletrobotface-userstudy";
+import { initialize } from "cycle-robot-drivers-async";
 
 let settings = {};
 try {
@@ -22,202 +15,13 @@ try {
 
 const handles = {};
 
-function sendActionGoal(actionName, goal) {
-  return promisify((g, callback) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (!err && val.status.status === "SUCCEEDED") {
-        callback(null, val.result);
-      } else {
-        callback(null, null);
-      }
-    });
-  })(goal);
-}
-
-function cancelActionGoal(actionName) {
-  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
-}
-
-function cancelActionGoals() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
-}
-
-function sleep(duration) {
-  return promisify((s, cb) => setTimeout(cb, s * 1000))(duration);
-}
-
 // HACK to make promisify in eval; used by wait_for_all and wait_for_one
 function promisify2(f) {
   return promisify(f);
 }
 
-const eventHandles = {};
-function removeEventHandles() {
-  for (const key in eventHandles) {
-    const eventHandle = eventHandles[key];
-    eventHandle.stream.removeListener(eventHandle.listener);
-  }
-}
-
-const NOSE_ANGLE_THRESHOLD = 10;
-function detectFaceDirectionChanged(id, callback) {
-  let prevFaceDirection = null;
-  eventHandles[id] = {
-    stream: sources.PoseDetection.events("poses"),
-    listener: {
-      next: poses => {
-        const features = extractFaceFeatures(poses);
-        const faceDirection = !features.isVisible
-          ? "noface"
-          : features.noseAngle > NOSE_ANGLE_THRESHOLD
-          ? "left"
-          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
-          ? "right"
-          : "center";
-        if (prevFaceDirection === null) {
-          prevFaceDirection = faceDirection;
-          return;
-        }
-        if (faceDirection === prevFaceDirection) return;
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
-        callback(null, faceDirection);
-      }
-    }
-  };
-  eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
-}
-
-function waitUntilFaceDirectionChanged(id) {
-  return promisify(detectFaceDirectionChanged)(id);
-}
-
-function waitUntilFaceEvent(id, direction) {
-  eventHandles[id] = {
-    listener: null,
-    stream: sources.PoseDetection.events("poses"),
-    stop: () => {
-      eventHandles[id].stream.removeListener(eventHandles[id].listener);
-    }
-  };
-  return promisify((pred, cb) => {
-    eventHandles[id].listener = createStreamEventListener(
-      poses => {
-        const faceFeatures = extractFaceFeatures(poses);
-        return pred(
-          !faceFeatures.isVisible
-            ? "noface"
-            : faceFeatures.noseAngle < -NOSE_ANGLE_THRESHOLD
-            ? "right"
-            : faceFeatures.noseAngle > NOSE_ANGLE_THRESHOLD
-            ? "left"
-            : "center"
-        );
-      },
-      (err, val) => {
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
-        cb(err, direction);
-      }
-    );
-    eventHandles[id].stream.addListener(eventHandles[id].listener);
-  })(dir => dir == direction);
-}
-
-function waitUntilVADStateChanged(id) {
-  eventHandles[id] = {
-    listener: null,
-    stream: sources.VAD,
-    stop: () => {
-      eventHandles[id].stream.removeListener(eventHandles[id].listener);
-    }
-  };
-  return promisify(cb => {
-    eventHandles[id].listener = {
-      next: val => {
-        eventHandles[id].stream.removeListener(eventHandles[id].listener);
-        cb(null, val);
-      }
-    };
-    eventHandles[id].stream.addListener(eventHandles[id].listener);
-  })();
-}
-
-function waitUntilVADState(id, state) {
-  eventHandles[id] = {
-    listener: null,
-    stream: sources.VAD,
-    stop: () => {
-      eventHandles[id].stream.removeListener(eventHandles[id].listener);
-    }
-  };
-  return promisify(cb => {
-    eventHandles[id].listener = {
-      next: val => {
-        if (val === state) {
-          eventHandles[id].stream.removeListener(eventHandles[id].listener);
-          cb(null, val);
-        }
-      }
-    };
-    eventHandles[id].stream.addListener(eventHandles[id].listener);
-  })();
-}
-
-function setMessage(message) {
-  sendActionGoal("RobotSpeechbubbleAction", String(message));
-}
-
-function startFollowingFace() {
-  sources.followFace.shamefullySendNext(true);
-}
-
-function stopFollowingFace() {
-  sources.followFace.shamefullySendNext(false);
-}
-
-async function say(message) {
-  return sendActionGoal("SpeechSynthesisAction", String(message));
-}
-
-async function gesture(name) {
-  return sendActionGoal("FacialExpressionAction", String(name));
-}
-
-async function waitForEvent(event) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceDirectionChanged") {
-    return await waitUntilFaceDirectionChanged(id);
-  }
-  return await waitUntilVADStateChanged(id);
-}
-
-async function waitForSpecificEvent(event) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (event == "humanFaceLookingAtCenter") {
-    return await waitUntilFaceEvent(id, "center");
-  } else if (event == "humanFaceLookingAtLeft") {
-    return await waitUntilFaceEvent(id, "left");
-  } else if (event == "humanFaceLookingAtRight") {
-    return await waitUntilFaceEvent(id, "right");
-  } else if (event == "noHumanFaceFound") {
-    return await waitUntilFaceEvent(id, "noface");
-  } else if (event == "isHumanSpeakingFalse") {
-    return await waitUntilVADState(id, false);
-  } else if (event == "isHumanSpeakingTrue") {
-    return await waitUntilVADState(id, true);
-  }
-}
-
-function waitForAll(subprogram1, subprogram2) {
-  return Promise.all([subprogram1, subprogram2]);
-}
-
-function waitForOne(subprogram1, subprogram2) {
-  return Promise.race([subprogram1, subprogram2]);
-}
-
 //------------------------------------------------------------------------------
-// Block Function Definitions
+// Blockly Definitions
 
 Blockly.defineBlocksWithJsonArray([
   {
@@ -291,8 +95,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "set_message",
-    message0: "set message %1",
+    type: "display_text",
+    message0: "display text %1",
     args0: [
       {
         type: "input_value",
@@ -301,24 +105,6 @@ Blockly.defineBlocksWithJsonArray([
       }
     ],
     output: "Action",
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_following_face",
-    message0: "start following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_following_face",
-    message0: "stop following face",
-    previousStatement: null,
-    nextStatement: null,
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -339,8 +125,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "gesture",
-    message0: "gesture  %1",
+    type: "express",
+    message0: "express  %1",
     args0: [
       {
         type: "field_dropdown",
@@ -373,29 +159,6 @@ Blockly.defineBlocksWithJsonArray([
       }
     ],
     output: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_until",
-    message0: "wait until %1",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "SE",
-        options: [
-          ["humanFaceLookingAtCenter", '"humanFaceLookingAtCenter"'],
-          ["humanFaceLookingAtLeft", '"humanFaceLookingAtLeft"'],
-          ["humanFaceLookingAtRight", '"humanFaceLookingAtRight"'],
-          ["noHumanFaceFound", '"noHumanFaceFound"'],
-          ["isHumanSpeakingFalse", '"isHumanSpeakingFalse"'],
-          ["isHumanSpeakingTrue", '"isHumanSpeakingTrue"']
-        ]
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -445,31 +208,6 @@ Blockly.defineBlocksWithJsonArray([
     previousStatement: null,
     nextStatement: null,
     colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "done",
-    message0: "done",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_until_face_event",
-    message0: "wait until face event: posX, posY %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "WU0",
-        check: "Boolean"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 210,
     tooltip: "",
     helpUrl: ""
   },
@@ -570,7 +308,8 @@ Blockly.JavaScript["sleep"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["set_message"] = function(block) {
+Blockly.JavaScript["display_text"] = function(block) {
+  return "";
   const code = check(block)
     ? `await setMessage(${Blockly.JavaScript.valueToCode(
         block,
@@ -581,15 +320,8 @@ Blockly.JavaScript["set_message"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-Blockly.JavaScript["start_following_face"] = function(block) {
-  return check(block) ? `await startFollowingFace();\n` : "";
-};
-
-Blockly.JavaScript["stop_following_face"] = function(block) {
-  return check(block) ? `await stopFollowingFace();\n` : "";
-};
-
 Blockly.JavaScript["say"] = function(block) {
+  return "";
   const code = check(block)
     ? `await say(${Blockly.JavaScript.valueToCode(
         block,
@@ -600,14 +332,16 @@ Blockly.JavaScript["say"] = function(block) {
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-Blockly.JavaScript["gesture"] = function(block) {
+Blockly.JavaScript["express"] = function(block) {
+  return "";
   const code = check(block)
-    ? `await gesture(${block.getFieldValue("MESSAGE")})`
+    ? `await express(${block.getFieldValue("MESSAGE")})`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["wait_for_event"] = function(block) {
+  return "";
   const code = check(block)
     ? `await waitForEvent(String(${block.getFieldValue("SE")}))`
     : "";
@@ -615,12 +349,14 @@ Blockly.JavaScript["wait_for_event"] = function(block) {
 };
 
 Blockly.JavaScript["wait_until"] = function(block) {
+  return "";
   return check(block)
     ? `await waitForSpecificEvent(String(${block.getFieldValue("SE")}));\n`
     : "";
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
+  return "";
   return check(block)
     ? `await waitForAll(${[0, 1]
         .map(
@@ -636,6 +372,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
 
 const _stop = [];
 Blockly.JavaScript["wait_for_one"] = function(block) {
+  return "";
   const id = block.id;
   return check(block)
     ? `_stop["${id}"] = false;\nawait waitForOne(${[0, 1]
@@ -658,39 +395,26 @@ Blockly.JavaScript["start_program"] = function(block) {
 };
 
 //------------------------------------------------------------------------------
-// Main Setup
+// UI Logic
 
 let editor;
-let code = document.getElementById("startBlocks");
 
 function render(element, toolbox) {
   if (editor) {
-    editor.removeChangeListener(updateCode);
-    code = Blockly.Xml.workspaceToDom(editor);
     editor.dispose();
   }
   editor = Blockly.inject(element, {
     toolbox: document.getElementById(toolbox)
   });
-
-  Blockly.Xml.domToWorkspace(code, editor);
-
-  editor.addChangeListener(updateCode);
-
-  return editor;
-}
-
-function updateCode() {
-  document.getElementById("js").innerText = Blockly.JavaScript.workspaceToCode(
-    editor
+  Blockly.Xml.domToWorkspace(Blockly.Xml.workspaceToDom(editor), editor);
+  editor.addChangeListener(() =>
+    console.log(Blockly.JavaScript.workspaceToCode(editor))
   );
+  return editor;
 }
 
 editor = render("editor", "toolbox");
 
-updateCode();
-
-//------------------------------------------------------------------------------
 const sources = initialize({
   container: document.getElementById("app"),
   styles: {
@@ -719,40 +443,16 @@ const sources = initialize({
   }
 });
 
-const handle = setInterval(() => {
-  if (!sources) return;
-  sources.PoseDetection.events("poses").addListener({
-    next: poses => {
-      const features = extractFaceFeatures(poses);
-      const faceDirection = !features.isVisible
-        ? "noface"
-        : features.noseAngle > NOSE_ANGLE_THRESHOLD
-        ? "left"
-        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
-        ? "right"
-        : "center";
-      document.querySelector("#isFaceVisible").innerText = features.isVisible;
-      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
-    }
-  });
-  sources.VAD.addListener({
-    next: val => {
-      document.querySelector("#isHumanSpeaking").innerText = val;
-    }
-  });
-  clearInterval(handle);
-});
-
 const _exit = [];
 
-const run = code => {
+function run(code) {
   // stop previously ran code
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
-  removeEventHandles();
-  cancelActionGoals();
-  stopFollowingFace();
+  // removeEventHandles();
+  // cancelActionGoals();
+  // stopFollowingFace();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -763,15 +463,15 @@ const run = code => {
 await sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
   eval(wrapped);
-};
+}
 
 const stop = () => {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
-  removeEventHandles();
-  cancelActionGoals();
-  stopFollowingFace();
+  // removeEventHandles();
+  // cancelActionGoals();
+  // stopFollowingFace();
 };
 
 document.getElementById("run").onclick = () => {
@@ -780,28 +480,6 @@ document.getElementById("run").onclick = () => {
 };
 
 document.getElementById("stop").onclick = stop;
-
-document.getElementById("download_js").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
-};
-
-document.getElementById("run_js").onclick = e => {
-  const filename = document.getElementById("filename").value;
-  console.debug(`filepath /programs/${filename}`);
-  fetch(`/programs/${filename}`)
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      run(code);
-    });
-};
 
 let startTime = Date.now();
 document.getElementById("download_xml").onclick = () => {
@@ -830,23 +508,9 @@ document.getElementById("load_xml").onchange = e => {
   reader.readAsText(xmlFile);
 };
 
-const mode = settings.mode || "devel";
-
-if (mode === "study") {
-  window.onload = () => {
-    document.querySelector("#download_js").remove();
-    document.querySelector("#run_js").remove();
-    document.querySelector("#load_xml").remove();
-    document.querySelector("#run_js_label").remove();
-    document.querySelector("#load_xml_label").remove();
-    document.querySelector("#filename").remove();
-    document.querySelector("#js_view").remove();
-    document.querySelector(".posenet").style.display = "none";
-  };
-}
-
 //------------------------------------------------------------------------------
 // Scratch
+console.error("==================started");
 (async () => {
   console.log("started");
 })();
