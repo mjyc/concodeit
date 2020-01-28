@@ -81,7 +81,46 @@ test("express", async () => {
     }
   });
 
-  const expected = "happy";
+  const expected = "HAPPY";
   const actual = await express(expected);
   expect(actual).toBe(expected);
 });
+
+// test("displayText", async () => {
+//   const Time = mockTimeSource();
+
+//   // setup main
+//   const { sources, sinks } = mockInitialize({
+//     mockSources: Object.assign(
+//       {},
+//       {
+//         PoseDetection: {
+//           events: () => xs.create()
+//         }
+//       },
+//       actionNames.reduce((prev, actionName) => {
+//         prev[actionName] = {
+//           status: xs.create(),
+//           result: xs.create()
+//         };
+//         return prev;
+//       }, {})
+//     )
+//   });
+
+//   sinks.HumanSpeechbubbleAction.goal.addListener({
+//     next: goal => {
+//       sources.HumanSpeechbubbleAction.result.shamefullySendNext({
+//         status: {
+//           goal_id: goal.goal_id,
+//           status: "SUCCEEDED"
+//         },
+//         result: goal.goal
+//       });
+//     }
+//   });
+
+//   const expected = "HAPPY";
+//   const actual = await express(expected);
+//   expect(actual).toBe(expected);
+// });

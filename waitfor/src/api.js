@@ -1,5 +1,9 @@
 const { sendActionGoal } = require("cycle-robot-drivers-async");
 
+const sleep = duration => {
+  return promisify((s, cb) => setTimeout(cb, s * 1000))(duration);
+};
+
 const say = text => {
   return sendActionGoal("SpeechSynthesisAction", String(text));
 };
@@ -8,9 +12,16 @@ const express = expression => {
   return sendActionGoal("FacialExpressionAction", String(expression));
 };
 
-// const displayText = (text, duration) => {}; //
+const displayText = (text, duration) => {
+  return Promise.race([
+    sendActionGoal("HumanSpeechbubbleAction", String(expression)),
+    sleep(duration)
+  ]);
+};
 
-// const displayButton = (buttons, duration) => {};
+// const displayButton = (buttons, duration) => {
+
+// };
 
 // const sleep = duration => {};
 
@@ -55,6 +66,8 @@ const express = expression => {
 // };
 
 module.exports = {
+  sleep,
   say,
-  express
+  express,
+  displayText
 };
