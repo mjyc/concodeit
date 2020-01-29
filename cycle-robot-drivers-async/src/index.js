@@ -4,6 +4,7 @@ import xs from "xstream";
 import get from "lodash.get";
 import sampleCombine from "xstream/extra/sampleCombine";
 import { div, label, input, makeDOMDriver } from "@cycle/dom";
+import isolate from "@cycle/isolate";
 import { makeTabletFaceDriver } from "@cycle-robot-drivers/screen";
 import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
 import {
@@ -19,6 +20,11 @@ import {
   isEqualGoalStatus,
   isEqualGoalID
 } from "@cycle-robot-drivers/action";
+import {
+  SleepAction,
+  DisplayTextAction,
+  DisplayButtonAction
+} from "@cycle-robot-drivers/actionbank";
 import makeVADDriver from "./makeVADDriver";
 
 const goals$ = xs.create();
@@ -49,6 +55,43 @@ function main(sources) {
       label("type and press enter:"),
       input(".speech", { attr: { type: "text" } })
     ])
+  );
+
+  const sleepGoalProxy$ = xs.create();
+  const sleepCancelProxy$ = xs.create();
+  const sleepAction = isolate(SleepAction, "SleepAction")({
+    state: sources.state,
+    goal: sleepGoalProxy$,
+    cancel: sleepCancelProxy$,
+    Time: sources.Time
+  });
+  const displayText = DisplayTextAction({
+    state: sources.state,
+    DisplayTextAction: {
+      goal: goals$
+        .filter(goals => goals.type === "DisplayTextAction")
+        .map(goals => goals.value),
+      cancel: cancels$
+        .filter(cancels => cancels.type === "DisplayTextAction")
+        .map(cancels => cancels.value)
+    }
+  });
+  const displayButton = DisplayButtonAction({
+    state: sources.state,
+    DisplayButtonAction: {
+      goal: goals$
+        .filter(goals => goals.type === "DisplayButtonAction")
+        .map(goals => goals.value),
+      cancel: cancels$
+        .filter(cancels => cancels.type === "DisplayButtonAction")
+        .map(cancels => cancels.value)
+    }
+  });
+  sleepGoalProxy$.imitate(
+    xs.merge(displayText.SleepAction.goal, displayButton.SleepAction.goal)
+  );
+  sleepCancelProxy$.imitate(
+    xs.merge(displayText.SleepAction.cancel, displayButton.SleepAction.cancel)
   );
 
   return Object.assign(

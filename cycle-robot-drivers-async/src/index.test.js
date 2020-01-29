@@ -17,6 +17,7 @@ test("makeSendGoal", async done => {
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
       {
+        state: { stream: xs.never() },
         DOM: mockDOMSource({
           ".speech": {
             keypress: xs.never()

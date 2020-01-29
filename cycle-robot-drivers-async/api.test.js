@@ -23,6 +23,7 @@ test("say", async () => {
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
       {
+        state: { stream: xs.never() },
         DOM: mockDOMSource({
           ".speech": {
             keypress: xs.never()
@@ -68,6 +69,7 @@ test("express", async () => {
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
       {
+        state: { stream: xs.never() },
         DOM: mockDOMSource({
           ".speech": {
             keypress: xs.never()
@@ -113,6 +115,7 @@ test("displayText", async () => {
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
       {
+        state: { stream: xs.never() },
         DOM: mockDOMSource({
           ".speech": {
             keypress: xs.never()
@@ -158,6 +161,7 @@ test("displayButton", async () => {
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
       {
+        state: { stream: xs.never() },
         DOM: mockDOMSource({
           ".speech": {
             keypress: xs.never()
@@ -203,6 +207,7 @@ test("waitForEvent - buttonPressed", async () => {
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
       {
+        state: { stream: xs.never() },
         DOM: mockDOMSource({
           ".speech": {
             keypress: xs.never()
