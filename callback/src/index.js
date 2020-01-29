@@ -3,14 +3,7 @@ import "./styles.css";
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import {
-  actionNames, // remove
-  initialize,
-  addEventListener, // remove
-  removeEventListener, // remove
-  cancelActionGoals,
-  off
-} from "cycle-robot-drivers-async";
+import { initialize } from "cycle-robot-drivers-async";
 import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
@@ -92,26 +85,22 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  //   {
-  //     type: "start_sleeping",
-  //     message0: "start sleeping for %1",
-  //     args0: [
-  //       {
-  //         type: "input_value",
-  //         name: "SE",
-  //         check: "Number"
-  //       }
-  //       // {
-  //       //   type: "input_statement",
-  //       //   name: "DO"
-  //       // }
-  //     ],
-  //     previousStatement: null,
-  //     nextStatement: null,
-  //     colour: 230,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   },
+  {
+    type: "sleep",
+    message0: "sleep for %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "ARG0",
+        check: "Number"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "display_text",
     message0: "start display text %1 %2",
@@ -202,6 +191,8 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "SE",
         options: [
+          ["speechDetected", '"speechDetected"'],
+          ["buttonPressed", '"buttonPressed"'],
           ["sayDone", '"sayDone"'],
           ["expressDone", '"expressDone"'],
           ["displayTextDone", '"displayTextDone"'],
@@ -302,19 +293,19 @@ function check(block) {
   );
 }
 
-// Blockly.JavaScript["start_sleeping"] = function(block) {
-//   return check(block)
-//     ? `startSleeping(${Blockly.JavaScript.valueToCode(
-//         block,
-//         "SE",
-//         Blockly.JavaScript.ORDER_ATOMIC
-//       )});\n`
-//     : "";
-// };
+Blockly.JavaScript["sleep"] = function(block) {
+  return check(block)
+    ? `sleep(${Blockly.JavaScript.valueToCode(
+        block,
+        "SE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
 
 Blockly.JavaScript["display_text"] = function(block) {
   return check(block)
-    ? `displayText(${Blockly.JavaScript.valueToCode(
+    ? `robot.displayText(${Blockly.JavaScript.valueToCode(
         block,
         "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -328,13 +319,13 @@ Blockly.JavaScript["display_text"] = function(block) {
 
 Blockly.JavaScript["display_button"] = function(block) {
   return check(block)
-    ? `displayButton(${Blockly.JavaScript.valueToCode(
+    ? `robot.displayButton(${Blockly.JavaScript.valueToCode(
         block,
-        "TEXT",
+        "BUTTONS",
         Blockly.JavaScript.ORDER_ATOMIC
       )}, ${Blockly.JavaScript.valueToCode(
         block,
-        "BUTTONS",
+        "DURATION",
         Blockly.JavaScript.ORDER_ATOMIC
       )});\n`
     : "";
@@ -342,7 +333,7 @@ Blockly.JavaScript["display_button"] = function(block) {
 
 Blockly.JavaScript["say"] = function(block) {
   return check(block)
-    ? `say(String(${Blockly.JavaScript.valueToCode(
+    ? `robot.say(String(${Blockly.JavaScript.valueToCode(
         block,
         "MESSAGE",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -352,14 +343,14 @@ Blockly.JavaScript["say"] = function(block) {
 
 Blockly.JavaScript["express"] = function(block) {
   return check(block)
-    ? `express(String(${block.getFieldValue("EXPRESSION")}));\n`
+    ? `robot.express(String(${block.getFieldValue("EXPRESSION")}));\n`
     : "";
 };
 
 Blockly.JavaScript["when"] = function(block) {
   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
   return stmtCode !== ""
-    ? `addEventListener(${block.getFieldValue(
+    ? `robot.addEventListener(${block.getFieldValue(
         "SE"
       )}, (res, err) => {\n${stmtCode}})`
     : "";
@@ -434,9 +425,7 @@ function stop() {
   for (const key in _stop) {
     _stop[key] = true;
   }
-  off();
-  cancelActionGoals();
-  removeEventListener();
+  robot.reset();
 }
 
 function run(code) {
@@ -445,36 +434,16 @@ function run(code) {
   // patch & run code
   const patched = code.replace(
     /;\n/g,
-    `; if (_exit[${_exit.length}]) return;\n`
+    `; if (robot._exit[${_exit.length}]) return;\n`
   );
-  const wrapped = `_exit[${_exit.length}] = false;
+  const wrapped = `robot._exit[${_exit.length}] = false;
 (async () => {
-await sleep(0.5); // HACK to wait until all actions are cancelled
+await robot.sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
 
   (code =>
-    Function(
-      '"use strict";return (function(promisify, addEventListener, removeEventListener, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
-        code +
-        "})"
-    )()(
-      promisify,
-      addEventListener,
-      removeEventListener,
-      _stop,
-      _exit,
-      say,
-      express,
-      sleep,
-      displayText,
-      displayButton,
-      waitForEvent,
-      waitForAll,
-      waitForOne,
-      isSaying,
-      isExpressing,
-      isDisplayingText,
-      isDisplayingButton
+    Function('"use strict";return (function(robot) {' + code + "})")()(
+      Object.assign({ promisify, _stop, _exit }, robot)
     ))(wrapped);
 }
 

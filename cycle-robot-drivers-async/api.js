@@ -3,7 +3,11 @@ const { promisify } = require("util");
 const {
   sendActionGoal,
   cancelActionGoal,
+  cancelActionGoals,
+  addEventListener,
+  removeEventListeners,
   once,
+  off,
   getActionStatus
 } = require("./");
 
@@ -79,6 +83,12 @@ const isDisplayingButton = () => {
   });
 };
 
+const reset = () => {
+  removeEventListeners();
+  off();
+  cancelActionGoals();
+};
+
 module.exports = {
   sleep,
   say,
@@ -91,5 +101,7 @@ module.exports = {
   isSaying,
   isExpressing,
   isDisplayingText,
-  isDisplayingButton
+  isDisplayingButton,
+  reset,
+  addEventListener
 };

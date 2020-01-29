@@ -3,7 +3,7 @@ import "./styles.css";
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import { initialize, cancelActionGoals, off } from "cycle-robot-drivers-async";
+import { initialize } from "cycle-robot-drivers-async";
 import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
@@ -508,8 +508,7 @@ function stop() {
   for (const key in _stop) {
     _stop[key] = true;
   }
-  off();
-  cancelActionGoals();
+  robot.reset();
 }
 
 function run(code) {

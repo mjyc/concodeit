@@ -21,10 +21,17 @@
       <xml id="toolbox" style="display: none">
         <category name="Robot sensing" colour="210">
           <block type="when">
-            <field name="SE">speechDetected</field>
+            <field name="SE">"speechDetected"</field>
           </block>
         </category>
         <category name="Robot actions" colour="230">
+          <block type="sleep">
+            <value name="ARG0">
+              <block type="math_number">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
           <block type="display_text">
             <value name="TEXT">
               <block type="text">
