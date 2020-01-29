@@ -6,19 +6,22 @@
     "prestart": "rm -rf dist/programs && mkdir -p dist && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
     "start": "parcel index.html --open",
     "build": "parcel build index.html",
-    "devel": "rm -rf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async"
+    "devel": "rm -rf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async",
+    "test": "jest --env=./node_modules/cycle-robot-drivers-async/custom_test_env.js"
   },
   "author": "Michael Jae-Yoon Chung",
   "license": "MIT",
   "dependencies": {
+    "@cycle/dom": "22.4.0",
     "cycle-robot-drivers-async": "0.0.6",
     "node-blockly": "1.0.36",
-    "tabletrobotface-userstudy": "0.0.5",
     "util.promisify": "1.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
-    "parcel-bundler": "^1.6.1"
+    "@cycle/time": "^0.19.0",
+    "parcel-bundler": "^1.6.1",
+    "xstream": "^11.11.0"
   },
   "browserslist": [
     "last 2 Chrome versions"

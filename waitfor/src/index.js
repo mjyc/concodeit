@@ -281,6 +281,9 @@ Blockly.defineBlocksWithJsonArray([
   //----------------------------------------------------------------------------
 ]);
 
+//------------------------------------------------------------------------------
+// Code Generators
+
 // copied and modified
 //   https://github.com/google/blockly/blob/23a78c89e4c0f2801768b5c55c7f91ac261f4bc6/generators/javascript/loops.js#L29-L55
 Blockly.JavaScript["controls_repeat_ext_with_sleep"] = function(block) {
@@ -476,9 +479,9 @@ function render(element, toolbox) {
     toolbox: document.getElementById(toolbox)
   });
   Blockly.Xml.domToWorkspace(document.getElementById("startBlocks"), editor);
-  editor.addChangeListener(() =>
-    console.log(Blockly.JavaScript.workspaceToCode(editor))
-  );
+  // editor.addChangeListener(() =>
+  //   console.debug(Blockly.JavaScript.workspaceToCode(editor))
+  // );
   return editor;
 }
 

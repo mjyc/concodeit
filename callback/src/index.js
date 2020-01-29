@@ -4,12 +4,11 @@ require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
-  actionNames,
-  initialize,
-  makeSendGoal,
-  makeCancelGoal
+  // actionNames,
+  initialize
+  // cancelActionGoals,
+  // off
 } from "cycle-robot-drivers-async";
-import { extractFaceFeatures } from "tabletrobotface-userstudy";
 
 let settings = {};
 try {
@@ -17,232 +16,7 @@ try {
 } catch (e) {}
 
 //------------------------------------------------------------------------------
-// Helper Function Definitions
-
-const handles = {};
-
-function sendActionGoalCallback(actionName, goal, callback = () => {}) {
-  ((g, cb) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (!err && val.status.status === "SUCCEEDED") {
-        cb(val.result);
-      } else {
-        cb(null);
-      }
-    });
-  })(goal, callback);
-}
-
-function cancelActionGoal(actionName) {
-  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
-}
-
-function cancelActionGoals() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
-}
-
-function sleep(sec) {
-  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
-}
-
-const eventHandles = {};
-function removeEventHandles() {
-  for (const key in eventHandles) {
-    const eventHandle = eventHandles[key];
-    eventHandle.stream.removeListener(eventHandle.listener);
-  }
-}
-
-const NOSE_ANGLE_THRESHOLD = 10;
-function onFaceDirectionChanged(id, callback) {
-  let prevFaceDirection = null;
-  eventHandles[id] = {
-    stream: sources.PoseDetection.events("poses"),
-    listener: {
-      next: poses => {
-        const features = extractFaceFeatures(poses);
-        const faceDirection = !features.isVisible
-          ? "noface"
-          : features.noseAngle > NOSE_ANGLE_THRESHOLD
-          ? "left"
-          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
-          ? "right"
-          : "center";
-        if (prevFaceDirection === null) {
-          prevFaceDirection = faceDirection;
-          return;
-        }
-        if (faceDirection === prevFaceDirection) return;
-        prevFaceDirection = faceDirection;
-        callback(null, faceDirection);
-      }
-    }
-  };
-  eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
-}
-
-function onVADChanged(id, callback) {
-  eventHandles[id] = {
-    stream: sources.VAD.drop(1),
-    listener: {
-      next: val => {
-        callback(null, val);
-      }
-    }
-  };
-  eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
-}
-
-function onFaceAppears(id, callback) {
-  eventHandles[id] = {
-    stream: sources.PoseDetection.events("poses"),
-    listener: {
-      next: poses => {
-        const features = extractFaceFeatures(poses);
-        const curFaceVisible = features.isVisible;
-        if (curFaceVisible) callback(null, null);
-      }
-    }
-  };
-  eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
-}
-
-function onFaceDirection(id, faceDirection, callback) {
-  eventHandles[id] = {
-    stream: sources.PoseDetection.events("poses"),
-    listener: {
-      next: poses => {
-        const features = extractFaceFeatures(poses);
-        const curFaceDirection = !features.isVisible
-          ? "noface"
-          : features.noseAngle > NOSE_ANGLE_THRESHOLD
-          ? "left"
-          : features.noseAngle < -NOSE_ANGLE_THRESHOLD
-          ? "right"
-          : "center";
-        if (curFaceDirection !== faceDirection) return;
-        curFaceDirection = faceDirection;
-        callback(null, null);
-      }
-    }
-  };
-  eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
-}
-
-function onVoiceActivity(id, voiceActivity, callback) {
-  eventHandles[id] = {
-    stream: sources.VAD,
-    listener: {
-      next: val => {
-        if (val !== voiceActivity) return;
-        callback(null, val);
-      }
-    }
-  };
-  eventHandles[id].stream.addListener(eventHandles[id].listener);
-  return id;
-}
-
-const actionCallbacks = {};
-["sleep", "SpeechSynthesisAction", "FacialExpressionAction"].map(
-  actionName => (actionCallbacks[actionName] = [])
-);
-
-function removeActionCallbacks() {
-  for (const key in actionCallbacks) {
-    actionCallbacks[key] = [];
-  }
-}
-
-function when(id, eventName, callback) {
-  switch (eventName) {
-    case "humanFaceDirectionChanged":
-      onFaceDirectionChanged(id, callback);
-      return;
-    case "isHumanSpeakingChanged":
-      onVADChanged(id, callback);
-      return;
-    case "noHumanFaceFound":
-      onFaceDirection(id, "noface", callback);
-      return;
-    case "humanFaceFound":
-      onFaceAppears(id, callback);
-      return;
-    case "humanFaceLookingAtRight":
-      onFaceDirection(id, "right", callback);
-      return;
-    case "humanFaceLookingAtLeft":
-      onFaceDirection(id, "left", callback);
-      return;
-    case "humanFaceLookingAtCenter":
-      onFaceDirection(id, "center", callback);
-      return;
-    case "isHumanSpeakingFalse":
-      onVoiceActivity(id, false, callback);
-      return;
-    case "isHumanSpeakingTrue":
-      onVoiceActivity(id, true, callback);
-      return;
-    case "sleepDone":
-      actionCallbacks["sleep"].push(callback);
-      return;
-    case "sayDone":
-      actionCallbacks["SpeechSynthesisAction"].push(callback);
-      return;
-    case "gestureDone":
-      actionCallbacks["FacialExpressionAction"].push(callback);
-      return;
-    default:
-      throw new Error("unknown eventName", eventName);
-  }
-}
-
-function stopDetectChangeOrWait(id) {
-  eventHandles[id].stream.removeListener(eventHandles[id].listener);
-}
-
-function startSleeping(duration) {
-  setTimeout(() => {
-    for (const callback of actionCallbacks["sleep"]) {
-      callback();
-    }
-  }, duration * 1000);
-}
-
-function setMessage(message) {
-  sendActionGoalCallback("RobotSpeechbubbleAction", message, result => {});
-}
-
-function startFollowingFace() {
-  sources.followFace.shamefullySendNext(true);
-}
-
-function stopFollowingFace() {
-  sources.followFace.shamefullySendNext(false);
-}
-
-function startSaying(text) {
-  sendActionGoalCallback("SpeechSynthesisAction", text, result => {
-    for (const callback of actionCallbacks["SpeechSynthesisAction"]) {
-      callback(result);
-    }
-  });
-}
-
-function startGesturing(gesture) {
-  sendActionGoalCallback("FacialExpressionAction", gesture, result => {
-    for (const callback of actionCallbacks["FacialExpressionAction"]) {
-      callback(result);
-    }
-  });
-}
-
-//------------------------------------------------------------------------------
-// Block Function Definitions
+// Blockly Definitions
 
 Blockly.defineBlocksWithJsonArray([
   {
@@ -314,140 +88,140 @@ Blockly.defineBlocksWithJsonArray([
     colour: 290,
     tooltip: "",
     helpUrl: ""
-  },
-  {
-    type: "start_sleeping",
-    message0: "start sleeping for %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "SE",
-        check: "Number"
-      }
-      // {
-      //   type: "input_statement",
-      //   name: "DO"
-      // }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "set_message",
-    message0: "set message %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_following_face",
-    message0: "start following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_following_face",
-    message0: "stop following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_saying",
-    message0: "start saying %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_gesturing",
-    message0: "start gesturing %1",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "MESSAGE",
-        options: [
-          ["happy", '"HAPPY"'],
-          ["sad", '"SAD"'],
-          ["angry", '"ANGRY"'],
-          ["focused", '"FOCUSED"'],
-          ["confused", '"CONFUSED"']
-        ]
-      }
-      // {
-      //   type: "input_dummy"
-      // },
-      // {
-      //   type: "input_statement",
-      //   name: "DO"
-      // }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "when",
-    message0: "when %1 %2 %3",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "SE",
-        options: [
-          ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
-          ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"'],
-          ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
-          ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
-          ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
-          ["humanAppears", '"humanFaceFound"'],
-          ["humanDisappears", '"noHumanFaceFound"'],
-          ["humanSpeaks", '"isHumanSpeakingTrue"'],
-          ["humanStopsSpeaking", '"isHumanSpeakingFalse"'],
-          ["sleepDone", '"sleepDone"'],
-          ["sayDone", '"sayDone"'],
-          ["gestureDone", '"gestureDone"']
-        ]
-      },
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO"
-      }
-    ],
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
   }
+  //   {
+  //     type: "start_sleeping",
+  //     message0: "start sleeping for %1",
+  //     args0: [
+  //       {
+  //         type: "input_value",
+  //         name: "SE",
+  //         check: "Number"
+  //       }
+  //       // {
+  //       //   type: "input_statement",
+  //       //   name: "DO"
+  //       // }
+  //     ],
+  //     previousStatement: null,
+  //     nextStatement: null,
+  //     colour: 230,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   },
+  //   {
+  //     type: "set_message",
+  //     message0: "set message %1",
+  //     args0: [
+  //       {
+  //         type: "input_value",
+  //         name: "MESSAGE",
+  //         check: ["String", "Number"]
+  //       }
+  //     ],
+  //     previousStatement: null,
+  //     nextStatement: null,
+  //     colour: 230,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   },
+  //   {
+  //     type: "start_following_face",
+  //     message0: "start following face",
+  //     previousStatement: null,
+  //     nextStatement: null,
+  //     colour: 230,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   },
+  //   {
+  //     type: "stop_following_face",
+  //     message0: "stop following face",
+  //     previousStatement: null,
+  //     nextStatement: null,
+  //     colour: 230,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   },
+  //   {
+  //     type: "start_saying",
+  //     message0: "start saying %1",
+  //     args0: [
+  //       {
+  //         type: "input_value",
+  //         name: "MESSAGE",
+  //         check: ["String", "Number"]
+  //       }
+  //     ],
+  //     previousStatement: null,
+  //     nextStatement: null,
+  //     colour: 230,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   },
+  //   {
+  //     type: "start_gesturing",
+  //     message0: "start gesturing %1",
+  //     args0: [
+  //       {
+  //         type: "field_dropdown",
+  //         name: "MESSAGE",
+  //         options: [
+  //           ["happy", '"HAPPY"'],
+  //           ["sad", '"SAD"'],
+  //           ["angry", '"ANGRY"'],
+  //           ["focused", '"FOCUSED"'],
+  //           ["confused", '"CONFUSED"']
+  //         ]
+  //       }
+  //       // {
+  //       //   type: "input_dummy"
+  //       // },
+  //       // {
+  //       //   type: "input_statement",
+  //       //   name: "DO"
+  //       // }
+  //     ],
+  //     previousStatement: null,
+  //     nextStatement: null,
+  //     colour: 230,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   },
+  //   {
+  //     type: "when",
+  //     message0: "when %1 %2 %3",
+  //     args0: [
+  //       {
+  //         type: "field_dropdown",
+  //         name: "SE",
+  //         options: [
+  //           ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
+  //           ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"'],
+  //           ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
+  //           ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
+  //           ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
+  //           ["humanAppears", '"humanFaceFound"'],
+  //           ["humanDisappears", '"noHumanFaceFound"'],
+  //           ["humanSpeaks", '"isHumanSpeakingTrue"'],
+  //           ["humanStopsSpeaking", '"isHumanSpeakingFalse"'],
+  //           ["sleepDone", '"sleepDone"'],
+  //           ["sayDone", '"sayDone"'],
+  //           ["gestureDone", '"gestureDone"']
+  //         ]
+  //       },
+  //       {
+  //         type: "input_dummy"
+  //       },
+  //       {
+  //         type: "input_statement",
+  //         name: "DO"
+  //       }
+  //     ],
+  //     colour: 210,
+  //     tooltip: "",
+  //     helpUrl: ""
+  //   }
 ]);
 
 //------------------------------------------------------------------------------
@@ -530,102 +304,89 @@ function check(block) {
   );
 }
 
-Blockly.JavaScript["start_sleeping"] = function(block) {
-  return check(block)
-    ? `startSleeping(${Blockly.JavaScript.valueToCode(
-        block,
-        "SE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )});\n`
-    : "";
-};
+// Blockly.JavaScript["start_sleeping"] = function(block) {
+//   return check(block)
+//     ? `startSleeping(${Blockly.JavaScript.valueToCode(
+//         block,
+//         "SE",
+//         Blockly.JavaScript.ORDER_ATOMIC
+//       )});\n`
+//     : "";
+// };
 
-Blockly.JavaScript["set_message"] = function(block) {
-  return check(block)
-    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
-    : "";
-};
+// Blockly.JavaScript["set_message"] = function(block) {
+//   return check(block)
+//     ? `setMessage(String(${Blockly.JavaScript.valueToCode(
+//         block,
+//         "MESSAGE",
+//         Blockly.JavaScript.ORDER_ATOMIC
+//       )}));\n`
+//     : "";
+// };
 
-Blockly.JavaScript["start_following_face"] = function(block) {
-  return check(block) ? `startFollowingFace();\n` : "";
-};
+// Blockly.JavaScript["start_following_face"] = function(block) {
+//   return check(block) ? `startFollowingFace();\n` : "";
+// };
 
-Blockly.JavaScript["stop_following_face"] = function(block) {
-  return check(block) ? `stopFollowingFace();\n` : "";
-};
+// Blockly.JavaScript["stop_following_face"] = function(block) {
+//   return check(block) ? `stopFollowingFace();\n` : "";
+// };
 
-Blockly.JavaScript["start_saying"] = function(block) {
-  return check(block)
-    ? `startSaying(String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
-    : "";
-};
+// Blockly.JavaScript["start_saying"] = function(block) {
+//   return check(block)
+//     ? `startSaying(String(${Blockly.JavaScript.valueToCode(
+//         block,
+//         "MESSAGE",
+//         Blockly.JavaScript.ORDER_ATOMIC
+//       )}));\n`
+//     : "";
+// };
 
-Blockly.JavaScript["start_gesturing"] = function(block) {
-  return check(block)
-    ? `startGesturing(String(${block.getFieldValue("MESSAGE")}));\n`
-    : "";
-};
+// Blockly.JavaScript["start_gesturing"] = function(block) {
+//   return check(block)
+//     ? `startGesturing(String(${block.getFieldValue("MESSAGE")}));\n`
+//     : "";
+// };
 
-Blockly.JavaScript["when"] = function(block) {
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
-  return stmtCode !== ""
-    ? `when(${id}, ${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
-    : "";
-};
+// Blockly.JavaScript["when"] = function(block) {
+//   const id = Math.floor(Math.random() * Math.pow(10, 8));
+//   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+//   return stmtCode !== ""
+//     ? `when(${id}, ${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
+//     : "";
+// };
 
-Blockly.JavaScript["start_program"] = function(block) {
-  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
-  return stmtCode !== ""
-    ? `(async () => {\n${Blockly.JavaScript.statementToCode(
-        block,
-        "DO"
-      )}})();\n`
-    : "";
-};
+// Blockly.JavaScript["start_program"] = function(block) {
+//   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+//   return stmtCode !== ""
+//     ? `(async () => {\n${Blockly.JavaScript.statementToCode(
+//         block,
+//         "DO"
+//       )}})();\n`
+//     : "";
+// };
 
 //------------------------------------------------------------------------------
-// Main Setup
+// UI Logic
 
 let editor;
-let code = document.getElementById("startBlocks");
 
 function render(element, toolbox) {
   if (editor) {
-    editor.removeChangeListener(updateCode);
-    code = Blockly.Xml.workspaceToDom(editor);
     editor.dispose();
   }
   editor = Blockly.inject(element, {
     toolbox: document.getElementById(toolbox)
   });
-
-  Blockly.Xml.domToWorkspace(code, editor);
-
-  editor.addChangeListener(updateCode);
-
+  Blockly.Xml.domToWorkspace(document.getElementById("startBlocks"), editor);
+  // editor.addChangeListener(() =>
+  //   console.debug(Blockly.JavaScript.workspaceToCode(editor))
+  // );
   return editor;
-}
-
-function updateCode() {
-  document.getElementById("js").innerText = Blockly.JavaScript.workspaceToCode(
-    editor
-  );
 }
 
 editor = render("editor", "toolbox");
 
-updateCode();
-
-//------------------------------------------------------------------------------
 const sources = initialize({
   container: document.getElementById("app"),
   styles: {
@@ -654,41 +415,22 @@ const sources = initialize({
   }
 });
 
-const handle = setInterval(() => {
-  if (!sources) return;
-  sources.PoseDetection.events("poses").addListener({
-    next: poses => {
-      const features = extractFaceFeatures(poses);
-      const faceDirection = !features.isVisible
-        ? "noface"
-        : features.noseAngle > NOSE_ANGLE_THRESHOLD
-        ? "left"
-        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
-        ? "right"
-        : "center";
-      document.querySelector("#isFaceVisible").innerText = features.isVisible;
-      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
-    }
-  });
-  sources.VAD.addListener({
-    next: val => {
-      document.querySelector("#isHumanSpeaking").innerText = val;
-    }
-  });
-  clearInterval(handle);
-});
+const _exit = [1];
 
-const _exit = [];
-
-const run = code => {
-  // stop previously ran code
+function stop() {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
-  removeEventHandles();
-  removeActionCallbacks();
+  for (const key in _stop) {
+    _stop[key] = true;
+  }
+  off();
   cancelActionGoals();
-  stopFollowingFace();
+}
+
+function run(code) {
+  // stop previously ran code
+  stop();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
@@ -696,20 +438,32 @@ const run = code => {
   );
   const wrapped = `_exit[${_exit.length}] = false;
 (async () => {
-await sleep(1); // HACK to wait until all actions are cancelled
+await sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
-  eval(wrapped);
-};
 
-const stop = () => {
-  if (_exit.length > 0) {
-    _exit[_exit.length - 1] = true;
-  }
-  removeEventHandles();
-  removeActionCallbacks();
-  cancelActionGoals();
-  stopFollowingFace();
-};
+  // (code =>
+  //   Function(
+  //     '"use strict";return (function(promisify, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
+  //       code +
+  //       "})"
+  //   )()(
+  //     promisify,
+  //     _stop,
+  //     _exit,
+  //     say,
+  //     express,
+  //     sleep,
+  //     displayText,
+  //     displayButton,
+  //     waitForEvent,
+  //     waitForAll,
+  //     waitForOne,
+  //     isSaying,
+  //     isExpressing,
+  //     isDisplayingText,
+  //     isDisplayingButton
+  //   ))(wrapped);
+}
 
 document.getElementById("run").onclick = () => {
   const code = Blockly.JavaScript.workspaceToCode(editor);
@@ -717,28 +471,6 @@ document.getElementById("run").onclick = () => {
 };
 
 document.getElementById("stop").onclick = stop;
-
-document.getElementById("download_js").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
-};
-
-document.getElementById("run_js").onclick = e => {
-  const filename = document.getElementById("filename").value;
-  console.debug(`filepath /programs/${filename}`);
-  fetch(`/programs/${filename}`)
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      run(code);
-    });
-};
 
 let startTime = Date.now();
 document.getElementById("download_xml").onclick = () => {
@@ -766,24 +498,3 @@ document.getElementById("load_xml").onchange = e => {
   };
   reader.readAsText(xmlFile);
 };
-
-const mode = settings.mode || "devel";
-
-if (mode === "study") {
-  window.onload = () => {
-    document.querySelector("#download_js").remove();
-    document.querySelector("#run_js").remove();
-    document.querySelector("#load_xml").remove();
-    document.querySelector("#run_js_label").remove();
-    document.querySelector("#load_xml_label").remove();
-    document.querySelector("#filename").remove();
-    document.querySelector("#js_view").remove();
-    document.querySelector(".posenet").style.display = "none";
-  };
-}
-
-//------------------------------------------------------------------------------
-// Scratch
-(async () => {
-  console.log("started");
-})();
