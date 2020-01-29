@@ -4,8 +4,8 @@ const {
   sendActionGoal,
   cancelActionGoal,
   cancelActionGoals,
-  addEventListener,
-  removeEventListeners,
+  addListener,
+  removeListeners,
   once,
   off,
   getActionStatus
@@ -55,8 +55,45 @@ const waitForAll = subprogs => {
   return Promise.all(subprogs);
 };
 
+// export function once(eventName) {
+//   if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
+//     throw new Error(`Invalid input "eventName" ${eventName}`);
+//   }
+//   const id = Math.floor(Math.random() * Math.pow(10, 8));
+
+//   const stream =
+//     eventName === "speechDetected"
+//       ? sinks.speechDetected
+//       : sources.HumanSpeechbubbleAction.result
+//           .filter(result => {
+//             return result.status.status === "SUCCEEDED";
+//           })
+//           .map(r => {
+//             return r.result;
+//           });
+
+//   onceHandles[id] = {
+//     id,
+//     listener: null,
+//     stream,
+//     stop: () => {
+//       onceHandles[id].stream.removeListener(onceHandles[id].listener);
+//     }
+//   };
+
+//   return promisify(cb => {
+//     onceHandles[id].listener = {
+//       next: val => {
+//         onceHandles[id].stream.removeListener(onceHandles[id].listener);
+//         cb(null, val);
+//       }
+//     };
+//     onceHandles[id].stream.addListener(onceHandles[id].listener);
+//   })();
+// }
+
 const waitForEvent = eventName => {
-  return once(eventName);
+  // return once(eventName);
 };
 
 const isSaying = () => {
@@ -83,8 +120,10 @@ const isDisplayingButton = () => {
   });
 };
 
+const addEventCallback = (eventName, callback) => {};
+
 const reset = () => {
-  removeEventListeners();
+  removeListeners();
   off();
   cancelActionGoals();
 };
@@ -102,6 +141,6 @@ module.exports = {
   isExpressing,
   isDisplayingText,
   isDisplayingButton,
-  reset,
-  addEventListener
+  addEventListener,
+  reset
 };

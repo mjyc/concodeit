@@ -5,6 +5,7 @@ console.warn = jest.fn(); // hide webgl outputs
 const { promisify } = require("util");
 const xs = require("xstream").default;
 const { mockTimeSource } = require("@cycle/time");
+const { mockDOMSource } = require("@cycle/dom");
 const { actionNames, mockInitialize, makeSendGoal, once } = require("../");
 
 console.debug = jest.fn(); // when debugging, comment this line out
@@ -15,7 +16,13 @@ test("makeSendGoal", async done => {
   // setup main
   const { sources, sinks } = mockInitialize({
     mockSources: Object.assign(
-      {},
+      {
+        DOM: mockDOMSource({
+          ".speech": {
+            keypress: xs.never()
+          }
+        })
+      },
       {
         PoseDetection: {
           events: () => xs.create()

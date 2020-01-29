@@ -196,50 +196,50 @@ test("displayButton", async () => {
   expect(actual).toBe(expected);
 });
 
-test("waitForEvent - buttonPressed", async () => {
-  const Time = mockTimeSource();
+// test("waitForEvent - buttonPressed", async () => {
+//   const Time = mockTimeSource();
 
-  // setup main
-  const { sources, sinks } = mockInitialize({
-    mockSources: Object.assign(
-      {
-        DOM: mockDOMSource({
-          ".speech": {
-            keypress: xs.never()
-          }
-        })
-      },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
-      actionNames.reduce((prev, actionName) => {
-        prev[actionName] = {
-          status: xs.create(),
-          result: xs.create()
-        };
-        return prev;
-      }, {})
-    )
-  });
+//   // setup main
+//   const { sources, sinks } = mockInitialize({
+//     mockSources: Object.assign(
+//       {
+//         DOM: mockDOMSource({
+//           ".speech": {
+//             keypress: xs.never()
+//           }
+//         })
+//       },
+//       {
+//         PoseDetection: {
+//           events: () => xs.create()
+//         }
+//       },
+//       actionNames.reduce((prev, actionName) => {
+//         prev[actionName] = {
+//           status: xs.create(),
+//           result: xs.create()
+//         };
+//         return prev;
+//       }, {})
+//     )
+//   });
 
-  sinks.HumanSpeechbubbleAction.goal.addListener({
-    next: goal => {
-      setTimeout(() => {
-        sources.HumanSpeechbubbleAction.result.shamefullySendNext({
-          status: {
-            goal_id: goal.goal_id,
-            status: "SUCCEEDED"
-          },
-          result: goal.goal[0]
-        });
-      }, 100); // sleep tiny bit so waitForEvent can be called
-    }
-  });
+//   sinks.HumanSpeechbubbleAction.goal.addListener({
+//     next: goal => {
+//       setTimeout(() => {
+//         sources.HumanSpeechbubbleAction.result.shamefullySendNext({
+//           status: {
+//             goal_id: goal.goal_id,
+//             status: "SUCCEEDED"
+//           },
+//           result: goal.goal[0]
+//         });
+//       }, 100); // sleep tiny bit so waitForEvent can be called
+//     }
+//   });
 
-  const expected = "Blue";
-  displayButton(["Blue", "Red"], 2);
-  const actual = await waitForEvent("buttonPressed");
-  expect(actual).toBe(expected);
-});
+//   const expected = "Blue";
+//   displayButton(["Blue", "Red"], 2);
+//   const actual = await waitForEvent("buttonPressed");
+//   expect(actual).toBe(expected);
+// });

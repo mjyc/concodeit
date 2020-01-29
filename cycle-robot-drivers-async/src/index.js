@@ -1,6 +1,7 @@
 require("util.promisify/shim")();
 import { promisify } from "util";
 import xs from "xstream";
+import get from "lodash.get";
 import sampleCombine from "xstream/extra/sampleCombine";
 import { div, label, input, makeDOMDriver } from "@cycle/dom";
 import { makeTabletFaceDriver } from "@cycle-robot-drivers/screen";
@@ -80,6 +81,7 @@ export function initialize(options = {}) {
     s => {
       sources = s;
       sinks = main(s);
+      sources.speechDetected = sinks.speechDetected;
       return sinks;
     },
     {
@@ -168,126 +170,6 @@ export function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
-export function addEventListener(eventName, listener) {
-  if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
-    throw new Error(`Invalid input "eventName" ${eventName}`);
-  }
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-
-  const stream =
-    eventName === "speechDetected"
-      ? sinks.speechDetected
-      : sources.HumanSpeechbubbleAction.result
-          .filter(result => {
-            return result.status.status === "SUCCEEDED";
-          })
-          .map(r => {
-            return r.result;
-          });
-
-  stream.addListener({
-    next: val => {
-      listener(null, val);
-    }
-  });
-}
-
-const eventListeners = {};
-
-export function removeEventListener(eventName, listener) {
-  if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
-    throw new Error(`Invalid input "eventName" ${eventName}`);
-  }
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-
-  const stream =
-    eventName === "speechDetected"
-      ? sinks.speechDetected
-      : sources.HumanSpeechbubbleAction.result
-          .filter(result => {
-            return result.status.status === "SUCCEEDED";
-          })
-          .map(r => {
-            return r.result;
-          });
-
-  eventListeners[id] = stream.removeListener({
-    next: val => {
-      listener(null, val);
-    }
-  });
-}
-
-export function removeEventListeners() {
-  for (const eventName in ["speechDetected", "buttonPressed"]) {
-    const stream =
-      eventName === "speechDetected"
-        ? sinks.speechDetected
-        : sources.HumanSpeechbubbleAction.result
-            .filter(result => {
-              return result.status.status === "SUCCEEDED";
-            })
-            .map(r => {
-              return r.result;
-            });
-    for (const k in eventListeners) {
-      stream.removeListener(eventListeners[k]);
-    }
-  }
-}
-
-const onceHandles = {};
-
-export function once(eventName) {
-  if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
-    throw new Error(`Invalid input "eventName" ${eventName}`);
-  }
-  const id = Math.floor(Math.random() * Math.pow(10, 8));
-
-  const stream =
-    eventName === "speechDetected"
-      ? sinks.speechDetected
-      : sources.HumanSpeechbubbleAction.result
-          .filter(result => {
-            return result.status.status === "SUCCEEDED";
-          })
-          .map(r => {
-            return r.result;
-          });
-
-  onceHandles[id] = {
-    id,
-    listener: null,
-    stream,
-    stop: () => {
-      onceHandles[id].stream.removeListener(onceHandles[id].listener);
-    }
-  };
-
-  return promisify(cb => {
-    onceHandles[id].listener = {
-      next: val => {
-        onceHandles[id].stream.removeListener(onceHandles[id].listener);
-        cb(null, val);
-      }
-    };
-    onceHandles[id].stream.addListener(onceHandles[id].listener);
-  })();
-}
-
-export function off(onceHandle) {
-  if (typeof onceHandle === "undefined") {
-    for (const key in onceHandles) {
-      onceHandle = onceHandles[key];
-      onceHandle.stream.removeListener(onceHandle.listener);
-      delete onceHandles[onceHandle.id];
-    }
-  } else {
-    onceHandle.stream.removeListener(onceHandle.listener);
-    delete onceHandles[onceHandle.id];
-  }
-}
-
 export function getActionStatus(actionName) {
   return promisify(callback => {
     const listener = {
@@ -306,4 +188,29 @@ export function getActionStatus(actionName) {
     };
     sources[actionName].status.addListener(listener);
   })();
+}
+
+const listenerHandles = {};
+
+export function addListener(eventName, listener) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  if (!listenerHandles[id]) {
+    throw new Error(`listners[${id}] is not "undefined"`);
+  }
+  listenerHandles[id] = {
+    _id: id,
+    stream: get(sources, eventName),
+    listener: {
+      next: val => {
+        listener(null, val);
+      }
+    }
+  };
+  listenerHandles[id].stream.addListener(listenerHandles[id].listener);
+}
+
+export function removeListeners() {
+  for (const listenerHandle in listenerHandles) {
+    listenerHandle.stream.removeListener(listenerHandle.listener);
+  }
 }
