@@ -3,9 +3,13 @@ import "./styles.css";
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import { initialize } from "cycle-robot-drivers-async";
-const { cancelActionGoals, off } = require("cycle-robot-drivers-async");
-const {
+import {
+  actionNames,
+  initialize,
+  cancelActionGoals,
+  off
+} from "cycle-robot-drivers-async";
+import {
   sleep,
   say,
   express,
@@ -13,8 +17,12 @@ const {
   displayButton,
   waitForOne,
   waitForAll,
-  waitForEvent
-} = require("./api");
+  waitForEvent,
+  isSaying,
+  isExpressing,
+  isDisplayingText,
+  isDisplayingButton
+} from "./api";
 
 let settings = {};
 try {
@@ -172,6 +180,26 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "get_state",
+    message0: "get state of %1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["isSaying", "isSaying"],
+          ["isExpressing", "isExpressing"],
+          ["isDisplayingText", "isDisplayingText"],
+          ["isDisplayingButton", "isDisplayingButton"]
+        ]
+      }
+    ],
+    output: "String",
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -383,6 +411,13 @@ Blockly.JavaScript["express"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["get_state"] = function(block) {
+  const code = check(block)
+    ? `await ${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
 Blockly.JavaScript["wait_for_event"] = function(block) {
   const code = check(block)
     ? `await waitForEvent(String(${block.getFieldValue("SE")}))`
@@ -505,7 +540,7 @@ ${patched}})();`;
 
   (code =>
     Function(
-      '"use strict";return (function(promisify, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne) {' +
+      '"use strict";return (function(promisify, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
         code +
         "})"
     )()(
@@ -519,7 +554,11 @@ ${patched}})();`;
       displayButton,
       waitForEvent,
       waitForAll,
-      waitForOne
+      waitForOne,
+      isSaying,
+      isExpressing,
+      isDisplayingText,
+      isDisplayingButton
     ))(wrapped);
 }
 

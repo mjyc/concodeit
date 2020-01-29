@@ -3,7 +3,8 @@ const { promisify } = require("util");
 const {
   sendActionGoal,
   cancelActionGoal,
-  once
+  once,
+  getActionStatus
 } = require("cycle-robot-drivers-async");
 
 const sleep = duration => {
@@ -54,6 +55,34 @@ const waitForEvent = eventName => {
   return once(eventName);
 };
 
+const isSaying = () => {
+  return getActionStatus("SpeechSynthesisAction").then(r => {
+    console.error(r);
+    return r !== null && r === "ACTIVE";
+  });
+};
+
+const isExpressing = () => {
+  return getActionStatus("FacialExpressionAction").then(r => {
+    console.error(r);
+    return r !== null && r === "ACTIVE";
+  });
+};
+
+const isDisplayingText = () => {
+  return getActionStatus("RobotSpeechbubbleAction").then(r => {
+    console.error(r);
+    return r !== null && r === "ACTIVE";
+  });
+};
+
+const isDisplayingButton = () => {
+  return getActionStatus("HumanSpeechbubbleAction").then(r => {
+    console.error(r);
+    return r !== null && r === "ACTIVE";
+  });
+};
+
 module.exports = {
   sleep,
   say,
@@ -62,5 +91,9 @@ module.exports = {
   displayButton,
   waitForOne,
   waitForAll,
-  waitForEvent
+  waitForEvent,
+  isSaying,
+  isExpressing,
+  isDisplayingText,
+  isDisplayingButton
 };

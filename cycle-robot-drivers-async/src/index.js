@@ -89,6 +89,10 @@ export function initialize(options = {}) {
     },
     options
   );
+  // make sure "sources[actionName].status" does not get jammed
+  actionNames.map(actionName =>
+    sources[actionName].status.addListener(() => {})
+  );
   return sources;
 }
 
@@ -218,4 +222,24 @@ export function off(onceHandle) {
     onceHandle.stream.removeListener(onceHandle.listener);
     delete onceHandles[onceHandle.id];
   }
+}
+
+export function getActionStatus(actionName) {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        sources[actionName].status.removeListener(listener);
+        if (
+          sendActionGoalHandles[actionName] &&
+          sendActionGoalHandles[actionName].goal_id &&
+          sendActionGoalHandles[actionName].goal_id.id === val.goal_id.id
+        ) {
+          callback(null, val.status);
+        } else {
+          callback(null, null);
+        }
+      }
+    };
+    sources[actionName].status.addListener(listener);
+  })();
 }

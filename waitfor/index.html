@@ -19,7 +19,7 @@
     <div>
       <div id="editor" style="height:480px;width:800px"></div>
       <xml id="toolbox" style="display: none">
-        <category name="Sensing" colour="210">
+        <category name="Robot sensing" colour="210">
           <block type="variables_set">
             <field name="VAR">value</field>
             <value name="VALUE">
@@ -29,7 +29,7 @@
             </value>
           </block>
         </category>
-        <category name="Action" colour="230">
+        <category name="Robot actions" colour="230">
           <block type="sleep">
             <value name="ARG0">
               <block type="math_number">
@@ -79,12 +79,18 @@
             </value>
           </block>
           <block type="express"></block>
+          <block type="variables_set">
+            <field name="VAR">state</field>
+            <value name="VALUE">
+              <block type="get_state"></block>
+            </value>
+          </block>
         </category>
         <category name="Concurrency" colour="290">
           <block type="wait_for_all"></block>
           <block type="wait_for_one"></block>
         </category>
-        <category name="Program control " colour="290">
+        <category name="Program control" colour="290">
           <block type="start_program"></block>
         </category>
         <sep></sep>
