@@ -3,7 +3,6 @@ import "./styles.css";
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import { initialize } from "cycle-robot-drivers-async";
 import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
@@ -387,7 +386,7 @@ function render(element, toolbox) {
 
 editor = render("editor", "toolbox");
 
-const sources = initialize({
+robot.init({
   container: document.getElementById("app"),
   styles: {
     speechbubblesOuter: {

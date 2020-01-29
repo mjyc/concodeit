@@ -1,6 +1,7 @@
 require("util.promisify/shim")();
 const { promisify } = require("util");
 const {
+  initialize,
   sendActionGoal,
   cancelActionGoal,
   cancelActionGoals,
@@ -108,6 +109,10 @@ const isDisplayingButton = () => {
 
 const addEventCallback = (eventName, callback) => {};
 
+const init = (...args) => {
+  initialize(...args);
+};
+
 const reset = () => {
   removeListeners();
   off();
@@ -128,5 +133,6 @@ module.exports = {
   isDisplayingText,
   isDisplayingButton,
   addEventListener,
+  init,
   reset
 };
