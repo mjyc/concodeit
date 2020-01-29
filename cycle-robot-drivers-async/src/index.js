@@ -192,6 +192,8 @@ export function addRobotEventListener(eventName, listener) {
   });
 }
 
+const listeners = {};
+
 export function removeRobotEventListener(eventName, listener) {
   if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
     throw new Error(`Invalid input "eventName" ${eventName}`);
@@ -209,11 +211,35 @@ export function removeRobotEventListener(eventName, listener) {
             return r.result;
           });
 
-  stream.removeListener({
+  listeners[id] = stream.removeListener({
     next: val => {
       listener(null, val);
     }
   });
+}
+
+export function removeAllRobotEventListener() {
+  for (const eventName in ["speechDetected", "buttonPressed"]) {
+    const stream =
+      eventName === "speechDetected"
+        ? sinks.speechDetected
+        : sources.HumanSpeechbubbleAction.result
+            .filter(result => {
+              return result.status.status === "SUCCEEDED";
+            })
+            .map(r => {
+              return r.result;
+            });
+    for (const k in listeners) {
+      stream.removeListener(listeners[k]);
+    }
+  }
+
+  // stream.removeListener({
+  //   next: val => {
+  //     listener(null, val);
+  //   }
+  // });
 }
 
 const onceHandles = {};

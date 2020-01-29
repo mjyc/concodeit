@@ -7,6 +7,7 @@ import {
   actionNames,
   initialize,
   addRobotEventListener,
+  removeAllRobotEventListener,
   cancelActionGoals,
   off
 } from "cycle-robot-drivers-async";
@@ -139,6 +140,7 @@ Blockly.defineBlocksWithJsonArray([
         check: ["Number"]
       }
     ],
+    inputsInline: true,
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -328,7 +330,7 @@ function check(block) {
 
 Blockly.JavaScript["display_text"] = function(block) {
   return check(block)
-    ? `displayText(String(${Blockly.JavaScript.valueToCode(
+    ? `displayText(${Blockly.JavaScript.valueToCode(
         block,
         "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -336,7 +338,7 @@ Blockly.JavaScript["display_text"] = function(block) {
         block,
         "DURATION",
         Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
+      )});\n`
     : "";
 };
 
@@ -444,6 +446,7 @@ function stop() {
   }
   off();
   cancelActionGoals();
+  removeAllRobotEventListener();
 }
 
 function run(code) {
@@ -461,12 +464,13 @@ ${patched}})();`;
 
   (code =>
     Function(
-      '"use strict";return (function(promisify, addRobotEventListener, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
+      '"use strict";return (function(promisify, addRobotEventListener, removeAllRobotEventListener, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
         code +
         "})"
     )()(
       promisify,
       addRobotEventListener,
+      removeAllRobotEventListener,
       _stop,
       _exit,
       say,
