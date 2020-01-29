@@ -49,7 +49,6 @@ function main(sources) {
 
   return Object.assign(
     {
-      // tabletFace: tabletFace$,
       speechDetected: speechDetected$,
       dom: vdom$
     },
@@ -79,7 +78,6 @@ export function initialize(options = {}) {
   }
   runTabletRobotFaceApp(
     s => {
-      s.followFace = xs.create();
       sources = s;
       sinks = main(s);
       return sinks;
