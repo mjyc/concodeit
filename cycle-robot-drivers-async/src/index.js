@@ -168,7 +168,7 @@ export function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
-export function addRobotEventListener(eventName, listener) {
+export function addEventListener(eventName, listener) {
   if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
     throw new Error(`Invalid input "eventName" ${eventName}`);
   }
@@ -192,9 +192,9 @@ export function addRobotEventListener(eventName, listener) {
   });
 }
 
-const listeners = {};
+const eventListeners = {};
 
-export function removeRobotEventListener(eventName, listener) {
+export function removeEventListener(eventName, listener) {
   if (["speechDetected", "buttonPressed"].indexOf(eventName) === -1) {
     throw new Error(`Invalid input "eventName" ${eventName}`);
   }
@@ -211,14 +211,14 @@ export function removeRobotEventListener(eventName, listener) {
             return r.result;
           });
 
-  listeners[id] = stream.removeListener({
+  eventListeners[id] = stream.removeListener({
     next: val => {
       listener(null, val);
     }
   });
 }
 
-export function removeAllRobotEventListener() {
+export function removeEventListeners() {
   for (const eventName in ["speechDetected", "buttonPressed"]) {
     const stream =
       eventName === "speechDetected"
@@ -230,16 +230,10 @@ export function removeAllRobotEventListener() {
             .map(r => {
               return r.result;
             });
-    for (const k in listeners) {
-      stream.removeListener(listeners[k]);
+    for (const k in eventListeners) {
+      stream.removeListener(eventListeners[k]);
     }
   }
-
-  // stream.removeListener({
-  //   next: val => {
-  //     listener(null, val);
-  //   }
-  // });
 }
 
 const onceHandles = {};
@@ -313,27 +307,3 @@ export function getActionStatus(actionName) {
     sources[actionName].status.addListener(listener);
   })();
 }
-
-// export function isSaying() {
-//   return getActionStatus("SpeechSynthesisAction").then(r => {
-//     return r !== null && r === "ACTIVE";
-//   });
-// };
-
-// export function isExpressing() {
-//   return getActionStatus("FacialExpressionAction").then(r => {
-//     return r !== null && r === "ACTIVE";
-//   });
-// };
-
-// export function isDisplayingText() {
-//   return getActionStatus("RobotSpeechbubbleAction").then(r => {
-//     return r !== null && r === "ACTIVE";
-//   });
-// };
-
-// export function isDisplayingButton() {
-//   return getActionStatus("HumanSpeechbubbleAction").then(r => {
-//     return r !== null && r === "ACTIVE";
-//   });
-// };

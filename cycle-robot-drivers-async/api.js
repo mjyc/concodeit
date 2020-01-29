@@ -4,8 +4,7 @@ const {
   sendActionGoal,
   cancelActionGoal,
   once,
-  getActionStatus,
-  addRobotEventListener
+  getActionStatus
 } = require("./");
 
 const sleep = duration => {

@@ -4,25 +4,11 @@ require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
-  actionNames,
   initialize,
   cancelActionGoals,
   off
 } from "cycle-robot-drivers-async";
-import {
-  sleep,
-  say,
-  express,
-  displayText,
-  displayButton,
-  waitForOne,
-  waitForAll,
-  waitForEvent,
-  isSaying,
-  isExpressing,
-  isDisplayingText,
-  isDisplayingButton
-} from "./api";
+import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
 try {
@@ -362,7 +348,7 @@ function check(block) {
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
-    ? `await sleep(${Blockly.JavaScript.valueToCode(
+    ? `await robot.sleep(${Blockly.JavaScript.valueToCode(
         block,
         "ARG0",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -372,7 +358,7 @@ Blockly.JavaScript["sleep"] = function(block) {
 
 Blockly.JavaScript["display_text"] = function(block) {
   return check(block)
-    ? `await displayText(${Blockly.JavaScript.valueToCode(
+    ? `await robot.displayText(${Blockly.JavaScript.valueToCode(
         block,
         "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -386,7 +372,7 @@ Blockly.JavaScript["display_text"] = function(block) {
 
 Blockly.JavaScript["display_button"] = function(block) {
   return check(block)
-    ? `await displayButton(${Blockly.JavaScript.valueToCode(
+    ? `await robot.displayButton(${Blockly.JavaScript.valueToCode(
         block,
         "BUTTONS",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -400,7 +386,7 @@ Blockly.JavaScript["display_button"] = function(block) {
 
 Blockly.JavaScript["say"] = function(block) {
   return check(block)
-    ? `await say(${Blockly.JavaScript.valueToCode(
+    ? `await robot.say(${Blockly.JavaScript.valueToCode(
         block,
         "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
@@ -410,27 +396,27 @@ Blockly.JavaScript["say"] = function(block) {
 
 Blockly.JavaScript["express"] = function(block) {
   return check(block)
-    ? `await express(${block.getFieldValue("EXPRESSION")});\n`
+    ? `await robot.express(${block.getFieldValue("EXPRESSION")});\n`
     : "";
 };
 
 Blockly.JavaScript["get_state"] = function(block) {
   const code = check(block)
-    ? `await ${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["wait_for_event"] = function(block) {
   const code = check(block)
-    ? `await waitForEvent(String(${block.getFieldValue("SE")}))`
+    ? `await robot.waitForEvent(String(${block.getFieldValue("SE")}))`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["wait_for_all"] = function(block) {
   return check(block)
-    ? `await waitForAll([${[0, 1]
+    ? `await robot.waitForAll([${[0, 1]
         .map(
           i =>
             `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
@@ -447,18 +433,18 @@ const _stop = [];
 Blockly.JavaScript["wait_for_one"] = function(block) {
   const id = block.id;
   return check(block)
-    ? `_stop["${id}"] = false;\nawait waitForOne([${[0, 1]
+    ? `robot._stop["${id}"] = false;\nawait robot.waitForOne([${[0, 1]
         .map(
           i =>
-            `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+            `robot.promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
               block,
               `DO${i}`
             ).replace(
               /;\n/g,
-              `; if (_stop["${block.id}"]) return;\n`
+              `; if (robot._stop["${block.id}"]) return;\n`
             )}  cb(null, null);\n})()`
         )
-        .join(", ")}]);\n_stop["${block.id}"] = true;\n`
+        .join(", ")}]);\nrobot._stop["${block.id}"] = true;\n`
     : "";
 };
 
@@ -515,6 +501,7 @@ const sources = initialize({
   }
 });
 
+// "_stop" is defined above Blockly.JavaScript["wait_for_one"] ...
 const _exit = [];
 
 function stop() {
@@ -534,34 +521,16 @@ function run(code) {
   // patch & run code
   const patched = code.replace(
     /;\n/g,
-    `; if (_exit[${_exit.length}]) return;\n`
+    `; if (robot._exit[${_exit.length}]) return;\n`
   );
-  const wrapped = `_exit[${_exit.length}] = false;
+  const wrapped = `robot._exit[${_exit.length}] = false;
 (async () => {
-await sleep(0.5); // HACK to wait until all actions are cancelled
+await robot.sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
 
   (code =>
-    Function(
-      '"use strict";return (function(promisify, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
-        code +
-        "})"
-    )()(
-      promisify,
-      _stop,
-      _exit,
-      say,
-      express,
-      sleep,
-      displayText,
-      displayButton,
-      waitForEvent,
-      waitForAll,
-      waitForOne,
-      isSaying,
-      isExpressing,
-      isDisplayingText,
-      isDisplayingButton
+    Function('"use strict";return (function(robot) {' + code + "})")()(
+      Object.assign({ promisify, _stop, _exit }, robot)
     ))(wrapped);
 }
 
