@@ -4,11 +4,26 @@ require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
-  // actionNames,
-  initialize
-  // cancelActionGoals,
-  // off
+  actionNames,
+  initialize,
+  addRobotEventListener,
+  cancelActionGoals,
+  off
 } from "cycle-robot-drivers-async";
+import {
+  sleep,
+  say,
+  express,
+  displayText,
+  displayButton,
+  waitForOne,
+  waitForAll,
+  waitForEvent,
+  isSaying,
+  isExpressing,
+  isDisplayingText,
+  isDisplayingButton
+} from "cycle-robot-drivers-async/api";
 
 let settings = {};
 try {
@@ -88,7 +103,7 @@ Blockly.defineBlocksWithJsonArray([
     colour: 290,
     tooltip: "",
     helpUrl: ""
-  }
+  },
   //   {
   //     type: "start_sleeping",
   //     message0: "start sleeping for %1",
@@ -109,22 +124,27 @@ Blockly.defineBlocksWithJsonArray([
   //     tooltip: "",
   //     helpUrl: ""
   //   },
-  //   {
-  //     type: "set_message",
-  //     message0: "set message %1",
-  //     args0: [
-  //       {
-  //         type: "input_value",
-  //         name: "MESSAGE",
-  //         check: ["String", "Number"]
-  //       }
-  //     ],
-  //     previousStatement: null,
-  //     nextStatement: null,
-  //     colour: 230,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   },
+  {
+    type: "display_text",
+    message0: "display text %1 %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "TEXT",
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_value",
+        name: "DURATION",
+        check: ["Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
   //   {
   //     type: "start_following_face",
   //     message0: "start following face",
@@ -188,40 +208,32 @@ Blockly.defineBlocksWithJsonArray([
   //     tooltip: "",
   //     helpUrl: ""
   //   },
-  //   {
-  //     type: "when",
-  //     message0: "when %1 %2 %3",
-  //     args0: [
-  //       {
-  //         type: "field_dropdown",
-  //         name: "SE",
-  //         options: [
-  //           ["humanFaceDirectionChanged", '"humanFaceDirectionChanged"'],
-  //           ["isHumanSpeakingChanged", '"isHumanSpeakingChanged"'],
-  //           ["humanLooksAtCenter", '"humanFaceLookingAtCenter"'],
-  //           ["humanLooksAtLeft", '"humanFaceLookingAtLeft"'],
-  //           ["humanLooksAtRight", '"humanFaceLookingAtRight"'],
-  //           ["humanAppears", '"humanFaceFound"'],
-  //           ["humanDisappears", '"noHumanFaceFound"'],
-  //           ["humanSpeaks", '"isHumanSpeakingTrue"'],
-  //           ["humanStopsSpeaking", '"isHumanSpeakingFalse"'],
-  //           ["sleepDone", '"sleepDone"'],
-  //           ["sayDone", '"sayDone"'],
-  //           ["gestureDone", '"gestureDone"']
-  //         ]
-  //       },
-  //       {
-  //         type: "input_dummy"
-  //       },
-  //       {
-  //         type: "input_statement",
-  //         name: "DO"
-  //       }
-  //     ],
-  //     colour: 210,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   }
+  {
+    type: "when",
+    message0: "when %1 %2 %3",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "SE",
+        options: [
+          ["sayDone", '"sayDone"'],
+          ["expressDone", '"expressDone"'],
+          ["displayTextDone", '"displayTextDone"'],
+          ["displayButtonDone", '"displayTextDone"']
+        ]
+      },
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO"
+      }
+    ],
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  }
 ]);
 
 //------------------------------------------------------------------------------
@@ -314,15 +326,19 @@ function check(block) {
 //     : "";
 // };
 
-// Blockly.JavaScript["set_message"] = function(block) {
-//   return check(block)
-//     ? `setMessage(String(${Blockly.JavaScript.valueToCode(
-//         block,
-//         "MESSAGE",
-//         Blockly.JavaScript.ORDER_ATOMIC
-//       )}));\n`
-//     : "";
-// };
+Blockly.JavaScript["display_text"] = function(block) {
+  return check(block)
+    ? `displayText(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "TEXT",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, ${Blockly.JavaScript.valueToCode(
+        block,
+        "DURATION",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
 
 // Blockly.JavaScript["start_following_face"] = function(block) {
 //   return check(block) ? `startFollowingFace();\n` : "";
@@ -348,23 +364,24 @@ function check(block) {
 //     : "";
 // };
 
-// Blockly.JavaScript["when"] = function(block) {
-//   const id = Math.floor(Math.random() * Math.pow(10, 8));
-//   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
-//   return stmtCode !== ""
-//     ? `when(${id}, ${block.getFieldValue("SE")}, (res, err) => {\n${stmtCode}})`
-//     : "";
-// };
+Blockly.JavaScript["when"] = function(block) {
+  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+  return stmtCode !== ""
+    ? `addRobotEventListener(${block.getFieldValue(
+        "SE"
+      )}, (res, err) => {\n${stmtCode}})`
+    : "";
+};
 
-// Blockly.JavaScript["start_program"] = function(block) {
-//   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
-//   return stmtCode !== ""
-//     ? `(async () => {\n${Blockly.JavaScript.statementToCode(
-//         block,
-//         "DO"
-//       )}})();\n`
-//     : "";
-// };
+Blockly.JavaScript["start_program"] = function(block) {
+  const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
+  return stmtCode !== ""
+    ? `(async () => {\n${Blockly.JavaScript.statementToCode(
+        block,
+        "DO"
+      )}})();\n`
+    : "";
+};
 
 //------------------------------------------------------------------------------
 // UI Logic
@@ -379,9 +396,9 @@ function render(element, toolbox) {
     toolbox: document.getElementById(toolbox)
   });
   Blockly.Xml.domToWorkspace(document.getElementById("startBlocks"), editor);
-  // editor.addChangeListener(() =>
-  //   console.debug(Blockly.JavaScript.workspaceToCode(editor))
-  // );
+  editor.addChangeListener(() =>
+    console.debug(Blockly.JavaScript.workspaceToCode(editor))
+  );
   return editor;
 }
 
@@ -415,7 +432,8 @@ const sources = initialize({
   }
 });
 
-const _exit = [1];
+const _stop = [];
+const _exit = [];
 
 function stop() {
   if (_exit.length > 0) {
@@ -441,28 +459,29 @@ function run(code) {
 await sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
 
-  // (code =>
-  //   Function(
-  //     '"use strict";return (function(promisify, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
-  //       code +
-  //       "})"
-  //   )()(
-  //     promisify,
-  //     _stop,
-  //     _exit,
-  //     say,
-  //     express,
-  //     sleep,
-  //     displayText,
-  //     displayButton,
-  //     waitForEvent,
-  //     waitForAll,
-  //     waitForOne,
-  //     isSaying,
-  //     isExpressing,
-  //     isDisplayingText,
-  //     isDisplayingButton
-  //   ))(wrapped);
+  (code =>
+    Function(
+      '"use strict";return (function(promisify, addRobotEventListener, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
+        code +
+        "})"
+    )()(
+      promisify,
+      addRobotEventListener,
+      _stop,
+      _exit,
+      say,
+      express,
+      sleep,
+      displayText,
+      displayButton,
+      waitForEvent,
+      waitForAll,
+      waitForOne,
+      isSaying,
+      isExpressing,
+      isDisplayingText,
+      isDisplayingButton
+    ))(wrapped);
 }
 
 document.getElementById("run").onclick = () => {

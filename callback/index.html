@@ -19,6 +19,25 @@
     <div>
       <div id="editor" style="height:480px;width:800px"></div>
       <xml id="toolbox" style="display: none">
+        <category name="Robot sensing" colour="210">
+          <block type="when">
+            <field name="SE">"speechDetected"</field>
+          </block>
+        </category>
+        <category name="Robot actions" colour="230">
+          <block type="display_text">
+            <value name="TEXT">
+              <block type="text">
+                <field name="TEXT">Hello there!</field>
+              </block>
+            </value>
+            <value name="DURATION">
+              <block type="math_number">
+                <field name="NUM">3</field>
+              </block>
+            </value>
+          </block>
+        </category>
         <category name="Program control " colour="290">
           <block type="start_program"></block>
         </category>
