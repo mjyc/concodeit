@@ -515,7 +515,7 @@ const sources = initialize({
   }
 });
 
-const _exit = [1];
+const _exit = [];
 
 function stop() {
   if (_exit.length > 0) {

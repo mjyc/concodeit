@@ -57,28 +57,24 @@ const waitForEvent = eventName => {
 
 const isSaying = () => {
   return getActionStatus("SpeechSynthesisAction").then(r => {
-    console.error(r);
     return r !== null && r === "ACTIVE";
   });
 };
 
 const isExpressing = () => {
   return getActionStatus("FacialExpressionAction").then(r => {
-    console.error(r);
     return r !== null && r === "ACTIVE";
   });
 };
 
 const isDisplayingText = () => {
   return getActionStatus("RobotSpeechbubbleAction").then(r => {
-    console.error(r);
     return r !== null && r === "ACTIVE";
   });
 };
 
 const isDisplayingButton = () => {
   return getActionStatus("HumanSpeechbubbleAction").then(r => {
-    console.error(r);
     return r !== null && r === "ACTIVE";
   });
 };
