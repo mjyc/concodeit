@@ -14,7 +14,7 @@
   "dependencies": {
     "@cycle-robot-drivers/action": "1.0.1",
     "@cycle-robot-drivers/actionbank": "1.0.6",
-    "@cycle-robot-drivers/run": "1.0.25",
+    "@cycle-robot-drivers/run": "1.0.26",
     "@cycle-robot-drivers/screen": "1.1.7",
     "@cycle/isolate": "5.2.0",
     "@mjyc/voice-activity-detection": "1.0.0",
