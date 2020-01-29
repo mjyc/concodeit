@@ -36,6 +36,9 @@ export let actionNames = [
 function main(sources) {
   const videoWidth = 640;
   const videoHeight = 480;
+  const buttonPressed$ = sources.HumanSpeechbubbleAction.result
+    .filter(r => r.status.status === "SUCCEEDED")
+    .map(r => r.result);
   // fake speech input
   const speechDetected$ = sources.DOM.select(".speech")
     .events("keypress")
@@ -50,6 +53,7 @@ function main(sources) {
 
   return Object.assign(
     {
+      buttonPressed: buttonPressed$,
       speechDetected: speechDetected$,
       dom: vdom$
     },
@@ -81,6 +85,8 @@ export function initialize(options = {}) {
     s => {
       sources = s;
       sinks = main(s);
+      // treat the below two as sources for "../api.js"
+      sources.buttonPressed = sinks.buttonPressed;
       sources.speechDetected = sinks.speechDetected;
       return sinks;
     },
@@ -101,6 +107,8 @@ export function initialize(options = {}) {
 export function mockInitialize({ mockSources = {} } = {}) {
   sources = mockSources;
   sinks = main(sources);
+  sources.buttonPressed = sinks.buttonPressed;
+  sources.speechDetected = sinks.speechDetected;
   return { sources, sinks };
 }
 
@@ -192,25 +200,72 @@ export function getActionStatus(actionName) {
 
 const listenerHandles = {};
 
-export function addListener(eventName, listener) {
+export function addListener(sourceName, listener) {
   const id = Math.floor(Math.random() * Math.pow(10, 8));
-  if (!listenerHandles[id]) {
+  if (listenerHandles[id]) {
     throw new Error(`listners[${id}] is not "undefined"`);
   }
   listenerHandles[id] = {
     _id: id,
-    stream: get(sources, eventName),
+    stream: get(sources, sourceName),
     listener: {
       next: val => {
         listener(null, val);
-      }
+      },
+      error: err => listener(err, null)
     }
   };
   listenerHandles[id].stream.addListener(listenerHandles[id].listener);
 }
 
 export function removeListeners() {
-  for (const listenerHandle in listenerHandles) {
+  for (const k in listenerHandles) {
+    const listenerHandle = listenerHandles[k];
     listenerHandle.stream.removeListener(listenerHandle.listener);
+    delete listenerHandles[k];
+  }
+}
+
+const onceHandles = {};
+
+export function once(sourceName) {
+  const id = Math.floor(Math.random() * Math.pow(10, 8));
+  if (onceHandles[id]) {
+    throw new Error(`onceHandles[${id}] is not "undefined"`);
+  }
+  onceHandles[id] = {
+    _id: id,
+    stream: get(sources, sourceName),
+    listener: null,
+    stop: () => {
+      get(sources, sourceName).removeListener(onceHandles[id].listener);
+    }
+  };
+
+  return promisify(cb => {
+    onceHandles[id].listener = {
+      next: val => {
+        onceHandles[id].stream.removeListener(onceHandles[id].listener);
+        cb(null, val);
+      },
+      error: err => {
+        onceHandles[id].stream.removeListener(onceHandles[id].listener);
+        cb(err, null);
+      }
+    };
+    onceHandles[id].stream.addListener(onceHandles[id].listener);
+  })();
+}
+
+export function off(onceHandle) {
+  if (typeof onceHandle === "undefined") {
+    for (const k in onceHandles) {
+      onceHandle = onceHandles[k];
+      onceHandle.stream.removeListener(onceHandle.listener);
+      delete onceHandles[onceHandle.id];
+    }
+  } else {
+    onceHandle.stream.removeListener(onceHandle.listener);
+    delete onceHandles[onceHandle.id];
   }
 }
