@@ -118,6 +118,27 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "display_button",
+    message0: "display button %1 %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "BUTTONS"
+      },
+      {
+        type: "input_value",
+        name: "DURATION",
+        check: ["Number"]
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "say",
     message0: "say %1",
     args0: [
@@ -323,6 +344,20 @@ Blockly.JavaScript["display_text"] = function(block) {
     ? `await displayText(${Blockly.JavaScript.valueToCode(
         block,
         "TEXT",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, ${Blockly.JavaScript.valueToCode(
+        block,
+        "DURATION",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
+
+Blockly.JavaScript["display_button"] = function(block) {
+  return check(block)
+    ? `await displayButton(${Blockly.JavaScript.valueToCode(
+        block,
+        "BUTTONS",
         Blockly.JavaScript.ORDER_ATOMIC
       )}, ${Blockly.JavaScript.valueToCode(
         block,

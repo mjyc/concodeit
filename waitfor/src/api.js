@@ -1,7 +1,6 @@
 require("util.promisify/shim")();
 const { promisify } = require("util");
 const { sendActionGoal, once } = require("cycle-robot-drivers-async");
-const test = require("cycle-robot-drivers-async");
 
 const sleep = duration => {
   return promisify((s, cb) => setTimeout(cb, s * 1000))(duration);
@@ -17,7 +16,7 @@ const express = expression => {
 
 const displayText = (text, duration) => {
   return Promise.race([
-    test.sendActionGoal("RobotSpeechbubbleAction", String(text)),
+    sendActionGoal("RobotSpeechbubbleAction", String(text)),
     sleep(duration)
   ]).then(() => null);
 };
