@@ -4,27 +4,14 @@ require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
 import {
-  actionNames,
+  actionNames, // remove
   initialize,
-  addRobotEventListener,
-  removeAllRobotEventListener,
+  addEventListener, // remove
+  removeEventListener, // remove
   cancelActionGoals,
   off
 } from "cycle-robot-drivers-async";
-import {
-  sleep,
-  say,
-  express,
-  displayText,
-  displayButton,
-  waitForOne,
-  waitForAll,
-  waitForEvent,
-  isSaying,
-  isExpressing,
-  isDisplayingText,
-  isDisplayingButton
-} from "cycle-robot-drivers-async/api";
+import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
 try {
@@ -127,7 +114,7 @@ Blockly.defineBlocksWithJsonArray([
   //   },
   {
     type: "display_text",
-    message0: "display text %1 %2",
+    message0: "start display text %1 %2",
     args0: [
       {
         type: "input_value",
@@ -147,69 +134,66 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  //   {
-  //     type: "start_following_face",
-  //     message0: "start following face",
-  //     previousStatement: null,
-  //     nextStatement: null,
-  //     colour: 230,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   },
-  //   {
-  //     type: "stop_following_face",
-  //     message0: "stop following face",
-  //     previousStatement: null,
-  //     nextStatement: null,
-  //     colour: 230,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   },
-  //   {
-  //     type: "start_saying",
-  //     message0: "start saying %1",
-  //     args0: [
-  //       {
-  //         type: "input_value",
-  //         name: "MESSAGE",
-  //         check: ["String", "Number"]
-  //       }
-  //     ],
-  //     previousStatement: null,
-  //     nextStatement: null,
-  //     colour: 230,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   },
-  //   {
-  //     type: "start_gesturing",
-  //     message0: "start gesturing %1",
-  //     args0: [
-  //       {
-  //         type: "field_dropdown",
-  //         name: "MESSAGE",
-  //         options: [
-  //           ["happy", '"HAPPY"'],
-  //           ["sad", '"SAD"'],
-  //           ["angry", '"ANGRY"'],
-  //           ["focused", '"FOCUSED"'],
-  //           ["confused", '"CONFUSED"']
-  //         ]
-  //       }
-  //       // {
-  //       //   type: "input_dummy"
-  //       // },
-  //       // {
-  //       //   type: "input_statement",
-  //       //   name: "DO"
-  //       // }
-  //     ],
-  //     previousStatement: null,
-  //     nextStatement: null,
-  //     colour: 230,
-  //     tooltip: "",
-  //     helpUrl: ""
-  //   },
+  {
+    type: "display_button",
+    message0: "start display button %1 %2",
+    args0: [
+      {
+        type: "input_value",
+        name: "BUTTONS",
+        check: ["Array"]
+      },
+      {
+        type: "input_value",
+        name: "DURATION",
+        check: ["Number"]
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "say",
+    message0: "start say %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "TEXT",
+        check: ["String", "Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "express",
+    message0: "start express %1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "EXPRESSION",
+        options: [
+          ["happy", '"HAPPY"'],
+          ["sad", '"SAD"'],
+          ["angry", '"ANGRY"'],
+          ["focused", '"FOCUSED"'],
+          ["confused", '"CONFUSED"']
+        ]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
   {
     type: "when",
     message0: "when %1 %2 %3",
@@ -342,34 +326,40 @@ Blockly.JavaScript["display_text"] = function(block) {
     : "";
 };
 
-// Blockly.JavaScript["start_following_face"] = function(block) {
-//   return check(block) ? `startFollowingFace();\n` : "";
-// };
+Blockly.JavaScript["display_button"] = function(block) {
+  return check(block)
+    ? `displayButton(${Blockly.JavaScript.valueToCode(
+        block,
+        "TEXT",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, ${Blockly.JavaScript.valueToCode(
+        block,
+        "BUTTONS",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
 
-// Blockly.JavaScript["stop_following_face"] = function(block) {
-//   return check(block) ? `stopFollowingFace();\n` : "";
-// };
+Blockly.JavaScript["say"] = function(block) {
+  return check(block)
+    ? `say(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "MESSAGE",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}));\n`
+    : "";
+};
 
-// Blockly.JavaScript["start_saying"] = function(block) {
-//   return check(block)
-//     ? `startSaying(String(${Blockly.JavaScript.valueToCode(
-//         block,
-//         "MESSAGE",
-//         Blockly.JavaScript.ORDER_ATOMIC
-//       )}));\n`
-//     : "";
-// };
-
-// Blockly.JavaScript["start_gesturing"] = function(block) {
-//   return check(block)
-//     ? `startGesturing(String(${block.getFieldValue("MESSAGE")}));\n`
-//     : "";
-// };
+Blockly.JavaScript["express"] = function(block) {
+  return check(block)
+    ? `express(String(${block.getFieldValue("EXPRESSION")}));\n`
+    : "";
+};
 
 Blockly.JavaScript["when"] = function(block) {
   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
   return stmtCode !== ""
-    ? `addRobotEventListener(${block.getFieldValue(
+    ? `addEventListener(${block.getFieldValue(
         "SE"
       )}, (res, err) => {\n${stmtCode}})`
     : "";
@@ -446,7 +436,7 @@ function stop() {
   }
   off();
   cancelActionGoals();
-  removeAllRobotEventListener();
+  removeEventListener();
 }
 
 function run(code) {
@@ -464,13 +454,13 @@ ${patched}})();`;
 
   (code =>
     Function(
-      '"use strict";return (function(promisify, addRobotEventListener, removeAllRobotEventListener, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
+      '"use strict";return (function(promisify, addEventListener, removeEventListener, _exit, _stop, say, express, sleep, displayText, displayButton, waitForEvent, waitForAll, waitForOne, isSaying, isExpressing, isDisplayingText, isDisplayingButton) {' +
         code +
         "})"
     )()(
       promisify,
-      addRobotEventListener,
-      removeAllRobotEventListener,
+      addEventListener,
+      removeEventListener,
       _stop,
       _exit,
       say,

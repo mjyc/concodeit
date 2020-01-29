@@ -3,11 +3,7 @@ import "./styles.css";
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import {
-  initialize,
-  cancelActionGoals,
-  off
-} from "cycle-robot-drivers-async";
+import { initialize, cancelActionGoals, off } from "cycle-robot-drivers-async";
 import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
@@ -117,7 +113,8 @@ Blockly.defineBlocksWithJsonArray([
     args0: [
       {
         type: "input_value",
-        name: "BUTTONS"
+        name: "BUTTONS",
+        check: ["Array"]
       },
       {
         type: "input_value",

@@ -21,7 +21,7 @@
       <xml id="toolbox" style="display: none">
         <category name="Robot sensing" colour="210">
           <block type="when">
-            <field name="SE">"speechDetected"</field>
+            <field name="SE">speechDetected</field>
           </block>
         </category>
         <category name="Robot actions" colour="230">
@@ -37,6 +37,36 @@
               </block>
             </value>
           </block>
+          <block type="display_button">
+            <value name="BUTTONS">
+              <block type="lists_create_with">
+                <mutation items="2"></mutation>
+                <value name="ADD0">
+                  <block type="text">
+                    <field name="TEXT">One</field>
+                  </block>
+                </value>
+                <value name="ADD1">
+                  <block type="text">
+                    <field name="TEXT">Two</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <value name="DURATION">
+              <block type="math_number">
+                <field name="NUM">3</field>
+              </block>
+            </value>
+          </block>
+          <block type="say">
+            <value name="TEXT">
+              <block type="text">
+                <field name="TEXT">Hi!</field>
+              </block>
+            </value>
+          </block>
+          <block type="express"></block>
         </category>
         <category name="Program control " colour="290">
           <block type="start_program"></block>
