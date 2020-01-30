@@ -201,7 +201,9 @@ export function initialize(options = {}) {
         sources.SleepAction = {
           status: sources.state.stream
             .compose(selectAction("SleepAction"))
-            .compose(selectSleepActionStatus),
+            .debug(console.error)
+            .compose(selectSleepActionStatus)
+            .debug(console.warn),
           result: sources.state.stream.compose(
             selectActionResult("SleepAction")
           )
@@ -312,6 +314,26 @@ export function cancelActionGoal(actionName) {
 export function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
+
+// export function lastEventValue(eventName) {
+//   return promisify(callback => {
+//     const listener = {
+//       next: val => {
+//         sources[actionName].status.removeListener(listener);
+//         if (
+//           sendActionGoalHandles[actionName] &&
+//           sendActionGoalHandles[actionName].goal_id &&
+//           sendActionGoalHandles[actionName].goal_id.id === val.goal_id.id
+//         ) {
+//           callback(null, val.status);
+//         } else {
+//           callback(null, null);
+//         }
+//       }
+//     };
+//     sources[actionName].status.addListener(listener);
+//   })();
+// }
 
 export function getActionStatus(actionName) {
   return promisify(callback => {

@@ -90,14 +90,34 @@ const isExpressing = () => {
 };
 
 const isDisplayingText = () => {
-  return getActionStatus("RobotSpeechbubbleAction").then(r => {
+  return getActionStatus("DisplayTextAction").then(r => {
     return r !== null && r === "ACTIVE";
   });
 };
 
 const isDisplayingButton = () => {
-  return getActionStatus("HumanSpeechbubbleAction").then(r => {
+  return getActionStatus("DisplayButtonAction").then(r => {
     return r !== null && r === "ACTIVE";
+  });
+};
+
+const isSleeping = () => {
+  return Promise.all([
+    getActionStatus("SleepAction").then(r => {
+      console.warn("SleepAction", r);
+      return r !== null && r === "ACTIVE";
+    }),
+    getActionStatus("DisplayTextAction").then(r => {
+      console.warn("DisplayTextAction", r);
+      return r !== null && r === "ACTIVE";
+    }),
+    getActionStatus("DisplayButtonAction").then(r => {
+      console.warn("DisplayButtonAction", r);
+      return r !== null && r === "ACTIVE";
+    })
+  ]).then(([isSleeping, isDisplayingText, isDisplayingButton]) => {
+    console.error(isSleeping, isDisplayingText, isDisplayingButton);
+    return isSleeping && !isDisplayingText && !isDisplayingButton;
   });
 };
 
@@ -152,6 +172,7 @@ module.exports = {
   isExpressing,
   isDisplayingText,
   isDisplayingButton,
+  isSleeping,
   addEventCallback,
   init,
   reset

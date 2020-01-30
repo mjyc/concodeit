@@ -172,6 +172,7 @@ Blockly.defineBlocksWithJsonArray([
         type: "field_dropdown",
         name: "TYPE",
         options: [
+          ["isSleeping", "isSleeping"],
           ["isSaying", "isSaying"],
           ["isExpressing", "isExpressing"],
           ["isDisplayingText", "isDisplayingText"],
