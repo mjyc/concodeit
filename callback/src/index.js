@@ -201,7 +201,6 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  ,
   {
     type: "when",
     message0: "when %1 %2 %3",
