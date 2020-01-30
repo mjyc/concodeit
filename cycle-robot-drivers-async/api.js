@@ -9,6 +9,7 @@ const {
   removeListeners,
   once,
   off,
+  getLastEventValue,
   getActionStatus
 } = require("./");
 
@@ -121,6 +122,13 @@ const isSleeping = () => {
   });
 };
 
+const lastDetectedSpeech = async () => {
+  return getLastEventValue("lastSpeechDetected");
+};
+const lastDetectedButton = async () => {
+  return getLastEventValue("lastButtonPressed");
+};
+
 const addEventCallback = (eventName, callback) => {
   if (
     [
@@ -173,6 +181,8 @@ module.exports = {
   isDisplayingText,
   isDisplayingButton,
   isSleeping,
+  lastDetectedSpeech,
+  lastDetectedButton,
   addEventCallback,
   init,
   reset

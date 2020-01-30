@@ -196,8 +196,13 @@ export function initialize(options = {}) {
         sources = s;
         sinks = main(s);
         // treat the below two as sources for "../api.js"
-        sources.buttonPressed = sinks.buttonPressed;
         sources.speechDetected = sinks.speechDetected;
+        sources.buttonPressed = sinks.buttonPressed;
+        sources.lastSpeechDetected = sinks.speechDetected.remember();
+        sources.lastButtonPressed = sinks.buttonPressed.remember();
+        // make sure "sources[lastEventName]"s do not get jammed
+        sources.lastSpeechDetected.addListener(() => {});
+        sources.lastButtonPressed.addListener(() => {});
         sources.SleepAction = {
           status: sources.state.stream
             .compose(selectAction("SleepAction"))
@@ -244,8 +249,8 @@ export function initialize(options = {}) {
 export function mockInitialize({ mockSources = {} } = {}) {
   sources = mockSources;
   sinks = main(sources);
-  sources.buttonPressed = sinks.buttonPressed;
-  sources.speechDetected = sinks.speechDetected;
+  sources.buttonPressed = sinks.buttonPressed.remember();
+  sources.speechDetected = sinks.speechDetected.remember();
   return { sources, sinks };
 }
 
@@ -315,25 +320,17 @@ export function cancelActionGoals() {
   actionNames.map(actionName => cancelActionGoal(actionName));
 }
 
-// export function lastEventValue(eventName) {
-//   return promisify(callback => {
-//     const listener = {
-//       next: val => {
-//         sources[actionName].status.removeListener(listener);
-//         if (
-//           sendActionGoalHandles[actionName] &&
-//           sendActionGoalHandles[actionName].goal_id &&
-//           sendActionGoalHandles[actionName].goal_id.id === val.goal_id.id
-//         ) {
-//           callback(null, val.status);
-//         } else {
-//           callback(null, null);
-//         }
-//       }
-//     };
-//     sources[actionName].status.addListener(listener);
-//   })();
-// }
+export function getLastEventValue(eventName) {
+  return promisify(callback => {
+    const listener = {
+      next: val => {
+        sources[eventName].removeListener(listener);
+        callback(null, val);
+      }
+    };
+    sources[eventName].addListener(listener);
+  })();
+}
 
 export function getActionStatus(actionName) {
   return promisify(callback => {

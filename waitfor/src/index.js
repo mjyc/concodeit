@@ -166,7 +166,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "get_state",
-    message0: "get state of %1",
+    message0: "%1",
     args0: [
       {
         type: "field_dropdown",
@@ -395,7 +395,7 @@ Blockly.JavaScript["gesture"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["get_state"] = function(block) {
+Blockly.JavaScript["action_state"] = function(block) {
   const code = check(block)
     ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
     : "";

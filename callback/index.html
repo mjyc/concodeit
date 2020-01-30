@@ -24,6 +24,12 @@
           <block type="when">
             <field name="SE">"speechDetected"</field>
           </block>
+          <block type="variables_set">
+            <field name="VAR">state</field>
+            <value name="VALUE">
+              <block type="last_detected_event"></block>
+            </value>
+          </block>
         </category>
         <category name="Robot actions" colour="230">
           <block type="sleep">

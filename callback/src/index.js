@@ -207,6 +207,24 @@ Blockly.defineBlocksWithJsonArray([
     colour: 210,
     tooltip: "",
     helpUrl: ""
+  },
+  {
+    type: "last_detected_event",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["lastDetectedSpeech", "lastDetectedSpeech"],
+          ["lastDetectedButton", "lastDetectedButton"]
+        ]
+      }
+    ],
+    output: "String",
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
   }
 ]);
 
@@ -349,8 +367,15 @@ Blockly.JavaScript["when"] = function(block) {
   return stmtCode !== ""
     ? `robot.addEventCallback(${block.getFieldValue(
         "SE"
-      )}, (res, err) => {\n${stmtCode}})`
+      )}, async (res, err) => {\n${stmtCode}})`
     : "";
+};
+
+Blockly.JavaScript["last_detected_event"] = function(block) {
+  const code = check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["start_program"] = function(block) {
