@@ -25,7 +25,7 @@
             <field name="SE">"speechDetected"</field>
           </block>
           <block type="variables_set">
-            <field name="VAR">state</field>
+            <field name="VAR">value</field>
             <value name="VALUE">
               <block type="last_detected_event"></block>
             </value>
@@ -81,6 +81,12 @@
             </value>
           </block>
           <block type="gesture"></block>
+          <block type="variables_set">
+            <field name="VAR">value</field>
+            <value name="VALUE">
+              <block type="action_state"></block>
+            </value>
+          </block>
         </category>
         <category name="Program control " colour="290">
           <block type="start_program"></block>

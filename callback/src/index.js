@@ -84,7 +84,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "sleep",
-    message0: "sleep for %1",
+    message0: "start sleeping for %1",
     args0: [
       {
         type: "input_value",
@@ -100,7 +100,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_text",
-    message0: "start display text %1 %2",
+    message0: "start displaying %1 for %2 sec",
     args0: [
       {
         type: "input_value",
@@ -122,7 +122,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_button",
-    message0: "start display button %1 %2",
+    message0: "start displaying buttons %1 for %2 sec",
     args0: [
       {
         type: "input_value",
@@ -144,7 +144,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "say",
-    message0: "start say %1",
+    message0: "start saying %1",
     args0: [
       {
         type: "input_value",
@@ -160,7 +160,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "gesture",
-    message0: "start gesture %1",
+    message0: "start %1 gesture",
     args0: [
       {
         type: "field_dropdown",
@@ -180,6 +180,28 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
+  {
+    type: "action_state",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["isSleeping", "isSleeping"],
+          ["isSaying", "isSaying"],
+          ["isExpressing", "isExpressing"],
+          ["isDisplayingText", "isDisplayingText"],
+          ["isDisplayingButton", "isDisplayingButton"]
+        ]
+      }
+    ],
+    output: "String",
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  ,
   {
     type: "when",
     message0: "when %1 %2 %3",
@@ -360,6 +382,13 @@ Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
     ? `robot.gesture(String(${block.getFieldValue("TYPE")}));\n`
     : "";
+};
+
+Blockly.JavaScript["action_state"] = function(block) {
+  const code = check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 Blockly.JavaScript["when"] = function(block) {
