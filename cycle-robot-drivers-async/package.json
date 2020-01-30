@@ -17,6 +17,8 @@
     "@cycle-robot-drivers/run": "1.0.26",
     "@cycle-robot-drivers/screen": "1.1.7",
     "@cycle/isolate": "5.2.0",
+    "@cycle/state": "1.4.0",
+    "@cycle/time": "0.19.0",
     "@mjyc/voice-activity-detection": "1.0.0",
     "lodash.get": "4.4.2",
     "util.promisify": "1.0.0",
@@ -24,8 +26,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
-    "@babel/plugin-transform-runtime": "^7.4.4",
-    "@cycle/time": "^0.19.0",
     "microbundle": "^0.11.0"
   }
 }

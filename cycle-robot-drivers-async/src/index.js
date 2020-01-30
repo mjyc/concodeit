@@ -5,8 +5,14 @@ import get from "lodash.get";
 import sampleCombine from "xstream/extra/sampleCombine";
 import { div, label, input, makeDOMDriver } from "@cycle/dom";
 import isolate from "@cycle/isolate";
+import { withState } from "@cycle/state";
+import { run } from "@cycle/run";
+import { timeDriver } from "@cycle/time";
 import { makeTabletFaceDriver } from "@cycle-robot-drivers/screen";
-import { runTabletRobotFaceApp } from "@cycle-robot-drivers/run";
+import {
+  initializeTabletFaceRobotDrivers,
+  withTabletFaceRobotActions
+} from "@cycle-robot-drivers/run";
 import {
   GoalID,
   Goal,
@@ -18,7 +24,8 @@ import {
   initGoal,
   generateGoalStatus,
   isEqualGoalStatus,
-  isEqualGoalID
+  isEqualGoalID,
+  selectActionResult
 } from "@cycle-robot-drivers/action";
 import {
   SleepAction,
@@ -57,14 +64,26 @@ function main(sources) {
     ])
   );
 
+  // set up extra action
   const sleepGoalProxy$ = xs.create();
   const sleepCancelProxy$ = xs.create();
   const sleepAction = isolate(SleepAction, "SleepAction")({
     state: sources.state,
-    goal: sleepGoalProxy$,
-    cancel: sleepCancelProxy$,
+    goal: xs.merge(
+      sleepGoalProxy$,
+      goals$
+        .filter(goals => goals.type === "SleepAction")
+        .map(goals => goals.value)
+    ),
+    cancel: xs.merge(
+      sleepCancelProxy$,
+      cancels$
+        .filter(cancels => cancels.type === "SleepAction")
+        .map(cancels => cancels.value)
+    ),
     Time: sources.Time
   });
+
   const displayText = DisplayTextAction({
     state: sources.state,
     DisplayTextAction: {
@@ -76,6 +95,14 @@ function main(sources) {
         .map(cancels => cancels.value)
     }
   });
+  displayText.RobotSpeechbubbleAction.goal.addListener({
+    next: goal =>
+      goals$.shamefullySendNext({
+        type: "RobotSpeechbubbleAction",
+        value: goal
+      })
+  });
+
   const displayButton = DisplayButtonAction({
     state: sources.state,
     DisplayButtonAction: {
@@ -87,6 +114,16 @@ function main(sources) {
         .map(cancels => cancels.value)
     }
   });
+  displayButton.HumanSpeechbubbleAction.goal.addListener({
+    next: goal => {
+      console.log("goal2", goal);
+      goals$.shamefullySendNext({
+        type: "HumanSpeechbubbleAction",
+        value: goal
+      });
+    }
+  });
+
   sleepGoalProxy$.imitate(
     xs.merge(displayText.SleepAction.goal, displayButton.SleepAction.goal)
   );
@@ -96,6 +133,11 @@ function main(sources) {
 
   return Object.assign(
     {
+      state: xs.merge(
+        sleepAction.state,
+        displayText.state,
+        displayButton.state
+      ),
       buttonPressed: buttonPressed$,
       speechDetected: speechDetected$,
       dom: vdom$
@@ -124,22 +166,44 @@ export function initialize(options = {}) {
   if (typeof options.hidePoseViz === "undefined") {
     options.hidePoseViz = true;
   }
-  runTabletRobotFaceApp(
-    s => {
-      sources = s;
-      sinks = main(s);
-      // treat the below two as sources for "../api.js"
-      sources.buttonPressed = sinks.buttonPressed;
-      sources.speechDetected = sinks.speechDetected;
-      return sinks;
-    },
-    {
-      DOM: makeDOMDriver(options.container),
-      TabletFace: makeTabletFaceDriver(options.TabletFace),
-      VAD: makeVADDriver()
-    },
-    options
+
+  run(
+    withState(
+      withTabletFaceRobotActions(
+        s => {
+          sources = s;
+          sinks = main(s);
+          // treat the below two as sources for "../api.js"
+          sources.buttonPressed = sinks.buttonPressed;
+          sources.speechDetected = sinks.speechDetected;
+          sources.SleepAction = {
+            result: sources.state.stream.compose(
+              selectActionResult("SleepAction")
+            )
+          };
+          sources.DisplayTextAction = {
+            result: sources.state.stream.compose(
+              selectActionResult("DisplayTextAction")
+            )
+          };
+          sources.DisplayButtonAction = {
+            result: sources.state.stream.compose(
+              selectActionResult("DisplayButtonAction")
+            )
+          };
+          return sinks;
+        },
+        {
+          DOM: makeDOMDriver(options.container),
+          TabletFace: makeTabletFaceDriver(options.TabletFace),
+          VAD: makeVADDriver()
+        },
+        options
+      )
+    ),
+    Object.assign({}, initializeTabletFaceRobotDrivers(), { Time: timeDriver })
   );
+
   // make sure "sources[actionName].status" does not get jammed
   actionNames.map(actionName =>
     sources[actionName].status.addListener(() => {})
