@@ -3,7 +3,7 @@
   "name": "concodeit-waitfor",
   "main": "index.html",
   "scripts": {
-    "prestart": "npx rimraf dist/programs && npx mkdir -p dist && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
+    "prestart": "npx rimraf dist/programs && npx mkdir -p dist && sed 's/dist\/index/src\/index/g' index.html > dist/index.html && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
     "build": "npx browserify src/index.js -t babelify --outfile dist/index.js -dv",
     "watch": "npx mkdirp dist && npx watchify src/index.js -t babelify --outfile dist/index.js -dv",
     "start": "npx concurrently \"npm run watch\" \"npx live-server --watch=dist/index.js,index.html\"",
