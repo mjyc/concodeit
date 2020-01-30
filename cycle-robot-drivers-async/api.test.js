@@ -30,11 +30,7 @@ test("say", async () => {
           }
         })
       },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
+      {},
       actionNames.reduce((prev, actionName) => {
         prev[actionName] = {
           status: xs.create(),
@@ -57,7 +53,7 @@ test("say", async () => {
     }
   });
 
-  const expected = "hello";
+  const expected = undefined;
   const actual = await say(expected);
   expect(actual).toBe(expected);
 });
@@ -76,11 +72,7 @@ test("express", async () => {
           }
         })
       },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
+      {},
       actionNames.reduce((prev, actionName) => {
         prev[actionName] = {
           status: xs.create(),
@@ -103,7 +95,7 @@ test("express", async () => {
     }
   });
 
-  const expected = "HAPPY";
+  const expected = undefined;
   const actual = await express(expected);
   expect(actual).toBe(expected);
 });
@@ -122,11 +114,7 @@ test("displayText", async () => {
           }
         })
       },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
+      {},
       actionNames.reduce((prev, actionName) => {
         prev[actionName] = {
           status: xs.create(),
@@ -137,9 +125,9 @@ test("displayText", async () => {
     )
   });
 
-  sinks.RobotSpeechbubbleAction.goal.addListener({
+  sinks.DisplayTextAction.goal.addListener({
     next: goal => {
-      sources.RobotSpeechbubbleAction.result.shamefullySendNext({
+      sources.DisplayTextAction.result.shamefullySendNext({
         status: {
           goal_id: goal.goal_id,
           status: "SUCCEEDED"
@@ -149,7 +137,7 @@ test("displayText", async () => {
     }
   });
 
-  const expected = null;
+  const expected = undefined;
   const actual = await displayText("Hello world!", 0.1);
   expect(actual).toBe(expected);
 });
@@ -168,11 +156,7 @@ test("displayButton", async () => {
           }
         })
       },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
+      {},
       actionNames.reduce((prev, actionName) => {
         prev[actionName] = {
           status: xs.create(),
@@ -183,9 +167,9 @@ test("displayButton", async () => {
     )
   });
 
-  sinks.HumanSpeechbubbleAction.goal.addListener({
+  sinks.DisplayButtonAction.goal.addListener({
     next: goal => {
-      sources.HumanSpeechbubbleAction.result.shamefullySendNext({
+      sources.DisplayButtonAction.result.shamefullySendNext({
         status: {
           goal_id: goal.goal_id,
           status: "SUCCEEDED"
@@ -195,7 +179,7 @@ test("displayButton", async () => {
     }
   });
 
-  const expected = null;
+  const expected = undefined;
   const actual = await displayButton(["Blue", "Red"], 1);
   expect(actual).toBe(expected);
 });
@@ -214,11 +198,7 @@ test("waitForEvent - buttonPressed", async () => {
           }
         })
       },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
+      {},
       actionNames.reduce((prev, actionName) => {
         prev[actionName] = {
           status: xs.create(),
@@ -229,7 +209,7 @@ test("waitForEvent - buttonPressed", async () => {
     )
   });
 
-  sinks.HumanSpeechbubbleAction.goal.addListener({
+  sinks.DisplayButtonAction.goal.addListener({
     next: goal => {
       setTimeout(() => {
         sources.HumanSpeechbubbleAction.result.shamefullySendNext({
@@ -237,13 +217,13 @@ test("waitForEvent - buttonPressed", async () => {
             goal_id: goal.goal_id,
             status: "SUCCEEDED"
           },
-          result: goal.goal[0]
+          result: goal.goal[0] // chooses the first option
         });
       }, 100); // sleep tiny bit so waitForEvent can be called
     }
   });
 
-  const expected = "Blue";
+  const expected = undefined;
   displayButton(["Blue", "Red"], 2);
   const actual = await waitForEvent("buttonPressed");
   expect(actual).toBe(expected);

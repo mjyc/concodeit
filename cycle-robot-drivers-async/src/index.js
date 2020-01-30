@@ -30,7 +30,10 @@ import {
 import {
   SleepAction,
   DisplayTextAction,
-  DisplayButtonAction
+  DisplayButtonAction,
+  selectSleepActionStatus,
+  selectDisplayTextActionStatus,
+  selectDisplayButtonActionStatus
 } from "@cycle-robot-drivers/actionbank";
 import makeVADDriver from "./makeVADDriver";
 
@@ -43,8 +46,15 @@ export let actionNames = [
   "HumanSpeechbubbleAction",
   "AudioPlayerAction",
   "SpeechSynthesisAction",
-  "SpeechRecognitionAction"
+  "SpeechRecognitionAction",
+  "SleepAction",
+  "DisplayTextAction",
+  "DisplayButtonAction"
 ];
+
+function selectAction(actionName) {
+  return in$ => in$.filter(s => !!s && !!s[actionName]).map(s => s[actionName]);
+}
 
 function main(sources) {
   const videoWidth = 640;
@@ -191,16 +201,25 @@ export function initialize(options = {}) {
           sources.buttonPressed = sinks.buttonPressed;
           sources.speechDetected = sinks.speechDetected;
           sources.SleepAction = {
+            status: state$
+              .compose(selectAction("SleepAction"))
+              .compose(selectSleepActionStatus),
             result: sources.state.stream.compose(
               selectActionResult("SleepAction")
             )
           };
           sources.DisplayTextAction = {
+            status: state$
+              .compose(selectAction("DisplayTextAction"))
+              .compose(selectDisplayTextActionStatus),
             result: sources.state.stream.compose(
               selectActionResult("DisplayTextAction")
             )
           };
           sources.DisplayButtonAction = {
+            status: state$
+              .compose(selectAction("DisplayButtonAction"))
+              .compose(selectDisplayButtonActionStatus),
             result: sources.state.stream.compose(
               selectActionResult("DisplayButtonAction")
             )

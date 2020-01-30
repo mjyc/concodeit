@@ -13,39 +13,33 @@ const {
 } = require("./");
 
 const sleep = duration => {
-  return promisify((s, cb) => setTimeout(cb, s * 1000))(duration);
+  return sendActionGoal("SleepAction", 1000 * duration).then(r => undefined);
 };
 
 const say = text => {
-  return sendActionGoal("SpeechSynthesisAction", String(text));
+  return sendActionGoal("SpeechSynthesisAction", String(text)).then(
+    r => undefined
+  );
 };
 
 const express = expression => {
-  return sendActionGoal("FacialExpressionAction", String(expression));
+  return sendActionGoal("FacialExpressionAction", String(expression)).then(
+    r => undefined
+  );
 };
 
 const displayText = (text, duration) => {
-  return Promise.race([
-    sendActionGoal("RobotSpeechbubbleAction", String(text)),
-    sleep(duration)
-  ]).then(result => {
-    if (typeof result === "undefined") {
-      cancelActionGoal("RobotSpeechbubbleAction");
-    }
-    return null;
-  });
+  return sendActionGoal("DisplayTextAction", {
+    RobotSpeechbubbleAction: String(text),
+    SleepAction: 1000 * duration
+  }).then(r => undefined);
 };
 
 const displayButton = (buttons, duration) => {
-  return Promise.race([
-    sendActionGoal("HumanSpeechbubbleAction", buttons),
-    sleep(duration)
-  ]).then(result => {
-    if (typeof result === "undefined") {
-      cancelActionGoal("HumanSpeechbubbleAction");
-    }
-    return null;
-  });
+  return sendActionGoal("DisplayButtonAction", {
+    HumanSpeechbubbleAction: buttons,
+    SleepAction: 1000 * duration
+  }).then(r => undefined);
 };
 
 const waitForOne = subprogs => {

@@ -24,11 +24,7 @@ test("makeSendGoal", async done => {
           }
         })
       },
-      {
-        PoseDetection: {
-          events: () => xs.create()
-        }
-      },
+      {},
       actionNames.reduce((prev, actionName) => {
         prev[actionName] = {
           status: xs.create(),
