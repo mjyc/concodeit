@@ -105,7 +105,6 @@ const isDisplayingButton = () => {
 const isSleeping = () => {
   return Promise.all([
     getActionStatus("SleepAction").then(r => {
-      console.warn("SleepAction", r);
       return r !== null && r === "ACTIVE";
     }),
     getActionStatus("DisplayTextAction").then(r => {
