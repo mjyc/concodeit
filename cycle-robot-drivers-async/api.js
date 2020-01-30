@@ -67,8 +67,8 @@ const waitForEvent = eventName => {
   const sourceNameMap = {
     sayDone: ["SpeechSynthesisAction", "result"],
     gestureDone: ["FacialExpressionAction", "result"],
-    displayTextDone: ["RobotSpeechbubbleAction", "result"],
-    displayButtonDone: ["HumanSpeechbubbleAction", "result"]
+    displayTextDone: ["DisplayTextAction", "result"],
+    displayButtonDone: ["DisplayButtonAction", "result"]
   };
   return once(
     typeof sourceNameMap[eventName] === "undefined"
@@ -101,7 +101,33 @@ const isDisplayingButton = () => {
   });
 };
 
-const addEventCallback = (eventName, callback) => {};
+const addEventCallback = (eventName, callback) => {
+  if (
+    [
+      "speechDetected",
+      "buttonPressed",
+      "sayDone",
+      "gestureDone",
+      "displayTextDone",
+      "displayButtonDone"
+    ].indexOf(eventName) === -1
+  ) {
+    throw new Error(`Invalid input "eventName" ${eventName}`);
+  }
+
+  const sourceNameMap = {
+    sayDone: ["SpeechSynthesisAction", "result"],
+    gestureDone: ["FacialExpressionAction", "result"],
+    displayTextDone: ["DisplayTextAction", "result"],
+    displayButtonDone: ["DisplayButtonAction", "result"]
+  };
+  return addListener(
+    typeof sourceNameMap[eventName] === "undefined"
+      ? eventName
+      : sourceNameMap[eventName],
+    callback
+  );
+};
 
 const init = options => {
   initialize(options);
@@ -126,7 +152,7 @@ module.exports = {
   isExpressing,
   isDisplayingText,
   isDisplayingButton,
-  addEventListener,
+  addEventCallback,
   init,
   reset
 };

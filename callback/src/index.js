@@ -1,5 +1,3 @@
-import "./styles.css";
-
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
@@ -161,12 +159,12 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "express",
-    message0: "start express %1",
+    type: "gesture",
+    message0: "start gesture %1",
     args0: [
       {
         type: "field_dropdown",
-        name: "EXPRESSION",
+        name: "TYPE",
         options: [
           ["happy", '"HAPPY"'],
           ["sad", '"SAD"'],
@@ -193,9 +191,9 @@ Blockly.defineBlocksWithJsonArray([
           ["speechDetected", '"speechDetected"'],
           ["buttonPressed", '"buttonPressed"'],
           ["sayDone", '"sayDone"'],
-          ["expressDone", '"expressDone"'],
+          ["gestureDone", '"gestureDone"'],
           ["displayTextDone", '"displayTextDone"'],
-          ["displayButtonDone", '"displayTextDone"']
+          ["displayButtonDone", '"displayButtonDone"']
         ]
       },
       {
@@ -334,22 +332,22 @@ Blockly.JavaScript["say"] = function(block) {
   return check(block)
     ? `robot.say(String(${Blockly.JavaScript.valueToCode(
         block,
-        "MESSAGE",
+        "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
       )}));\n`
     : "";
 };
 
-Blockly.JavaScript["express"] = function(block) {
+Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
-    ? `robot.express(String(${block.getFieldValue("EXPRESSION")}));\n`
+    ? `robot.gesture(String(${block.getFieldValue("TYPE")}));\n`
     : "";
 };
 
 Blockly.JavaScript["when"] = function(block) {
   const stmtCode = Blockly.JavaScript.statementToCode(block, "DO");
   return stmtCode !== ""
-    ? `robot.addEventListener(${block.getFieldValue(
+    ? `robot.addEventCallback(${block.getFieldValue(
         "SE"
       )}, (res, err) => {\n${stmtCode}})`
     : "";
