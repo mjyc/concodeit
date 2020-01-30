@@ -1,148 +1,12 @@
-import "./styles.css";
-
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
-import {
-  actionNames,
-  initialize,
-  makeSendGoal,
-  makeCancelGoal
-} from "cycle-robot-drivers-async";
-import { extractFaceFeatures } from "tabletrobotface-userstudy";
+import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
 try {
   settings = require("./settings.json");
 } catch (e) {}
-
-//------------------------------------------------------------------------------
-// Helper Function Definitions
-
-const handles = {};
-
-function sendActionGoal(actionName, goal) {
-  return promisify((g, callback) => {
-    handles[actionName] = makeSendGoal(actionName)(g, (err, val) => {
-      if (val.status.status === "SUCCEEDED") {
-        callback(null, val.result);
-      } else {
-        callback(null, null);
-      }
-    });
-  })(goal);
-}
-
-function getActionStatus(actionName) {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        sources[actionName].status.removeListener(listener);
-        console.debug(actionName, "status", val);
-        if (
-          handles[actionName].goal_id &&
-          handles[actionName].goal_id.id === val.goal_id.id
-        ) {
-          callback(null, val.status);
-        } else {
-          callback(null, null);
-        }
-      }
-    };
-    sources[actionName].status.addListener(listener);
-  })();
-}
-
-function cancelActionGoal(actionName) {
-  if (handles[actionName]) makeCancelGoal(actionName)(handles[actionName]);
-}
-
-function cancelActionGoals() {
-  actionNames.map(actionName => cancelActionGoal(actionName));
-}
-
-function sleep(sec) {
-  return promisify((s, cb) => setTimeout(cb, s * 1000))(sec);
-}
-
-function startFollowingFace() {
-  sources.followFace.shamefullySendNext(true);
-}
-
-function stopFollowingFace() {
-  sources.followFace.shamefullySendNext(false);
-}
-
-const NOSE_ANGLE_THRESHOLD = 10;
-let poses$;
-function getFaceDirection() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        poses$.removeListener(listener);
-        const features = extractFaceFeatures(val);
-        if (!features.isVisible) {
-          callback(null, "noface");
-        } else {
-          if (features.noseAngle > NOSE_ANGLE_THRESHOLD) {
-            callback(null, "left");
-          } else if (features.noseAngle < -NOSE_ANGLE_THRESHOLD) {
-            callback(null, "right");
-          } else {
-            callback(null, "center");
-          }
-        }
-      }
-    };
-    poses$.addListener(listener);
-  })();
-}
-
-let VAD$;
-function getVADState() {
-  return promisify(callback => {
-    const listener = {
-      next: val => {
-        VAD$.removeListener(listener);
-        callback(null, val);
-      }
-    };
-    VAD$.addListener(listener);
-  })();
-}
-
-async function getState(whichState) {
-  if (whichState === "humanFaceDirection") {
-    return await getFaceDirection();
-  } else if (whichState === "isHumanSpeaking") {
-    return await getVADState();
-  }
-}
-
-const GESTURES = ["HAPPY", "SAD", "ANGRY", "FOCUSED", "CONFUSED"];
-function startGesturing(gesture) {
-  if (GESTURES.indexOf(gesture) != -1) {
-    sendActionGoal("FacialExpressionAction", gesture);
-  }
-}
-
-function setMessage(message) {
-  sendActionGoal("RobotSpeechbubbleAction", message);
-}
-
-function startSaying(message) {
-  sendActionGoal("SpeechSynthesisAction", message);
-}
-
-async function isSayFinished() {
-  const speech_status = await getActionStatus("SpeechSynthesisAction");
-  return speech_status !== null && speech_status !== "ACTIVE";
-}
-
-async function isGestureFinished() {
-  const gesture_status = await getActionStatus("FacialExpressionAction");
-  return gesture_status !== null && gesture_status !== "ACTIVE";
-}
 
 //------------------------------------------------------------------------------
 // Block Function Definitions
@@ -203,12 +67,88 @@ Blockly.defineBlocksWithJsonArray([
     extensions: ["controls_whileUntil_tooltip"]
   },
   {
-    type: "start_gesturing",
-    message0: "start gesture  %1",
+    type: "sleep",
+    message0: "sleep for %1 sec",
+    args0: [
+      {
+        type: "input_value",
+        name: "ARG0",
+        check: "Number"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "display_text",
+    message0: "display %1 for %2 sec",
+    args0: [
+      {
+        type: "input_value",
+        name: "TEXT",
+        check: ["String", "Number"]
+      },
+      {
+        type: "input_value",
+        name: "DURATION",
+        check: ["Number"]
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "display_button",
+    message0: "display buttons %1 for %2 sec",
+    args0: [
+      {
+        type: "input_value",
+        name: "BUTTONS",
+        check: ["Array"]
+      },
+      {
+        type: "input_value",
+        name: "DURATION",
+        check: ["Number"]
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "say",
+    message0: "say %1",
+    args0: [
+      {
+        type: "input_value",
+        name: "TEXT",
+        check: ["String", "Number"]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "gesture",
+    message0: "do %1 gesture",
     args0: [
       {
         type: "field_dropdown",
-        name: "MESSAGE",
+        name: "TYPE",
         options: [
           ["happy", '"HAPPY"'],
           ["sad", '"SAD"'],
@@ -225,15 +165,80 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "get_state",
-    message0: "get state of %1",
+    type: "stop_action",
+    message0: "%1",
     args0: [
       {
         type: "field_dropdown",
-        name: "MESSAGE",
+        name: "TYPE",
         options: [
-          ["humanFaceDirection", '"humanFaceDirection"'],
-          ["isHumanSpeaking", '"isHumanSpeaking"']
+          ["stopSay", "stopSay"],
+          ["stopGesture", "stopGesture"],
+          ["stopDisplayText", "stopDisplayText"],
+          ["stopDisplayButton", "stopDisplayButton"]
+        ]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "action_state",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["isSleeping", "isSleeping"],
+          ["isSaying", "isSaying"],
+          ["isExpressing", "isExpressing"],
+          ["isDisplayingText", "isDisplayingText"],
+          ["isDisplayingButton", "isDisplayingButton"]
+        ]
+      }
+    ],
+    output: "String",
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "wait_for_event",
+    message0: "wait for %1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "SE",
+        options: [
+          ["speechDetected", '"speechDetected"'],
+          ["buttonPressed", '"buttonPressed"'],
+          ["sayDone", '"sayDone"'],
+          ["gestureDone", '"gestureDone"'],
+          ["displayTextDone", '"displayTextDone"'],
+          ["displayButtonDone", '"displayButtonDone"']
+        ]
+      }
+    ],
+    output: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  ,
+  {
+    type: "last_detected_event",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["lastDetectedSpeech", "lastDetectedSpeech"],
+          ["lastDetectedButton", "lastDetectedButton"]
         ]
       }
     ],
@@ -243,85 +248,50 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "sleep",
-    message0: "sleep for %1",
+    type: "wait_for_all",
+    message0: "wait for all %1 %2 %3",
     args0: [
       {
-        type: "input_value",
-        name: "ARG0",
-        check: "Number"
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO0",
+        check: "Action"
+      },
+      {
+        type: "input_statement",
+        name: "DO1",
+        check: "Action"
       }
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
+    colour: 290,
     tooltip: "",
     helpUrl: ""
   },
   {
-    type: "set_message",
-    message0: "set message %1",
+    type: "wait_for_one",
+    message0: "wait for one %1 %2 %3",
     args0: [
       {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO0",
+        check: "Action"
+      },
+      {
+        type: "input_statement",
+        name: "DO1",
+        check: "Action"
       }
     ],
     previousStatement: null,
     nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "stop_following_face",
-    message0: "stop following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_following_face",
-    message0: "start following face",
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "start_saying",
-    message0: "start saying %1",
-    args0: [
-      {
-        type: "input_value",
-        name: "MESSAGE",
-        check: ["String", "Number"]
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "is_say_finished",
-    message0: "is say finished",
-    output: null,
-    colour: 230,
-    tooltip: "",
-    helpUrl: ""
-  },
-
-  {
-    type: "is_gesture_finished",
-    message0: "is gesture finished",
-    output: null,
-    colour: 230,
+    colour: 290,
     tooltip: "",
     helpUrl: ""
   },
