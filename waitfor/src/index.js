@@ -145,12 +145,12 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "express",
-    message0: "express  %1",
+    type: "gesture",
+    message0: "gesture  %1",
     args0: [
       {
         type: "field_dropdown",
-        name: "EXPRESSION",
+        name: "TYPE",
         options: [
           ["happy", '"HAPPY"'],
           ["sad", '"SAD"'],
@@ -390,9 +390,9 @@ Blockly.JavaScript["say"] = function(block) {
     : "";
 };
 
-Blockly.JavaScript["express"] = function(block) {
+Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
-    ? `await robot.express(${block.getFieldValue("EXPRESSION")});\n`
+    ? `await robot.gesture(${block.getFieldValue("TYPE")});\n`
     : "";
 };
 

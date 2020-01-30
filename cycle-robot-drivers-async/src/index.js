@@ -201,7 +201,7 @@ export function initialize(options = {}) {
           sources.buttonPressed = sinks.buttonPressed;
           sources.speechDetected = sinks.speechDetected;
           sources.SleepAction = {
-            status: state$
+            status: sources.state.stream
               .compose(selectAction("SleepAction"))
               .compose(selectSleepActionStatus),
             result: sources.state.stream.compose(
@@ -209,7 +209,7 @@ export function initialize(options = {}) {
             )
           };
           sources.DisplayTextAction = {
-            status: state$
+            status: sources.state.stream
               .compose(selectAction("DisplayTextAction"))
               .compose(selectDisplayTextActionStatus),
             result: sources.state.stream.compose(
@@ -217,7 +217,7 @@ export function initialize(options = {}) {
             )
           };
           sources.DisplayButtonAction = {
-            status: state$
+            status: sources.state.stream
               .compose(selectAction("DisplayButtonAction"))
               .compose(selectDisplayButtonActionStatus),
             result: sources.state.stream.compose(

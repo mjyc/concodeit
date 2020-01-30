@@ -22,8 +22,8 @@ const say = text => {
   );
 };
 
-const express = expression => {
-  return sendActionGoal("FacialExpressionAction", String(expression)).then(
+const gesture = type => {
+  return sendActionGoal("FacialExpressionAction", String(type)).then(
     r => undefined
   );
 };
@@ -56,7 +56,7 @@ const waitForEvent = eventName => {
       "speechDetected",
       "buttonPressed",
       "sayDone",
-      "expressDone",
+      "gestureDone",
       "displayTextDone",
       "displayButtonDone"
     ].indexOf(eventName) === -1
@@ -66,7 +66,7 @@ const waitForEvent = eventName => {
 
   const sourceNameMap = {
     sayDone: ["SpeechSynthesisAction", "result"],
-    expressDone: ["FacialExpressionAction", "result"],
+    gestureDone: ["FacialExpressionAction", "result"],
     displayTextDone: ["RobotSpeechbubbleAction", "result"],
     displayButtonDone: ["HumanSpeechbubbleAction", "result"]
   };
@@ -116,7 +116,7 @@ const reset = () => {
 module.exports = {
   sleep,
   say,
-  express,
+  gesture,
   displayText,
   displayButton,
   waitForOne,
