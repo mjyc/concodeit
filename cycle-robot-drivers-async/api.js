@@ -32,14 +32,14 @@ const gesture = type => {
 const displayText = (text, duration) => {
   return sendActionGoal("DisplayTextAction", {
     RobotSpeechbubbleAction: String(text),
-    SleepAction: 1000 * duration
+    DisplayTextSleepAction: 1000 * duration
   }).then(r => undefined);
 };
 
 const displayButton = (buttons, duration) => {
   return sendActionGoal("DisplayButtonAction", {
     HumanSpeechbubbleAction: buttons,
-    SleepAction: 1000 * duration
+    DisplayButtonSleepAction: 1000 * duration
   }).then(r => undefined);
 };
 
@@ -108,15 +108,12 @@ const isSleeping = () => {
       return r !== null && r === "ACTIVE";
     }),
     getActionStatus("DisplayTextAction").then(r => {
-      console.warn("DisplayTextAction", r);
       return r !== null && r === "ACTIVE";
     }),
     getActionStatus("DisplayButtonAction").then(r => {
-      console.warn("DisplayButtonAction", r);
       return r !== null && r === "ACTIVE";
     })
   ]).then(([isSleeping, isDisplayingText, isDisplayingButton]) => {
-    console.error(isSleeping, isDisplayingText, isDisplayingButton);
     return isSleeping && !isDisplayingText && !isDisplayingButton;
   });
 };

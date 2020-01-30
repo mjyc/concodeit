@@ -74,22 +74,34 @@ function main(sources) {
   );
 
   // set up extra action
-  const sleepGoalProxy$ = xs.create();
-  const sleepCancelProxy$ = xs.create();
   const sleepAction = isolate(SleepAction, "SleepAction")({
     state: sources.state,
-    goal: xs.merge(
-      sleepGoalProxy$,
-      goals$
-        .filter(goals => goals.type === "SleepAction")
-        .map(goals => goals.value)
-    ),
-    cancel: xs.merge(
-      sleepCancelProxy$,
-      cancels$
-        .filter(cancels => cancels.type === "SleepAction")
-        .map(cancels => cancels.value)
-    ),
+    goal: goals$
+      .filter(goals => goals.type === "SleepAction")
+      .map(goals => goals.value),
+    cancel: cancels$
+      .filter(cancels => cancels.type === "SleepAction")
+      .map(cancels => cancels.value),
+    Time: sources.Time
+  });
+  const sleepAction2 = isolate(SleepAction, "DisplayTextSleepAction")({
+    state: sources.state,
+    goal: goals$
+      .filter(goals => goals.type === "DisplayTextSleepAction")
+      .map(goals => goals.value),
+    cancel: cancels$
+      .filter(cancels => cancels.type === "DisplayTextSleepAction")
+      .map(cancels => cancels.value),
+    Time: sources.Time
+  });
+  const sleepAction3 = isolate(SleepAction, "DisplayButtonSleepAction")({
+    state: sources.state,
+    goal: goals$
+      .filter(goals => goals.type === "DisplayButtonSleepAction")
+      .map(goals => goals.value),
+    cancel: cancels$
+      .filter(cancels => cancels.type === "DisplayButtonSleepAction")
+      .map(cancels => cancels.value),
     Time: sources.Time
   });
 
@@ -105,18 +117,36 @@ function main(sources) {
     }
   });
   displayText.RobotSpeechbubbleAction.goal.addListener({
-    next: goal =>
+    next: goal => {
       goals$.shamefullySendNext({
         type: "RobotSpeechbubbleAction",
         value: goal
-      })
+      });
+    }
   });
   displayText.RobotSpeechbubbleAction.cancel.addListener({
-    next: cancel =>
+    next: cancel => {
       cancels$.shamefullySendNext({
         type: "RobotSpeechbubbleAction",
         value: cancel
-      })
+      });
+    }
+  });
+  displayText.DisplayTextSleepAction.goal.addListener({
+    next: goal => {
+      goals$.shamefullySendNext({
+        type: "DisplayTextSleepAction",
+        value: goal
+      });
+    }
+  });
+  displayText.DisplayTextSleepAction.cancel.addListener({
+    next: cancel => {
+      cancels$.shamefullySendNext({
+        type: "DisplayTextSleepAction",
+        value: cancel
+      });
+    }
   });
 
   const displayButton = DisplayButtonAction({
@@ -146,18 +176,29 @@ function main(sources) {
       });
     }
   });
-
-  sleepGoalProxy$.imitate(
-    xs.merge(displayText.SleepAction.goal, displayButton.SleepAction.goal)
-  );
-  sleepCancelProxy$.imitate(
-    xs.merge(displayText.SleepAction.cancel, displayButton.SleepAction.cancel)
-  );
+  displayButton.DisplayButtonSleepAction.goal.addListener({
+    next: goal => {
+      goals$.shamefullySendNext({
+        type: "DisplayButtonSleepAction",
+        value: goal
+      });
+    }
+  });
+  displayButton.DisplayButtonSleepAction.cancel.addListener({
+    next: cancel => {
+      cancels$.shamefullySendNext({
+        type: "DisplayButtonSleepAction",
+        value: cancel
+      });
+    }
+  });
 
   return Object.assign(
     {
       state: xs.merge(
         sleepAction.state,
+        sleepAction2.state,
+        sleepAction3.state,
         displayText.state,
         displayButton.state
       ),
@@ -206,11 +247,25 @@ export function initialize(options = {}) {
         sources.SleepAction = {
           status: sources.state.stream
             .compose(selectAction("SleepAction"))
-            .debug(console.error)
-            .compose(selectSleepActionStatus)
-            .debug(console.warn),
+            .compose(selectSleepActionStatus),
           result: sources.state.stream.compose(
             selectActionResult("SleepAction")
+          )
+        };
+        sources.DisplayTextSleepAction = {
+          status: sources.state.stream
+            .compose(selectAction("DisplayTextSleepAction"))
+            .compose(selectSleepActionStatus),
+          result: sources.state.stream.compose(
+            selectActionResult("DisplayTextSleepAction")
+          )
+        };
+        sources.DisplayButtonSleepAction = {
+          status: sources.state.stream
+            .compose(selectAction("DisplayButtonSleepAction"))
+            .compose(selectSleepActionStatus),
+          result: sources.state.stream.compose(
+            selectActionResult("DisplayButtonSleepAction")
           )
         };
         sources.DisplayTextAction = {
