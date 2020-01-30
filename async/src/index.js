@@ -384,64 +384,64 @@ function check(block) {
   );
 }
 
-Blockly.JavaScript["get_state"] = function(block) {
-  const code = check(block)
-    ? `await getState(${block.getFieldValue("MESSAGE")})`
-    : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
-    ? `await sleep(${Blockly.JavaScript.valueToCode(
+    ? `sleep(${Blockly.JavaScript.valueToCode(
         block,
-        "ARG0",
+        "SE",
         Blockly.JavaScript.ORDER_ATOMIC
       )});\n`
     : "";
 };
 
-Blockly.JavaScript["set_message"] = function(block) {
+Blockly.JavaScript["display_text"] = function(block) {
   return check(block)
-    ? `setMessage(String(${Blockly.JavaScript.valueToCode(
+    ? `robot.displayText(${Blockly.JavaScript.valueToCode(
         block,
-        "MESSAGE",
+        "TEXT",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, ${Blockly.JavaScript.valueToCode(
+        block,
+        "DURATION",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
+
+Blockly.JavaScript["display_button"] = function(block) {
+  return check(block)
+    ? `robot.displayButton(${Blockly.JavaScript.valueToCode(
+        block,
+        "BUTTONS",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )}, ${Blockly.JavaScript.valueToCode(
+        block,
+        "DURATION",
+        Blockly.JavaScript.ORDER_ATOMIC
+      )});\n`
+    : "";
+};
+
+Blockly.JavaScript["say"] = function(block) {
+  return check(block)
+    ? `robot.say(String(${Blockly.JavaScript.valueToCode(
+        block,
+        "TEXT",
         Blockly.JavaScript.ORDER_ATOMIC
       )}));\n`
     : "";
 };
 
-Blockly.JavaScript["start_following_face"] = function(block) {
-  return `startFollowingFace();\n`;
-};
-
-Blockly.JavaScript["stop_following_face"] = function(block) {
-  return `stopFollowingFace();\n`;
-};
-
-Blockly.JavaScript["start_saying"] = function(block) {
+Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
-    ? `sendActionGoal("SpeechSynthesisAction", String(${Blockly.JavaScript.valueToCode(
-        block,
-        "MESSAGE",
-        Blockly.JavaScript.ORDER_ATOMIC
-      )}));\n`
+    ? `robot.gesture(String(${block.getFieldValue("TYPE")}));\n`
     : "";
 };
 
-Blockly.JavaScript["start_gesturing"] = function(block) {
-  return check(block)
-    ? `startGesturing(${block.getFieldValue("MESSAGE")});\n`
+Blockly.JavaScript["action_state"] = function(block) {
+  const code = check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
     : "";
-};
-
-Blockly.JavaScript["is_say_finished"] = function(block) {
-  const code = check(block) ? `await isSayFinished()` : "";
-  return [code, Blockly.JavaScript.ORDER_NONE];
-};
-
-Blockly.JavaScript["is_gesture_finished"] = function(block) {
-  const code = check(block) ? `await isGestureFinished()` : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
@@ -450,39 +450,27 @@ Blockly.JavaScript["start_program"] = function(block) {
 };
 
 //------------------------------------------------------------------------------
-// Main Setup
+// UI Logic
 
 let editor;
-let code = document.getElementById("startBlocks");
 
 function render(element, toolbox) {
   if (editor) {
-    editor.removeChangeListener(updateCode);
-    code = Blockly.Xml.workspaceToDom(editor);
     editor.dispose();
   }
   editor = Blockly.inject(element, {
     toolbox: document.getElementById(toolbox)
   });
-
-  Blockly.Xml.domToWorkspace(code, editor);
-
-  editor.addChangeListener(updateCode);
-
-  return editor;
-}
-
-function updateCode() {
-  document.getElementById("js").innerText = Blockly.JavaScript.workspaceToCode(
-    editor
+  Blockly.Xml.domToWorkspace(document.getElementById("startBlocks"), editor);
+  editor.addChangeListener(() =>
+    console.debug(Blockly.JavaScript.workspaceToCode(editor))
   );
+  return editor;
 }
 
 editor = render("editor", "toolbox");
 
-updateCode();
-
-const sources = initialize({
+robot.init({
   container: document.getElementById("app"),
   styles: {
     speechbubblesOuter: {
@@ -510,75 +498,36 @@ const sources = initialize({
   }
 });
 
-const handle = setInterval(() => {
-  if (!sources) return;
-  poses$ = sources.PoseDetection.events("poses").startWith([]);
-  poses$.addListener({
-    next: poses => {
-      const features = extractFaceFeatures(poses);
-      const faceDirection = !features.isVisible
-        ? "noface"
-        : features.noseAngle > NOSE_ANGLE_THRESHOLD
-        ? "left"
-        : features.noseAngle < -NOSE_ANGLE_THRESHOLD
-        ? "right"
-        : "center";
-      document.querySelector("#isFaceVisible").innerText = features.isVisible;
-      document.querySelector("#humanFaceLookingAt").innerText = faceDirection;
-    }
-  });
-  VAD$ = sources.VAD;
-  VAD$.addListener({
-    next: val => {
-      document.querySelector("#isHumanSpeaking").innerText = val;
-    }
-  });
-  clearInterval(handle);
-});
-
-actionNames.map(actionName => {
-  // provide an initial value for result streams
-  sources[actionName].result = sources[actionName].result.startWith({
-    status: { status: null }
-  });
-  sources[actionName].result.addListener({ next: _ => {} });
-});
-actionNames.map(actionName => {
-  // provide an initial value for status streams
-  sources[actionName].status = sources[actionName].status.startWith({
-    status: null
-  });
-  sources[actionName].status.addListener({ next: _ => {} });
-});
-
 const _exit = [];
 
-const run = code => {
-  // stop previously ran code
+function stop() {
   if (_exit.length > 0) {
     _exit[_exit.length - 1] = true;
   }
-  cancelActionGoals();
-  stopFollowingFace();
+  for (const key in _stop) {
+    _stop[key] = true;
+  }
+  robot.reset();
+}
+
+function run(code) {
+  // stop previously ran code
+  stop();
   // patch & run code
   const patched = code.replace(
     /;\n/g,
-    `; if (_exit[${_exit.length}]) return;\n`
+    `; if (robot._exit[${_exit.length}]) return;\n`
   );
-  const wrapped = `_exit[${_exit.length}] = false;
+  const wrapped = `robot._exit[${_exit.length}] = false;
 (async () => {
-await sleep(0.5); // HACK to wait until all actions are cancelled
+await robot.sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
-  eval(wrapped);
-};
 
-const stop = () => {
-  if (_exit.length > 0) {
-    _exit[_exit.length - 1] = true;
-  }
-  cancelActionGoals();
-  stopFollowingFace();
-};
+  (code =>
+    Function('"use strict";return (function(robot) {' + code + "})")()(
+      Object.assign({ promisify, _stop, _exit }, robot)
+    ))(wrapped);
+}
 
 document.getElementById("run").onclick = () => {
   const code = Blockly.JavaScript.workspaceToCode(editor);
@@ -586,28 +535,6 @@ document.getElementById("run").onclick = () => {
 };
 
 document.getElementById("stop").onclick = stop;
-
-document.getElementById("download_js").onclick = () => {
-  const text = document.getElementById("js").innerText;
-  const a = document.createElement("a");
-  a.id = "js";
-  a.href = "data:text/javascript;charset=utf-8," + encodeURIComponent(text);
-  a.download = "program";
-  a.click();
-};
-
-document.getElementById("run_js").onclick = e => {
-  const filename = document.getElementById("filename").value;
-  console.debug(`filepath /programs/${filename}`);
-  fetch(`/programs/${filename}`)
-    .then(function(response) {
-      return response.text();
-    })
-    .then(function(code) {
-      console.debug(code);
-      run(code);
-    });
-};
 
 let startTime = Date.now();
 document.getElementById("download_xml").onclick = () => {
@@ -635,24 +562,3 @@ document.getElementById("load_xml").onchange = e => {
   };
   reader.readAsText(xmlFile);
 };
-
-const mode = settings.mode || "devel";
-
-if (mode === "study") {
-  window.onload = () => {
-    document.querySelector("#download_js").remove();
-    document.querySelector("#run_js").remove();
-    document.querySelector("#load_xml").remove();
-    document.querySelector("#run_js_label").remove();
-    document.querySelector("#load_xml_label").remove();
-    document.querySelector("#filename").remove();
-    document.querySelector("#js_view").remove();
-    document.querySelector(".posenet").style.display = "none";
-  };
-}
-
-//------------------------------------------------------------------------------
-// Scratch
-(async () => {
-  console.log("started");
-})();

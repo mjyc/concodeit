@@ -215,11 +215,11 @@ Blockly.defineBlocksWithJsonArray([
         name: "SE",
         options: [
           ["speechDetected", '"speechDetected"'],
-          ["buttonPressed", '"buttonPressed"'],
-          ["sayDone", '"sayDone"'],
-          ["gestureDone", '"gestureDone"'],
-          ["displayTextDone", '"displayTextDone"'],
-          ["displayButtonDone", '"displayButtonDone"']
+          ["buttonPressed", '"buttonPressed"']
+          // ["sayDone", '"sayDone"'],
+          // ["gestureDone", '"gestureDone"'],
+          // ["displayTextDone", '"displayTextDone"'],
+          // ["displayButtonDone", '"displayButtonDone"']
         ]
       }
     ],
