@@ -43,6 +43,22 @@ const displayButton = (buttons, duration) => {
   }).then(r => undefined);
 };
 
+const stopSay = () => {
+  return cancelActionGoal("SpeechSynthesisAction");
+};
+
+const stopGesture = () => {
+  return cancelActionGoal("FacialExpressionAction");
+};
+
+const stopDisplayText = () => {
+  return cancelActionGoal("DisplayTextAction");
+};
+
+const stopDisplayButton = () => {
+  return cancelActionGoal("DisplayButtonAction");
+};
+
 const waitForOne = subprogs => {
   return Promise.race(subprogs);
 };
@@ -169,6 +185,10 @@ module.exports = {
   gesture,
   displayText,
   displayButton,
+  stopSay,
+  stopGesture,
+  stopDisplayText,
+  stopDisplayButton,
   waitForOne,
   waitForAll,
   waitForEvent,

@@ -165,6 +165,27 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "stop_action",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["stopSay", "stopSay"],
+          ["stopGesture", "stopGesture"],
+          ["stopDisplayText", "stopDisplayText"],
+          ["stopDisplayButton", "stopDisplayButton"]
+        ]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "action_state",
     message0: "%1",
     args0: [
@@ -418,6 +439,12 @@ Blockly.JavaScript["gesture"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["stop_action"] = function(block) {
+  return check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}();\n`
+    : "";
+};
+
 Blockly.JavaScript["action_state"] = function(block) {
   const code = check(block)
     ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
@@ -490,9 +517,9 @@ function render(element, toolbox) {
     toolbox: document.getElementById(toolbox)
   });
   Blockly.Xml.domToWorkspace(document.getElementById("startBlocks"), editor);
-  // editor.addChangeListener(() =>
-  //   console.debug(Blockly.JavaScript.workspaceToCode(editor))
-  // );
+  editor.addChangeListener(() =>
+    console.debug(Blockly.JavaScript.workspaceToCode(editor))
+  );
   return editor;
 }
 
