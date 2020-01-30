@@ -3,10 +3,10 @@
   "name": "concodeit-waitfor",
   "main": "index.html",
   "scripts": {
-    "prestart": "rm -rf dist/programs && mkdir -p dist && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
-    "start": "parcel index.html --open",
-    "build": "parcel build index.html",
-    "devel": "rm -rf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async"
+    "prestart": "npx rimraf dist/programs && npx mkdir -p dist && cp -r programs dist/ && test -e src/settings.json || echo {} > src/settings.json",
+    "watch": "npx mkdirp dist && npx watchify src/index.js -t babelify --outfile dist/index.js -dv",
+    "start": "npx concurrently \"npm run watch\" \"npx live-server --watch=dist/index.js,index.html\"",
+    "devel": "npx rimraf node_modules/cycle-robot-drivers-async && ln -s ../../cycle-robot-drivers-async node_modules/cycle-robot-drivers-async"
   },
   "author": "Michael Jae-Yoon Chung",
   "license": "MIT",
@@ -17,11 +17,9 @@
     "util.promisify": "1.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.2.0",
-    "@cycle/time": "^0.19.0",
-    "parcel-bundler": "^1.6.1"
-  },
-  "browserslist": [
-    "last 2 Chrome versions"
-  ]
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^8.0.0",
+    "@cycle/time": "^0.19.0"
+  }
 }

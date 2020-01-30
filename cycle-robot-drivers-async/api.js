@@ -103,8 +103,8 @@ const isDisplayingButton = () => {
 
 const addEventCallback = (eventName, callback) => {};
 
-const init = (...args) => {
-  initialize(...args);
+const init = options => {
+  initialize(options);
 };
 
 const reset = () => {

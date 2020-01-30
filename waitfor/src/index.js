@@ -1,5 +1,3 @@
-import "./styles.css";
-
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";

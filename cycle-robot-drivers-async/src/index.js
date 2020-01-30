@@ -35,7 +35,6 @@ import {
   selectDisplayTextActionStatus,
   selectDisplayButtonActionStatus
 } from "@cycle-robot-drivers/actionbank";
-import makeVADDriver from "./makeVADDriver";
 
 const goals$ = xs.create();
 const cancels$ = xs.create();
@@ -193,48 +192,44 @@ export function initialize(options = {}) {
 
   run(
     withState(
-      withTabletFaceRobotActions(
-        s => {
-          sources = s;
-          sinks = main(s);
-          // treat the below two as sources for "../api.js"
-          sources.buttonPressed = sinks.buttonPressed;
-          sources.speechDetected = sinks.speechDetected;
-          sources.SleepAction = {
-            status: sources.state.stream
-              .compose(selectAction("SleepAction"))
-              .compose(selectSleepActionStatus),
-            result: sources.state.stream.compose(
-              selectActionResult("SleepAction")
-            )
-          };
-          sources.DisplayTextAction = {
-            status: sources.state.stream
-              .compose(selectAction("DisplayTextAction"))
-              .compose(selectDisplayTextActionStatus),
-            result: sources.state.stream.compose(
-              selectActionResult("DisplayTextAction")
-            )
-          };
-          sources.DisplayButtonAction = {
-            status: sources.state.stream
-              .compose(selectAction("DisplayButtonAction"))
-              .compose(selectDisplayButtonActionStatus),
-            result: sources.state.stream.compose(
-              selectActionResult("DisplayButtonAction")
-            )
-          };
-          return sinks;
-        },
-        {
-          DOM: makeDOMDriver(options.container),
-          TabletFace: makeTabletFaceDriver(options.TabletFace),
-          VAD: makeVADDriver()
-        },
-        options
-      )
+      withTabletFaceRobotActions(s => {
+        sources = s;
+        sinks = main(s);
+        // treat the below two as sources for "../api.js"
+        sources.buttonPressed = sinks.buttonPressed;
+        sources.speechDetected = sinks.speechDetected;
+        sources.SleepAction = {
+          status: sources.state.stream
+            .compose(selectAction("SleepAction"))
+            .compose(selectSleepActionStatus),
+          result: sources.state.stream.compose(
+            selectActionResult("SleepAction")
+          )
+        };
+        sources.DisplayTextAction = {
+          status: sources.state.stream
+            .compose(selectAction("DisplayTextAction"))
+            .compose(selectDisplayTextActionStatus),
+          result: sources.state.stream.compose(
+            selectActionResult("DisplayTextAction")
+          )
+        };
+        sources.DisplayButtonAction = {
+          status: sources.state.stream
+            .compose(selectAction("DisplayButtonAction"))
+            .compose(selectDisplayButtonActionStatus),
+          result: sources.state.stream.compose(
+            selectActionResult("DisplayButtonAction")
+          )
+        };
+        return sinks;
+      }, options)
     ),
-    Object.assign({}, initializeTabletFaceRobotDrivers(), { Time: timeDriver })
+    Object.assign(initializeTabletFaceRobotDrivers(), {
+      DOM: makeDOMDriver(options.container),
+      TabletFace: makeTabletFaceDriver(options.TabletFace),
+      Time: timeDriver
+    })
   );
 
   // make sure "sources[actionName].status" does not get jammed
