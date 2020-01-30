@@ -102,6 +102,13 @@ function main(sources) {
         value: goal
       })
   });
+  displayText.RobotSpeechbubbleAction.cancel.addListener({
+    next: cancel =>
+      cancels$.shamefullySendNext({
+        type: "RobotSpeechbubbleAction",
+        value: cancel
+      })
+  });
 
   const displayButton = DisplayButtonAction({
     state: sources.state,
@@ -116,10 +123,17 @@ function main(sources) {
   });
   displayButton.HumanSpeechbubbleAction.goal.addListener({
     next: goal => {
-      console.log("goal2", goal);
       goals$.shamefullySendNext({
         type: "HumanSpeechbubbleAction",
         value: goal
+      });
+    }
+  });
+  displayButton.HumanSpeechbubbleAction.cancel.addListener({
+    next: cancel => {
+      cancels$.shamefullySendNext({
+        type: "HumanSpeechbubbleAction",
+        value: cancel
       });
     }
   });
