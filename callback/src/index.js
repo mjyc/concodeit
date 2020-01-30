@@ -222,7 +222,7 @@ Blockly.defineBlocksWithJsonArray([
       }
     ],
     output: "String",
-    colour: 230,
+    colour: 210,
     tooltip: "",
     helpUrl: ""
   }

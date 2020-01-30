@@ -68,7 +68,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "sleep",
-    message0: "sleep for %1",
+    message0: "sleep for %1 sec",
     args0: [
       {
         type: "input_value",
@@ -84,7 +84,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_text",
-    message0: "display text %1 %2",
+    message0: "display %1 for %2 sec",
     args0: [
       {
         type: "input_value",
@@ -106,7 +106,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_button",
-    message0: "display button %1 %2",
+    message0: "display buttons %1 for %2 sec",
     args0: [
       {
         type: "input_value",
@@ -144,7 +144,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "gesture",
-    message0: "gesture  %1",
+    message0: "do %1 gesture",
     args0: [
       {
         type: "field_dropdown",
@@ -165,7 +165,7 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "get_state",
+    type: "action_state",
     message0: "%1",
     args0: [
       {
@@ -187,18 +187,41 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "wait_for_event",
-    message0: "wait for event %1",
+    message0: "wait for %1",
     args0: [
       {
         type: "field_dropdown",
         name: "SE",
         options: [
           ["speechDetected", '"speechDetected"'],
-          ["buttonPressed", '"buttonPressed"']
+          ["buttonPressed", '"buttonPressed"'],
+          ["sayDone", '"sayDone"'],
+          ["gestureDone", '"gestureDone"'],
+          ["displayTextDone", '"displayTextDone"'],
+          ["displayButtonDone", '"displayButtonDone"']
         ]
       }
     ],
     output: null,
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  ,
+  {
+    type: "last_detected_event",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["lastDetectedSpeech", "lastDetectedSpeech"],
+          ["lastDetectedButton", "lastDetectedButton"]
+        ]
+      }
+    ],
+    output: "String",
     colour: 210,
     tooltip: "",
     helpUrl: ""
@@ -405,6 +428,13 @@ Blockly.JavaScript["action_state"] = function(block) {
 Blockly.JavaScript["wait_for_event"] = function(block) {
   const code = check(block)
     ? `await robot.waitForEvent(String(${block.getFieldValue("SE")}))`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["last_detected_event"] = function(block) {
+  const code = check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
