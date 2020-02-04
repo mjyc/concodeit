@@ -72,6 +72,7 @@ const waitForEvent = eventName => {
     [
       "speechDetected",
       "buttonPressed",
+      "sleepDone",
       "sayDone",
       "gestureDone",
       "displayTextDone",
@@ -82,6 +83,7 @@ const waitForEvent = eventName => {
   }
 
   const sourceNameMap = {
+    sleepDone: ["SleepAction", "result"],
     sayDone: ["SpeechSynthesisAction", "result"],
     gestureDone: ["FacialExpressionAction", "result"],
     displayTextDone: ["DisplayTextAction", "result"],
@@ -100,7 +102,7 @@ const isSaying = () => {
   });
 };
 
-const isExpressing = () => {
+const isGesturing = () => {
   return getActionStatus("FacialExpressionAction").then(r => {
     return r !== null && r === "ACTIVE";
   });
@@ -146,6 +148,7 @@ const addEventCallback = (eventName, callback) => {
     [
       "speechDetected",
       "buttonPressed",
+      "sleepDone",
       "sayDone",
       "gestureDone",
       "displayTextDone",
@@ -156,6 +159,7 @@ const addEventCallback = (eventName, callback) => {
   }
 
   const sourceNameMap = {
+    sleepDone: ["SleepAction", "result"],
     sayDone: ["SpeechSynthesisAction", "result"],
     gestureDone: ["FacialExpressionAction", "result"],
     displayTextDone: ["DisplayTextAction", "result"],
@@ -193,7 +197,7 @@ module.exports = {
   waitForAll,
   waitForEvent,
   isSaying,
-  isExpressing,
+  isGesturing,
   isDisplayingText,
   isDisplayingButton,
   isSleeping,

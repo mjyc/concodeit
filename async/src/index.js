@@ -102,7 +102,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_text",
-    message0: "display %1 for %2 sec",
+    message0: "start displaying %1 for %2 sec",
     args0: [
       {
         type: "input_value",
@@ -124,7 +124,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "display_button",
-    message0: "display buttons %1 for %2 sec",
+    message0: "start displaying buttons %1 for %2 sec",
     args0: [
       {
         type: "input_value",
@@ -146,7 +146,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "say",
-    message0: "say %1",
+    message0: "start saying %1",
     args0: [
       {
         type: "input_value",
@@ -162,7 +162,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "gesture",
-    message0: "do %1 gesture",
+    message0: "start %1 gesture",
     args0: [
       {
         type: "field_dropdown",
@@ -204,6 +204,27 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "stop_action",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["stopSay", "stopSay"],
+          ["stopGesture", "stopGesture"],
+          ["stopDisplayText", "stopDisplayText"],
+          ["stopDisplayButton", "stopDisplayButton"]
+        ]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "action_state",
     message0: "%1",
     args0: [
@@ -213,13 +234,13 @@ Blockly.defineBlocksWithJsonArray([
         options: [
           ["isSleeping", "isSleeping"],
           ["isSaying", "isSaying"],
-          ["isExpressing", "isExpressing"],
+          ["isGesturing", "isGesturing"],
           ["isDisplayingText", "isDisplayingText"],
           ["isDisplayingButton", "isDisplayingButton"]
         ]
       }
     ],
-    output: "String",
+    output: "Boolean",
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -324,9 +345,9 @@ Blockly.JavaScript["last_detected_event"] = function(block) {
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
-    ? `sleep(${Blockly.JavaScript.valueToCode(
+    ? `robot.sleep(${Blockly.JavaScript.valueToCode(
         block,
-        "SE",
+        "ARG0",
         Blockly.JavaScript.ORDER_ATOMIC
       )});\n`
     : "";
@@ -373,6 +394,12 @@ Blockly.JavaScript["say"] = function(block) {
 Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
     ? `robot.gesture(String(${block.getFieldValue("TYPE")}));\n`
+    : "";
+};
+
+Blockly.JavaScript["stop_action"] = function(block) {
+  return check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}();\n`
     : "";
 };
 

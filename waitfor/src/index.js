@@ -195,13 +195,13 @@ Blockly.defineBlocksWithJsonArray([
         options: [
           ["isSleeping", "isSleeping"],
           ["isSaying", "isSaying"],
-          ["isExpressing", "isExpressing"],
+          ["isGesturing", "isGesturing"],
           ["isDisplayingText", "isDisplayingText"],
           ["isDisplayingButton", "isDisplayingButton"]
         ]
       }
     ],
-    output: "String",
+    output: "Boolean",
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -228,7 +228,6 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: "",
     helpUrl: ""
   },
-  ,
   {
     type: "last_detected_event",
     message0: "%1",
@@ -351,7 +350,7 @@ Blockly.JavaScript["controls_repeat_ext_with_sleep"] = function(block) {
     loopVar +
     "++) {\n" +
     branch +
-    "  await sleep(0.1);\n" +
+    "  await robot.sleep(0.1);\n" +
     "}\n";
   return code;
 };
@@ -374,7 +373,9 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return "while (" + argument0 + ") {\n" + branch + "  await sleep(0.1);\n}\n";
+  return (
+    "while (" + argument0 + ") {\n" + branch + "  await robot.sleep(0.1);\n}\n"
+  );
   return "";
 };
 

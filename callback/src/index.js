@@ -181,6 +181,27 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "stop_action",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["stopSay", "stopSay"],
+          ["stopGesture", "stopGesture"],
+          ["stopDisplayText", "stopDisplayText"],
+          ["stopDisplayButton", "stopDisplayButton"]
+        ]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "action_state",
     message0: "%1",
     args0: [
@@ -190,13 +211,13 @@ Blockly.defineBlocksWithJsonArray([
         options: [
           ["isSleeping", "isSleeping"],
           ["isSaying", "isSaying"],
-          ["isExpressing", "isExpressing"],
+          ["isGesturing", "isGesturing"],
           ["isDisplayingText", "isDisplayingText"],
           ["isDisplayingButton", "isDisplayingButton"]
         ]
       }
     ],
-    output: "String",
+    output: "Boolean",
     colour: 230,
     tooltip: "",
     helpUrl: ""
@@ -211,6 +232,7 @@ Blockly.defineBlocksWithJsonArray([
         options: [
           ["speechDetected", '"speechDetected"'],
           ["buttonPressed", '"buttonPressed"'],
+          ["sleepDone", '"sleepDone"'],
           ["sayDone", '"sayDone"'],
           ["gestureDone", '"gestureDone"'],
           ["displayTextDone", '"displayTextDone"'],
@@ -294,7 +316,7 @@ Blockly.JavaScript["controls_repeat_ext_with_sleep"] = function(block) {
     loopVar +
     "++) {\n" +
     branch +
-    "  await sleep(0.1);\n" +
+    "  await robot.sleep(0.1);\n" +
     "}\n";
   return code;
 };
@@ -317,7 +339,9 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return "while (" + argument0 + ") {\n  await sleep(0.1);\n" + branch + "}\n";
+  return (
+    "while (" + argument0 + ") {\n  await robot.sleep(0.1);\n" + branch + "}\n"
+  );
   return "";
 };
 
@@ -331,9 +355,9 @@ function check(block) {
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
-    ? `sleep(${Blockly.JavaScript.valueToCode(
+    ? `robot.sleep(${Blockly.JavaScript.valueToCode(
         block,
-        "SE",
+        "ARG0",
         Blockly.JavaScript.ORDER_ATOMIC
       )});\n`
     : "";
@@ -380,6 +404,12 @@ Blockly.JavaScript["say"] = function(block) {
 Blockly.JavaScript["gesture"] = function(block) {
   return check(block)
     ? `robot.gesture(String(${block.getFieldValue("TYPE")}));\n`
+    : "";
+};
+
+Blockly.JavaScript["stop_action"] = function(block) {
+  return check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}();\n`
     : "";
 };
 
