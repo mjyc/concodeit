@@ -239,8 +239,8 @@ export function initialize(options = {}) {
         // treat the below two as sources for "../api.js"
         sources.speechDetected = sinks.speechDetected;
         sources.buttonPressed = sinks.buttonPressed;
-        sources.lastSpeechDetected = sinks.speechDetected.remember();
-        sources.lastButtonPressed = sinks.buttonPressed.remember();
+        sources.lastSpeechDetected = sinks.speechDetected.startWith("");
+        sources.lastButtonPressed = sinks.buttonPressed.startWith("");
         // make sure "sources[lastEventName]"s do not get jammed
         sources.lastSpeechDetected.addListener(() => {});
         sources.lastButtonPressed.addListener(() => {});
