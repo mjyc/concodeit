@@ -67,6 +67,24 @@ Blockly.defineBlocksWithJsonArray([
     extensions: ["controls_whileUntil_tooltip"]
   },
   {
+    type: "last_detected_event",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["lastDetectedSpeech", "lastDetectedSpeech"],
+          ["lastDetectedButton", "lastDetectedButton"]
+        ]
+      }
+    ],
+    output: "String",
+    colour: 210,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "sleep",
     message0: "sleep for %1 sec",
     args0: [
@@ -207,95 +225,6 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
-    type: "wait_for_event",
-    message0: "wait for %1",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "SE",
-        options: [
-          ["speechDetected", '"speechDetected"'],
-          ["buttonPressed", '"buttonPressed"'],
-          ["sayDone", '"sayDone"'],
-          ["gestureDone", '"gestureDone"'],
-          ["displayTextDone", '"displayTextDone"'],
-          ["displayButtonDone", '"displayButtonDone"']
-        ]
-      }
-    ],
-    output: null,
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  ,
-  {
-    type: "last_detected_event",
-    message0: "%1",
-    args0: [
-      {
-        type: "field_dropdown",
-        name: "TYPE",
-        options: [
-          ["lastDetectedSpeech", "lastDetectedSpeech"],
-          ["lastDetectedButton", "lastDetectedButton"]
-        ]
-      }
-    ],
-    output: "String",
-    colour: 210,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_for_all",
-    message0: "wait for all %1 %2 %3",
-    args0: [
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO0",
-        check: "Action"
-      },
-      {
-        type: "input_statement",
-        name: "DO1",
-        check: "Action"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
-    type: "wait_for_one",
-    message0: "wait for one %1 %2 %3",
-    args0: [
-      {
-        type: "input_dummy"
-      },
-      {
-        type: "input_statement",
-        name: "DO0",
-        check: "Action"
-      },
-      {
-        type: "input_statement",
-        name: "DO1",
-        check: "Action"
-      }
-    ],
-    previousStatement: null,
-    nextStatement: null,
-    colour: 290,
-    tooltip: "",
-    helpUrl: ""
-  },
-  {
     type: "start_program",
     message0: "start program",
     nextStatement: null,
@@ -350,7 +279,7 @@ Blockly.JavaScript["controls_repeat_ext_with_sleep"] = function(block) {
     loopVar +
     "++) {\n" +
     branch +
-    "  await sleep(0.1);\n" +
+    "  await robot.sleep(0.1);\n" +
     "}\n";
   return code;
 };
@@ -373,7 +302,9 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return "while (" + argument0 + ") {\n  await sleep(0.1);\n" + branch + "}\n";
+  return (
+    "while (" + argument0 + ") {\n  await robot.sleep(0.1);\n" + branch + "}\n"
+  );
   return "";
 };
 
@@ -383,6 +314,13 @@ function check(block) {
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
+
+Blockly.JavaScript["last_detected_event"] = function(block) {
+  const code = check(block)
+    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    : "";
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
@@ -498,6 +436,7 @@ robot.init({
   }
 });
 
+const _stop = [];
 const _exit = [];
 
 function stop() {
