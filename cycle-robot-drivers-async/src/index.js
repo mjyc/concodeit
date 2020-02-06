@@ -68,8 +68,8 @@ function main(sources) {
     .map(ev => ev.target.value);
   const vdom$ = xs.of(
     div([
-      label("type and press enter:"),
-      input(".speech", { attr: { type: "text" } })
+      label("Type something and press enter to speak to the robot:"),
+      input(".speech", { attr: { type: "text" }, style: { width: "100%" } })
     ])
   );
 
