@@ -474,7 +474,7 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
     ? `await robot.waitForAll([${[0, 1]
         .map(
           i =>
-            `promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+            `robot.promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
               block,
               `DO${i}`
             )}  cb(null, null);\n})()`
