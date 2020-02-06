@@ -121,18 +121,8 @@ const isDisplayingButton = () => {
 };
 
 const isSleeping = () => {
-  return Promise.all([
-    getActionStatus("SleepAction").then(r => {
-      return r !== null && r === "ACTIVE";
-    }),
-    getActionStatus("DisplayTextAction").then(r => {
-      return r !== null && r === "ACTIVE";
-    }),
-    getActionStatus("DisplayButtonAction").then(r => {
-      return r !== null && r === "ACTIVE";
-    })
-  ]).then(([isSleeping, isDisplayingText, isDisplayingButton]) => {
-    return isSleeping && !isDisplayingText && !isDisplayingButton;
+  getActionStatus("SleepAction").then(r => {
+    return r !== null && r === "ACTIVE";
   });
 };
 

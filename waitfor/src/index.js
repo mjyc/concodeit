@@ -1,6 +1,7 @@
 require("util.promisify/shim")();
 import { promisify } from "util";
 import Blockly from "node-blockly/browser";
+import { addListener } from "cycle-robot-drivers-async";
 import robot from "cycle-robot-drivers-async/api";
 
 let settings = {};
@@ -579,6 +580,34 @@ function run(code) {
 (async () => {
 await robot.sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
+
+  // show status
+  addListener("lastSpeechDetected", (e, r) => {
+    document.getElementById("lastSpeechDetected").innerText = r;
+  });
+  addListener("lastButtonPressed", (e, r) => {
+    document.getElementById("lastButtonPressed").innerText = r;
+  });
+  // addListener(["SleepAction", "status"], (e, r) => {
+  //   document.getElementById("isSleeping").innerText =
+  //     r !== null && r.status === "ACTIVE";
+  // });
+  addListener(["SpeechSynthesisAction", "status"], (e, r) => {
+    document.getElementById("isSaying").innerText =
+      r !== null && r.status === "ACTIVE";
+  });
+  addListener(["FacialExpressionAction", "status"], (e, r) => {
+    document.getElementById("isGesturing").innerText =
+      r !== null && r.status === "ACTIVE";
+  });
+  addListener(["DisplayTextAction", "status"], (e, r) => {
+    document.getElementById("isDisplayingText").innerText =
+      r !== null && r.status === "ACTIVE";
+  });
+  addListener(["DisplayButtonAction", "status"], (e, r) => {
+    document.getElementById("isDisplayingButton").innerText =
+      r !== null && r.status === "ACTIVE";
+  });
 
   (code =>
     Function('"use strict";return (function(robot) {' + code + "})")()(
