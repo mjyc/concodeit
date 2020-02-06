@@ -383,6 +383,7 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
 function check(block) {
   return (
     block.getRootBlock().type === "start_program" ||
+    block.getRootBlock().type === "procedures_defreturn" ||
     block.getRootBlock().type === "procedures_defnoreturn"
   );
 }
@@ -506,6 +507,22 @@ Blockly.JavaScript["start_program"] = function(block) {
   return "";
 };
 
+const procedures_callreturn = Blockly.JavaScript["procedures_callreturn"];
+Blockly.JavaScript["procedures_callreturn"] = function(block) {
+  return [
+    "await " + procedures_callreturn(block)[0],
+    Blockly.JavaScript.ORDER_FUNCTION_CALL
+  ];
+};
+
+Blockly.JavaScript["procedures_callnoreturn"] = function(block) {
+  // Call a procedure with no return value.
+  // Generated code is for a function call as a statement is the same as a
+  // function call as a value, with the addition of line ending.
+  var tuple = Blockly.JavaScript["procedures_callreturn"](block);
+  return tuple[0] + ";\n";
+};
+
 //------------------------------------------------------------------------------
 // UI Logic
 
@@ -572,10 +589,9 @@ function run(code) {
   // stop previously ran code
   stop();
   // patch & run code
-  const patched = code.replace(
-    /;\n/g,
-    `; if (robot._exit[${_exit.length}]) return;\n`
-  );
+  const patched = code
+    .replace(/;\n/g, `; if (robot._exit[${_exit.length}]) return;\n`)
+    .replace(/function/g, "async function");
   const wrapped = `robot._exit[${_exit.length}] = false;
 (async () => {
 await robot.sleep(0.5); // HACK to wait until all actions are cancelled
