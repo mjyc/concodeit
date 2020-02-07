@@ -347,7 +347,7 @@ Blockly.JavaScript["last_detected_event"] = function(block) {
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
-    ? `robot.sleep(${Blockly.JavaScript.valueToCode(
+    ? `await robot.sleep(${Blockly.JavaScript.valueToCode(
         block,
         "ARG0",
         Blockly.JavaScript.ORDER_ATOMIC
