@@ -1,26 +1,31 @@
 {
   "name": "cycle-robot-drivers-async",
-  "version": "0.0.6",
-  "description": "cycle-robot-drivers with async callbacks",
+  "version": "0.0.10",
+  "description": "cycle-robot-drivers without FRP",
   "main": "dist/index.js",
   "source": "src/index.js",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch",
-    "test": "jest"
+    "test": "npx jest --env=./custom_test_env.js"
   },
+  "author": "Michael Jae-Yoon Chung",
+  "license": "MIT",
   "dependencies": {
-    "@cycle-robot-drivers/action": "1.0.1",
-    "@cycle-robot-drivers/run": "1.0.25",
-    "@cycle-robot-drivers/screen": "1.1.7",
+    "@cycle-robot-drivers/action": "1.0.2",
+    "@cycle-robot-drivers/actionbank": "1.0.17",
+    "@cycle-robot-drivers/run": "1.0.27",
+    "@cycle-robot-drivers/screen": "1.1.8",
+    "@cycle/isolate": "5.2.0",
+    "@cycle/state": "1.4.0",
+    "@cycle/time": "0.19.0",
     "@mjyc/voice-activity-detection": "1.0.0",
+    "lodash.get": "4.4.2",
+    "util.promisify": "1.0.0",
     "xstream": "11.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
-    "@babel/plugin-transform-runtime": "^7.4.4",
-    "@cycle/time": "^0.19.0",
-    "jest": "^24.8.0",
     "microbundle": "^0.11.0"
   }
 }

@@ -1,31 +1,15 @@
-import "./styles.css";
-
-import {
-  initialize,
-  makeSendGoal,
-  makeCancelGoal
-} from "cycle-robot-drivers-async";
 import { promisify } from "util";
+import { initialize, makeSendGoal } from "cycle-robot-drivers-async";
 
 initialize();
 
-const handles = {};
-
-const sendRobotSpeechbubbleActionGoal = promisify((goal, callback) => {
-  handles["RobotSpeechbubbleAction"] = makeSendGoal("RobotSpeechbubbleAction")(
-    goal,
-    callback
-  );
-});
-const sendHumanSpeechbubbleActionGoal = promisify(
-  makeSendGoal("HumanSpeechbubbleAction")
-);
-
 (async () => {
-  const outputs = await Promise.race([
-    sendRobotSpeechbubbleActionGoal("Hello"),
-    sendHumanSpeechbubbleActionGoal(["Hi"])
-  ]);
-  makeCancelGoal("RobotSpeechbubbleAction")(handles["RobotSpeechbubbleAction"]);
-  console.log(outputs);
+  const result = await promisify(makeSendGoal("DisplayButtonAction"))({
+    HumanSpeechbubbleAction: ["Hi", "Bye"],
+    DisplayButtonSleepAction: 3000
+  });
+  promisify(makeSendGoal("DisplayTextAction"))({
+    RobotSpeechbubbleAction: `I got "${result.result}"`,
+    DisplayTextSleepAction: 3000
+  });
 })();

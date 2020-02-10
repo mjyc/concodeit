@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="../src/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <title></title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <div class="my-1">
+      <div class="row px-1 py-1">
+        <div class="program_editor flex-column pl-3 py-1">
+          <div>
+            <h2 class="display-4 text-center text-secondary">Program Editor</h2>
+          </div>
+
+          <div class="blockly">
+            <xml id="startBlocks" style="display:none">
+              <block type="start_program"> </block>
+            </xml>
+            <div id="editor" style="height:620px;width:775px"></div>
+            <xml id="toolbox" style="display: none">
+              <category name="Robot sensing" colour="210">
+                <block type="variables_set">
+                  <field name="VAR">value</field>
+                  <value name="VALUE">
+                    <block type="wait_for_event">
+                      <field name="SE">"speechDetected"</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="variables_set">
+                  <field name="VAR">value</field>
+                  <value name="VALUE">
+                    <block type="last_detected_event"></block>
+                  </value>
+                </block>
+              </category>
+              <category name="Robot actions" colour="230">
+                <block type="sleep">
+                  <value name="ARG0">
+                    <block type="math_number">
+                      <field name="NUM">1</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="display_text">
+                  <value name="TEXT">
+                    <block type="text">
+                      <field name="TEXT">Hello there!</field>
+                    </block>
+                  </value>
+                  <value name="DURATION">
+                    <block type="math_number">
+                      <field name="NUM">3</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="display_button">
+                  <value name="BUTTONS">
+                    <block type="lists_create_with">
+                      <mutation items="2"></mutation>
+                      <value name="ADD0">
+                        <block type="text">
+                          <field name="TEXT">One</field>
+                        </block>
+                      </value>
+                      <value name="ADD1">
+                        <block type="text">
+                          <field name="TEXT">Two</field>
+                        </block>
+                      </value>
+                    </block>
+                  </value>
+                  <value name="DURATION">
+                    <block type="math_number">
+                      <field name="NUM">3</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="say">
+                  <value name="TEXT">
+                    <block type="text">
+                      <field name="TEXT">Hi!</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="gesture"></block>
+                <block type="stop_action"></block>
+                <block type="variables_set">
+                  <field name="VAR">value</field>
+                  <value name="VALUE">
+                    <block type="action_state"></block>
+                  </value>
+                </block>
+              </category>
+              <category name="Concurrency" colour="290">
+                <block type="wait_for_all"></block>
+                <block type="wait_for_one"></block>
+              </category>
+              <category name="Program control" colour="290">
+                <block type="start_program"></block>
+              </category>
+              <sep></sep>
+              <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+                <block type="controls_if"></block>
+                <block type="logic_compare"></block>
+                <block type="logic_operation"></block>
+                <block type="logic_negate"></block>
+                <block type="logic_boolean"></block>
+                <!-- <block type="logic_null"></block> -->
+                <!-- <block type="logic_ternary"></block> -->
+              </category>
+              <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+                <block type="controls_repeat_ext_with_sleep">
+                  <value name="TIMES">
+                    <shadow type="math_number">
+                      <field name="NUM">10</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="controls_whileUntil_with_sleep"></block>
+                <!-- <block type="controls_for">
+                  <value name="FROM">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                  <value name="TO">
+                    <shadow type="math_number">
+                      <field name="NUM">10</field>
+                    </shadow>
+                  </value>
+                  <value name="BY">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="controls_forEach"></block> -->
+                <block type="controls_flow_statements"></block>
+              </category>
+              <category name="Math" colour="%{BKY_MATH_HUE}">
+                <block type="math_number"></block>
+                <block type="math_arithmetic">
+                  <value name="A">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                  <value name="B">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_single">
+                  <value name="NUM">
+                    <shadow type="math_number">
+                      <field name="NUM">9</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_trig">
+                  <value name="NUM">
+                    <shadow type="math_number">
+                      <field name="NUM">45</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_constant"></block>
+                <block type="math_number_property">
+                  <value name="NUMBER_TO_CHECK">
+                    <shadow type="math_number">
+                      <field name="NUM">0</field>
+                    </shadow>
+                  </value>
+                </block>
+                <!-- <block type="math_round">
+                  <value name="NUM">
+                    <shadow type="math_number">
+                      <field name="NUM">3.1</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_on_list"></block>
+                <block type="math_modulo">
+                  <value name="DIVIDEND">
+                    <shadow type="math_number">
+                      <field name="NUM">64</field>
+                    </shadow>
+                  </value>
+                  <value name="DIVISOR">
+                    <shadow type="math_number">
+                      <field name="NUM">10</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_constrain">
+                  <value name="VALUE">
+                    <shadow type="math_number">
+                      <field name="NUM">50</field>
+                    </shadow>
+                  </value>
+                  <value name="LOW">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                  <value name="HIGH">
+                    <shadow type="math_number">
+                      <field name="NUM">100</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_random_int">
+                  <value name="FROM">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                  <value name="TO">
+                    <shadow typ e="math_number">
+                      <field name="NUM">100</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="math_random_float"></block> -->
+              </category>
+              <category name="Text" colour="%{BKY_TEXTS_HUE}">
+                <block type="text"></block>
+                <block type="text_join"></block>
+                <block type="text_append">
+                  <value name="TEXT">
+                    <shadow type="text"></shadow>
+                  </value>
+                </block>
+                <block type="text_length">
+                  <value name="VALUE">
+                    <shadow type="text">
+                      <field name="TEXT">abc</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="text_isEmpty">
+                  <value name="VALUE">
+                    <shadow type="text">
+                      <field name="TEXT"></field>
+                    </shadow>
+                  </value>
+                </block>
+                <!-- <block type="text_indexOf">
+                  <value name="VALUE">
+                    <block type="variables_get">
+                      <field name="VAR">text</field>
+                    </block>
+                  </value>
+                  <value name="FIND">
+                    <shadow type="text">
+                      <field name="TEXT">abc</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="text_charAt">
+                  <value name="VALUE">
+                    <block type="variables_get">
+                      <field name="VAR">text</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="text_getSubstring">
+                  <value name="STRING">
+                    <block type="variables_get">
+                      <field name="VAR">text</field>
+                    </block>
+                  </value>
+                </block> -->
+                <block type="text_changeCase">
+                  <value name="TEXT">
+                    <shadow type="text">
+                      <field name="TEXT">abc</field>
+                    </shadow>
+                  </value>
+                </block>
+                <!-- <block type="text_trim">
+                  <value name="TEXT">
+                    <shadow type="text">
+                      <field name="TEXT">abc</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="text_print">
+                  <value name="TEXT">
+                    <shadow type="text">
+                      <field name="TEXT">abc</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="text_prompt_ext">
+                  <value name="TEXT">
+                    <shadow type="text">
+                      <field name="TEXT">abc</field>
+                    </shadow>
+                  </value>
+                </block> -->
+              </category>
+              <category name="Lists" colour="%{BKY_LISTS_HUE}">
+                <block type="lists_create_with">
+                  <mutation items="2"></mutation>
+                </block>
+                <!-- <block type="lists_create_with"></block>
+                <block type="lists_repeat">
+                  <value name="NUM">
+                    <shadow type="math_number">
+                      <field name="NUM">5</field>
+                    </shadow>
+                  </value>
+                </block> -->
+                <block type="lists_length"></block>
+                <block type="lists_isEmpty"></block>
+                <block type="lists_indexOf">
+                  <value name="VALUE">
+                    <block type="variables_get">
+                      <field name="VAR">{listVariable}</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="lists_getIndex">
+                  <value name="VALUE">
+                    <block type="variables_get">
+                      <field name="VAR">{listVariable}</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="lists_setIndex">
+                  <value name="LIST">
+                    <block type="variables_get">
+                      <field name="VAR">{listVariable}</field>
+                    </block>
+                  </value>
+                </block>
+                <!-- <block type="lists_getSublist">
+                  <value name="LIST">
+                    <block type="variables_get">
+                      <field name="VAR">{listVariable}</field>
+                    </block>
+                  </value>
+                </block>
+                <block type="lists_split">
+                  <value name="DELIM">
+                    <shadow type="text">
+                      <field name="TEXT">,</field>
+                    </shadow>
+                  </value>
+                </block>
+                <block type="lists_sort"></block> -->
+              </category>
+              <sep></sep>
+              <category
+                name="Variables"
+                custom="VARIABLE"
+                colour="%{BKY_VARIABLES_HUE}"
+              >
+              </category>
+              <category
+                name="Functions"
+                custom="PROCEDURE"
+                colour="%{BKY_PROCEDURES_HUE}"
+              >
+              </category>
+            </xml>
+          </div>
+
+          <div class="pt-3">
+            <span id="load_xml_label"><small>Load XML</small></span>
+            <input id="load_xml" name="load" type="file" />
+            <button class="btn btn-success mr-1" id="run">Run</button>
+            <button class="btn btn-danger mr-1" id="stop">Stop</button>
+            <button class="btn btn-dark mr-1" id="download_xml">
+              Download as XML
+            </button>
+          </div>
+        </div>
+
+        <div class="robot flex-column pl-3 py-1">
+          <h2 class="display-4 text-center text-secondary">Robot</h2>
+          <div>
+            <div id="app" class="border border-dark"></div>
+
+            <div class="d-flex mt-3 py-2 border border-light">
+              <div class="col-6 px-1 align-items-center">
+                <div class="text-right">
+                  <div style="font-weight:bold">lastSpeechDetected:</div>
+                  <div style="font-weight:bold">lastButtonPressed:</div>
+                  <!-- <div style="font-weight:bold">isSleeping:</div> -->
+                  <div style="font-weight:bold">isSaying:</div>
+                  <div style="font-weight:bold">isGesturing:</div>
+                  <div style="font-weight:bold">isDisplayingText:</div>
+                  <div style="font-weight:bold">isDisplayingButton:</div>
+                </div>
+              </div>
+
+              <div class="col-6 px-1 align-items-center">
+                <div class="text-left">
+                  <div id="lastSpeechDetected" style="height:24px"></div>
+                  <div id="lastButtonPressed" style="height:24px"></div>
+                  <!-- <div id="isSleeping" style="height:24px">false</div> -->
+                  <div id="isSaying" style="height:24px">false</div>
+                  <div id="isGesturing" style="height:24px">false</div>
+                  <div id="isDisplayingText" style="height:24px">false</div>
+                  <div id="isDisplayingButton" style="height:24px">false</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="src/index.js"></script>
+  </body>
+</html>
