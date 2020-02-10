@@ -407,7 +407,9 @@ Blockly.JavaScript["stop_action"] = function(block) {
 
 Blockly.JavaScript["action_state"] = function(block) {
   const code = check(block)
-    ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    ? `((await robot.sleep(0.01)) || await robot.${block
+        .getFieldValue("TYPE")
+        .replace(/['"]+/g, "")}())`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
