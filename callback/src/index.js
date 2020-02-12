@@ -427,7 +427,7 @@ Blockly.JavaScript["when"] = function(block) {
   return stmtCode !== ""
     ? `robot.addEventCallback(${block.getFieldValue(
         "SE"
-      )}, async (res, err) => {\n${stmtCode}})`
+      )}, async (res, err) => {\n${stmtCode}});\n`
     : "";
 };
 
