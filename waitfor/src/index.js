@@ -275,13 +275,37 @@ Blockly.defineBlocksWithJsonArray([
       },
       {
         type: "input_statement",
-        name: "DO0",
-        check: "Action"
+        name: "DO0"
       },
       {
         type: "input_statement",
-        name: "DO1",
-        check: "Action"
+        name: "DO1"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "wait_for_all3",
+    message0: "wait for all %1 %2 %3 %4",
+    args0: [
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO0"
+      },
+      {
+        type: "input_statement",
+        name: "DO1"
+      },
+      {
+        type: "input_statement",
+        name: "DO2"
       }
     ],
     previousStatement: null,
@@ -299,13 +323,37 @@ Blockly.defineBlocksWithJsonArray([
       },
       {
         type: "input_statement",
-        name: "DO0",
-        check: "Action"
+        name: "DO0"
       },
       {
         type: "input_statement",
-        name: "DO1",
-        check: "Action"
+        name: "DO1"
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "wait_for_one3",
+    message0: "wait for one %1 %2 %3 %4",
+    args0: [
+      {
+        type: "input_dummy"
+      },
+      {
+        type: "input_statement",
+        name: "DO0"
+      },
+      {
+        type: "input_statement",
+        name: "DO1"
+      },
+      {
+        type: "input_statement",
+        name: "DO1"
       }
     ],
     previousStatement: null,
@@ -508,12 +556,44 @@ Blockly.JavaScript["wait_for_all"] = function(block) {
     : "";
 };
 
+Blockly.JavaScript["wait_for_all3"] = function(block) {
+  return check(block)
+    ? `await robot.waitForAll([${[0, 1, 2]
+        .map(
+          i =>
+            `robot.promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+              block,
+              `DO${i}`
+            )}  cb(null, null);\n})()`
+        )
+        .join(", ")}]);\n`
+    : "";
+};
+
 const _stop = [];
 
 Blockly.JavaScript["wait_for_one"] = function(block) {
   const id = block.id;
   return check(block)
     ? `robot._stop["${id}"] = false;\nawait robot.waitForOne([${[0, 1]
+        .map(
+          i =>
+            `robot.promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
+              block,
+              `DO${i}`
+            ).replace(
+              /;\n/g,
+              `; if (robot._stop["${block.id}"]) return;\n`
+            )}  cb(null, null);\n})()`
+        )
+        .join(", ")}]);\nrobot._stop["${block.id}"] = true;\n`
+    : "";
+};
+
+Blockly.JavaScript["wait_for_one3"] = function(block) {
+  const id = block.id;
+  return check(block)
+    ? `robot._stop["${id}"] = false;\nawait robot.waitForOne([${[0, 1, 2]
         .map(
           i =>
             `robot.promisify(async cb => {\n${Blockly.JavaScript.statementToCode(
