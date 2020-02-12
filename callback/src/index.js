@@ -443,7 +443,7 @@ Blockly.JavaScript["action_state"] = function(block) {
 
 Blockly.JavaScript["reset_event"] = function(block) {
   return check(block)
-    ? `robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    ? `robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}();\n`
     : "";
 };
 
