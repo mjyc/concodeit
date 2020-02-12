@@ -10,7 +10,8 @@ const {
   once,
   off,
   getLastEventValue,
-  getActionStatus
+  getActionStatus,
+  resetLastEventValue
 } = require("./");
 
 const sleep = duration => {
@@ -129,8 +130,15 @@ const isSleeping = () => {
 const lastDetectedSpeech = async () => {
   return getLastEventValue("lastSpeechDetected");
 };
-const lastDetectedButton = async () => {
+const lastPressedButton = async () => {
   return getLastEventValue("lastButtonPressed");
+};
+
+const resetLastDetectedSpeech = (value = "") => {
+  return resetLastEventValue("lastSpeechDetected", value);
+};
+const resetLastDetectedButton = (value = "") => {
+  return resetLastEventValue("lastButtonPressed", value);
 };
 
 const addEventCallback = (eventName, callback) => {
@@ -168,6 +176,8 @@ const init = options => {
 };
 
 const reset = () => {
+  resetLastDetectedSpeech();
+  resetLastDetectedButton();
   removeListeners();
   off();
   cancelActionGoals();
@@ -192,7 +202,9 @@ module.exports = {
   isDisplayingButton,
   isSleeping,
   lastDetectedSpeech,
-  lastDetectedButton,
+  lastPressedButton,
+  resetLastDetectedSpeech,
+  resetLastDetectedButton,
   addEventCallback,
   init,
   reset

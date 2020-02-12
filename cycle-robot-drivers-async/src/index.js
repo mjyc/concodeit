@@ -239,8 +239,18 @@ export function initialize(options = {}) {
         // treat the below two as sources for "../api.js"
         sources.speechDetected = sinks.speechDetected;
         sources.buttonPressed = sinks.buttonPressed;
-        sources.lastSpeechDetected = sinks.speechDetected.startWith("");
-        sources.lastButtonPressed = sinks.buttonPressed.startWith("");
+        sources.reset = {
+          lastSpeechDetected: xs.create(),
+          lastButtonPressed: xs.create()
+        };
+        sources.lastSpeechDetected = xs.merge(
+          sources.reset.lastSpeechDetected,
+          sinks.speechDetected.startWith("")
+        );
+        sources.lastButtonPressed = xs.merge(
+          sources.reset.lastButtonPressed,
+          sinks.buttonPressed.startWith("")
+        );
         // make sure "sources[lastEventName]"s do not get jammed
         sources.lastSpeechDetected.addListener(() => {});
         sources.lastButtonPressed.addListener(() => {});
@@ -385,6 +395,10 @@ export function getLastEventValue(eventName) {
     };
     sources[eventName].addListener(listener);
   })();
+}
+
+export function resetLastEventValue(eventName, value) {
+  get(sources.reset, eventName).shamefullySendNext(value);
 }
 
 export function getActionStatus(actionName) {
