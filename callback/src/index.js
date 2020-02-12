@@ -224,6 +224,25 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: ""
   },
   {
+    type: "reset_event",
+    message0: "%1",
+    args0: [
+      {
+        type: "field_dropdown",
+        name: "TYPE",
+        options: [
+          ["resetLastDetectedSpeech", "resetLastDetectedSpeech"],
+          ["resetLastPressedButton", "resetLastPressedButton"]
+        ]
+      }
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
     type: "when",
     message0: "when %1 %2 %3",
     args0: [
@@ -261,7 +280,7 @@ Blockly.defineBlocksWithJsonArray([
         name: "TYPE",
         options: [
           ["lastDetectedSpeech", "lastDetectedSpeech"],
-          ["lastDetectedButton", "lastDetectedButton"]
+          ["lastPressedButton", "lastPressedButton"]
         ]
       }
     ],
@@ -420,6 +439,12 @@ Blockly.JavaScript["action_state"] = function(block) {
     ? `await robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
     : "";
   return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+Blockly.JavaScript["reset_event"] = function(block) {
+  return check(block)
+    ? `robot.${block.getFieldValue("TYPE").replace(/['"]+/g, "")}()`
+    : "";
 };
 
 Blockly.JavaScript["when"] = function(block) {
