@@ -730,7 +730,7 @@ ${patched}})();`;
 
   const sleep = promisify((dur, cb) => setTimeout(cb, dur * 1000));
   (code =>
-    Function('"use strict";return (function(robot) {' + code + "})")()(
+    Function('"use strict";return (function(robot, sleep) {' + code + "})")()(
       Object.assign({ promisify, _stop, _exit }, robot),
       sleep
     ))(wrapped);
