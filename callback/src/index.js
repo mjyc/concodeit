@@ -336,7 +336,7 @@ Blockly.JavaScript["controls_repeat_ext_with_sleep"] = function(block) {
     loopVar +
     "++) {\n" +
     branch +
-    "  await robot.sleep(0.1);\n" +
+    "  await sleep(0.1);\n" +
     "}\n";
   return code;
 };
@@ -359,9 +359,7 @@ Blockly.JavaScript["controls_whileUntil_with_sleep"] = function(block) {
   if (until) {
     argument0 = "!" + argument0;
   }
-  return (
-    "while (" + argument0 + ") {\n  await robot.sleep(0.1);\n" + branch + "}\n"
-  );
+  return "while (" + argument0 + ") {\n  await sleep(0.1);\n" + branch + "}\n";
   return "";
 };
 
@@ -560,7 +558,7 @@ function run(code) {
     .replace(/function/g, "async function");
   const wrapped = `robot._exit[${_exit.length}] = false;
 (async () => {
-await robot.sleep(0.5); // HACK to wait until all actions are cancelled
+await sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;
 
   // show status
@@ -570,10 +568,10 @@ ${patched}})();`;
   addListener("lastButtonPressed", (e, r) => {
     document.getElementById("lastButtonPressed").innerText = r;
   });
-  // addListener(["SleepAction", "status"], (e, r) => {
-  //   document.getElementById("isSleeping").innerText =
-  //     r !== null && r.status === "ACTIVE";
-  // });
+  addListener(["SleepAction", "status"], (e, r) => {
+    document.getElementById("isSleeping").innerText =
+      r !== null && r.status === "ACTIVE";
+  });
   addListener(["SpeechSynthesisAction", "status"], (e, r) => {
     document.getElementById("isSaying").innerText =
       r !== null && r.status === "ACTIVE";
@@ -591,9 +589,11 @@ ${patched}})();`;
       r !== null && r.status === "ACTIVE";
   });
 
+  const sleep = promisify((dur, cb) => setTimeout(cb, dur * 1000));
   (code =>
     Function('"use strict";return (function(robot) {' + code + "})")()(
-      Object.assign({ promisify, _stop, _exit }, robot)
+      Object.assign({ promisify, _stop, _exit }, robot),
+      sleep
     ))(wrapped);
 }
 
