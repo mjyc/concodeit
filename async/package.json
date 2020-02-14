@@ -13,7 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@cycle/dom": "22.4.0",
-    "cycle-robot-drivers-async": "0.0.12",
+    "cycle-robot-drivers-async": "0.0.13",
     "node-blockly": "1.0.36",
     "util.promisify": "1.0.0"
   },
