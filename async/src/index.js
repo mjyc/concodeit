@@ -87,7 +87,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: "sleep",
-    message0: "sleep for %1 sec",
+    message0: "start sleeping for %1 sec",
     args0: [
       {
         type: "input_value",
@@ -98,6 +98,15 @@ Blockly.defineBlocksWithJsonArray([
     previousStatement: null,
     nextStatement: null,
     colour: 230,
+    tooltip: "",
+    helpUrl: ""
+  },
+  {
+    type: "pass",
+    message0: "pass",
+    previousStatement: null,
+    nextStatement: null,
+    colour: 290,
     tooltip: "",
     helpUrl: ""
   },
@@ -364,12 +373,16 @@ Blockly.JavaScript["last_detected_event"] = function(block) {
 
 Blockly.JavaScript["sleep"] = function(block) {
   return check(block)
-    ? `await robot.sleep(${Blockly.JavaScript.valueToCode(
+    ? `robot.sleep(${Blockly.JavaScript.valueToCode(
         block,
         "ARG0",
         Blockly.JavaScript.ORDER_ATOMIC
       )});\n`
     : "";
+};
+
+Blockly.JavaScript["pass"] = function(block) {
+  return check(block) ? `await sleep(0.1);\n` : "";
 };
 
 Blockly.JavaScript["display_text"] = function(block) {
