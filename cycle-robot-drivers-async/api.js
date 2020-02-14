@@ -137,7 +137,7 @@ const lastPressedButton = async () => {
 const resetLastDetectedSpeech = (value = "") => {
   return resetLastEventValue("lastSpeechDetected", value);
 };
-const resetLastDetectedButton = (value = "") => {
+const resetLastPressedButton = (value = "") => {
   return resetLastEventValue("lastButtonPressed", value);
 };
 
@@ -177,7 +177,7 @@ const init = options => {
 
 const reset = () => {
   resetLastDetectedSpeech();
-  resetLastDetectedButton();
+  resetLastPressedButton();
   removeListeners();
   off();
   cancelActionGoals();
@@ -204,7 +204,7 @@ module.exports = {
   lastDetectedSpeech,
   lastPressedButton,
   resetLastDetectedSpeech,
-  resetLastDetectedButton,
+  resetLastPressedButton,
   addEventCallback,
   init,
   reset
