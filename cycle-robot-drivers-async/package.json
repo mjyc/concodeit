@@ -1,6 +1,6 @@
 {
   "name": "cycle-robot-drivers-async",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "cycle-robot-drivers without FRP",
   "main": "dist/index.js",
   "source": "src/index.js",

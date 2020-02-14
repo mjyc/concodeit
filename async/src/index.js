@@ -539,7 +539,7 @@ function run(code) {
   const patched = code
     .replace(/;\n/g, `; if (robot._exit[${_exit.length}]) return;\n`)
     .replace(/function/g, "async function");
-  const wrapped = `robot._exit[${_exit.length}] = false;
+  const wrapped = `robot._exit[${_exit.length}] = false; console.log(robot.lastPressedButton);
 (async () => {
 await sleep(0.5); // HACK to wait until all actions are cancelled
 ${patched}})();`;

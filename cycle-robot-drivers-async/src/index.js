@@ -243,14 +243,12 @@ export function initialize(options = {}) {
           lastSpeechDetected: xs.create(),
           lastButtonPressed: xs.create()
         };
-        sources.lastSpeechDetected = xs.merge(
-          sources.reset.lastSpeechDetected,
-          sinks.speechDetected.startWith("")
-        );
-        sources.lastButtonPressed = xs.merge(
-          sources.reset.lastButtonPressed,
-          sinks.buttonPressed.startWith("")
-        );
+        sources.lastSpeechDetected = xs
+          .merge(sources.reset.lastSpeechDetected, sinks.speechDetected)
+          .startWith("");
+        sources.lastButtonPressed = xs
+          .merge(sources.reset.lastButtonPressed, sinks.buttonPressed)
+          .startWith("");
         // make sure "sources[lastEventName]"s do not get jammed
         sources.lastSpeechDetected.addListener(() => {});
         sources.lastButtonPressed.addListener(() => {});
