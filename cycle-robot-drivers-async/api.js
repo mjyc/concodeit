@@ -122,7 +122,7 @@ const isDisplayingButton = () => {
 };
 
 const isSleeping = () => {
-  getActionStatus("SleepAction").then(r => {
+  return getActionStatus("SleepAction").then(r => {
     return r !== null && r === "ACTIVE";
   });
 };
