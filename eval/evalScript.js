@@ -45,8 +45,8 @@ fs.readdir(programDir, (err, files) => {
                 let maxDepth = getMaxDepth(input, startIndices, endIndices);
 
                 console.log("Total block count: " + blocks.length);
-                console.log("Count of each block type:");
-                console.log(blockCountDict);
+                //console.log("Count of each block type:");
+                //console.log(blockCountDict);
                 console.log("Number of islands: " + numIslands);
                 console.log("Maximum depth: " + maxDepth);
 
@@ -82,7 +82,7 @@ function getMaxDepth(input, startIndices, endIndices) {
         while (s_i < startIndices.length && startIndices[s_i] < currEnd) {
             stack.push(startIndices[s_i++]);
         }
-        if (s_i < startIndices.length || e_i == (endIndices.length - 1)) {
+        if (s_i < startIndices.length || e_i < (endIndices.length)) {
             let start = stack.pop();
             let subInput = input.slice(start, currEnd);
             let depth = (subInput.match(/<next>/g) || []).length + 1; 
