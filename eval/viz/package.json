@@ -4,13 +4,12 @@
     "build": "node ./build_html.js",
     "plot1": "npm run build -- plot1 && npx live-server --open=./dist/plot1.html"
   },
-  "devDependencies": {
-    "live-server": "^1.2.1",
-    "mkdirp": "^0.5.1"
-  },
   "dependencies": {
-    "vega": "5.7.3",
-    "vega-embed": "6.0.0",
-    "vega-lite": "4.0.0-beta.11"
+    "vega": "5.10.1",
+    "vega-embed": "6.6.0",
+    "vega-lite": "4.11.0"
+  },
+  "devDependencies": {
+    "mkdirp": "^0.5.1"
   }
 }

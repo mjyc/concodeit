@@ -8,7 +8,6 @@
   "author": "Michael Jae-Yoon Chung",
   "license": "MIT",
   "devDependencies": {
-    "@rgrove/parse-xml": "^2.0.3",
     "jest": "^24.8.0",
     "lerna": "^3.20.2"
   }
