@@ -1,85 +1,89 @@
-const fs = require("fs");
-
 if (process.argv.length <= 2) {
   console.log("Usage: node evalScript.js path/to/directory");
   process.exit(-1);
 }
 
-var programDir = process.argv[2];
+const fs = require("fs");
 
-fs.readdir(programDir, (err, files) => {
-  for (var i = 0; i < files.length; i++) {
-    let filename = files[i];
-    let fullpath = programDir + "" + filename;
-    if (filename.endsWith(".xml")) {
-      fs.readFile(fullpath, (err, data) => {
-        if (err) throw err;
+const readProgXMLFile = (filename) => fs.readFileSync(filename).toString();
 
-        console.log("Stats for " + filename + "\n");
+const countNumBlocks = (progXMLStr) =>
+  (progXMLStr.match(/<block type="\w+"/g) || []).length;
 
-        let input = data.toString();
+const countNumVariables = (progXMLStr) =>
+  (progXMLStr.match(/<variable type=""/g) || []).length;
 
-        // get list of blocks and variables used in program
-        let blocks = input.match(/<block type="\w+"/g) || [];
-        let variables = input.match(/<variable type=""/g) || [];
-
-        // count number of each type of block used in program
-        var blockCountDict = {};
-        blockCountDict["variables"] = variables.length;
-        let numIslands = populateBlockDict(blocks, blockCountDict);
-
-        // get maximum depth of a nested scope in program
-        let startReg = /<statement name/g,
-          result,
-          startIndices = [];
-        while ((result = startReg.exec(input))) {
-          startIndices.push(result.index);
-        }
-        let endReg = /<\/statement>/g,
-          endIndices = [];
-        while ((result = endReg.exec(input))) {
-          endIndices.push(result.index);
-        }
-        if (filename.includes("Callback")) {
-          // exclude the nested scope of the start program block for Callback API
-          startIndices.pop();
-          endIndices.pop();
-        }
-        let maxDepth = getMaxDepth(input, startIndices, endIndices);
-
-        console.log("Total block count: " + blocks.length);
-        //console.log("Count of each block type:");
-        //console.log(blockCountDict);
-        console.log("Number of islands: " + numIslands);
-        console.log("Maximum depth: " + maxDepth);
-
-        console.log("----------------------------------");
-      });
-    }
-  }
-});
-
-// Builds dictionary of <block type, count of block type> pairs
-function populateBlockDict(blocks, dict) {
-  let islandCount = 0;
-  for (var i = 0; i < blocks.length; i++) {
+// Builds dictionary of <block type, # of block type> pairs
+const countBlockByType = (progXMLStr) => {
+  const blocks = progXMLStr.match(/<block type="\w+"/g) || [];
+  const counts = {
+    variables: countNumVariables(progXMLStr),
+  };
+  for (let i = 0; i < blocks.length; i++) {
     let blockType = blocks[i].slice(13, blocks[i].length - 1);
-    if (dict[blockType]) {
-      dict[blockType] += 1;
+    if (counts[blockType]) {
+      counts[blockType] += 1;
     } else {
-      dict[blockType] = 1;
+      counts[blockType] = 1;
     }
-    islandCount +=
-      blockType.includes("when") || blockType.includes("procedures_def")
-        ? 1
-        : 0;
   }
-  return islandCount;
-}
 
-// Returns the maximum depth of a nested scope in the input program
-function getMaxDepth(input, startIndices, endIndices) {
-  var stack = [];
+  const knownBlockTypes = [
+    "start_program",
+    "say",
+    "text",
+    "gesture",
+    "controls_whileUntil_with_sleep",
+    "logic_operation",
+    "action_state",
+    "sleep",
+    "math_number",
+    "text_isEmpty",
+    "last_detected_event",
+    "lists_create_with",
+    "display_button",
+    "pass",
+    "variables_set",
+    "logic_boolean",
+    "when",
+    "procedures_callnoreturn",
+    "procedures_defnoreturn",
+    "controls_if",
+    "logic_negate",
+    "variables_get",
+    "wait_for_all",
+    "wait_for_event",
+    "wait_for_one",
+  ];
+  const countsOut = knownBlockTypes.reduce(
+    (prev, blockType) => {
+      prev[blockType] = counts[blockType] || 0;
+      return prev;
+    },
+    {
+      numBlockTypes: Object.keys(counts).length - 1,
+      functions:
+        (counts["when"] || 0) + (counts["procedures_defnoreturn"] || 0),
+    }
+  );
+  return countsOut;
+};
+
+// Returns the maximum depth of a nested scope in the input program xml string
+const getMaxDepth = (progXMLStr) => {
+  let result;
+  const startReg = /<statement name/g,
+    startIndices = [];
+  while ((result = startReg.exec(progXMLStr))) {
+    startIndices.push(result.index);
+  }
+  const endReg = /<\/statement>/g,
+    endIndices = [];
+  while ((result = endReg.exec(progXMLStr))) {
+    endIndices.push(result.index);
+  }
+
+  const stack = [];
   let s_i = 0;
   let e_i = 0;
   let maxDepth = -1;
@@ -90,15 +94,35 @@ function getMaxDepth(input, startIndices, endIndices) {
     }
     if (s_i < startIndices.length || e_i < endIndices.length) {
       let start = stack.pop();
-      let subInput = input.slice(start, currEnd);
-      let depth = (subInput.match(/<next>/g) || []).length + 1;
+      let subProgXMLStr = progXMLStr.slice(start, currEnd);
+      let depth = (subProgXMLStr.match(/<next>/g) || []).length + 1;
       maxDepth = Math.max(maxDepth, depth);
       input =
-        input.substring(0, start) +
-        subInput.replace("<next>", "<abcd>") +
-        input.substring(currEnd);
+        progXMLStr.substring(0, start) +
+        subProgXMLStr.replace("<next>", "<abcd>") +
+        progXMLStr.substring(currEnd);
       e_i++;
     }
   }
   return maxDepth;
-}
+};
+
+const computeMeasures = (progXMLStr) => {
+  const numBlocks = countNumBlocks(progXMLStr);
+  const numBlocksByType = countBlockByType(progXMLStr);
+  const maxDepth = getMaxDepth(progXMLStr);
+  return Object.assign({ numBlocks, maxDepth }, numBlocksByType);
+};
+
+// main
+
+const path = require("path");
+
+const programDirname = process.argv[2];
+fs.readdirSync(programDirname).map((filename, index) => {
+  const filepath = path.join(programDirname, filename);
+  const progXMLStr = readProgXMLFile(filepath);
+  const measures = Object.assign({ filename }, computeMeasures(progXMLStr));
+  if (index === 0) console.log(Object.keys(measures).join(","));
+  console.log(Object.values(measures).join(","));
+});
