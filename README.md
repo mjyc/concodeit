@@ -17,6 +17,6 @@ npm run
 
 ## Demo
 
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/waitfor
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/callback
-- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/async
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/pkgs/waitfor
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/pkgs/callback
+- https://codesandbox.io/s/github/mjyc/concodeit/tree/master/pkgs/async
