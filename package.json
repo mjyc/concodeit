@@ -2,10 +2,13 @@
   "private": "true",
   "name": "concodeit",
   "description": "A block-based visual programming for interactive programs",
-  "scripts": {},
+  "scripts": {
+    "build": "npm install && lerna bootstrap"
+  },
   "author": "Michael Jae-Yoon Chung",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "lerna": "^3.20.2"
   }
 }
