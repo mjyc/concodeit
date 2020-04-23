@@ -69,42 +69,13 @@ const countBlockByType = (progXMLStr) => {
   return countsOut;
 };
 
+const parseXml = require("@rgrove/parse-xml");
+
 // Returns the maximum depth of a nested scope in the input program xml string
 const getMaxDepth = (progXMLStr) => {
-  let result;
-  const startReg = /<statement name/g,
-    startIndices = [];
-  while ((result = startReg.exec(progXMLStr))) {
-    startIndices.push(result.index);
-  }
-  const endReg = /<\/statement>/g,
-    endIndices = [];
-  while ((result = endReg.exec(progXMLStr))) {
-    endIndices.push(result.index);
-  }
-
-  const stack = [];
-  let s_i = 0;
-  let e_i = 0;
-  let maxDepth = -1;
-  while (e_i < endIndices.length) {
-    let currEnd = endIndices[e_i];
-    while (s_i < startIndices.length && startIndices[s_i] < currEnd) {
-      stack.push(startIndices[s_i++]);
-    }
-    if (s_i < startIndices.length || e_i < endIndices.length) {
-      let start = stack.pop();
-      let subProgXMLStr = progXMLStr.slice(start, currEnd);
-      let depth = (subProgXMLStr.match(/<next>/g) || []).length + 1;
-      maxDepth = Math.max(maxDepth, depth);
-      input =
-        progXMLStr.substring(0, start) +
-        subProgXMLStr.replace("<next>", "<abcd>") +
-        progXMLStr.substring(currEnd);
-      e_i++;
-    }
-  }
-  return maxDepth;
+  const progJSON = parseXml(progXMLStr).toJSON();
+  console.log(JSON.stringify(progJSON, null, 2));
+  return 1;
 };
 
 const computeMeasures = (progXMLStr) => {
@@ -119,6 +90,7 @@ const computeMeasures = (progXMLStr) => {
 const path = require("path");
 
 const programDirname = process.argv[2];
+
 fs.readdirSync(programDirname).map((filename, index) => {
   const filepath = path.join(programDirname, filename);
   const progXMLStr = readProgXMLFile(filepath);
