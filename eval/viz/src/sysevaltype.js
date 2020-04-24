@@ -19,28 +19,6 @@ const main = (data) => {
     numVariables: d["numVariables"],
     maxDepth: d["maxDepth"],
   }));
-  const vspecs = [
-    {
-      xField: "numBlocks",
-      xScale: { domain: [0, 25] },
-      xTitle: "Average Number of Blocks",
-    },
-    {
-      xField: "numFunctions",
-      xScale: { domain: [-1, 5] },
-      xTitle: "Average Number of Functions",
-    },
-    {
-      xField: "maxDepth",
-      xScale: { domain: [-1, 5] },
-      xTitle: "Average Max Depth",
-    },
-    // {
-    //   xField: "numVariables",
-    //   xScale: { domain: [-1, 5] },
-    //   xTitle: "Average Number of Variables",
-    // },
-  ];
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
     data: {
@@ -64,12 +42,35 @@ const main = (data) => {
     ],
     hconcat: [
       {
-        title: {
-          text: "Across Action-Event Compositions",
-          fontSize: 11,
-        },
-        vconcat: vspecs.map((vspec) => ({
-          height: 60,
+        vconcat: [
+          {
+            filter: 'datum.api == "async"',
+            xField: "numBlocks",
+            xScale: { domain: [0, 25] },
+            xTitle: "Average Number of Blocks",
+            yField: "cctype",
+          },
+          {
+            filter: 'datum.api == "callback"',
+            xField: "numBlocks",
+            xScale: { domain: [0, 25] },
+            xTitle: "Average Number of Blocks",
+            yField: "cctype",
+          },
+          {
+            filter: 'datum.api == "waitfor"',
+            xField: "numBlocks",
+            xScale: { domain: [0, 25] },
+            xTitle: "Average Number of Blocks",
+            yField: "cctype",
+          },
+        ].map((vspec) => ({
+          // height: 60,
+          transform: [
+            {
+              filter: vspec.filter,
+            },
+          ],
           layer: [
             {
               mark: { type: "point", filled: true, color: "black" },
@@ -81,7 +82,7 @@ const main = (data) => {
                   scale: vspec.xScale,
                   title: vspec.xTitle,
                 },
-                y: { field: "cctype", type: "ordinal", title: null },
+                y: { field: vspec.yField, type: "ordinal", title: null },
               },
             },
             {
@@ -96,19 +97,42 @@ const main = (data) => {
                   aggregate: "mean",
                   title: vspec.xTitle,
                 },
-                y: { field: "cctype", type: "ordinal" },
+                y: { field: vspec.yField, type: "ordinal" },
               },
             },
           ],
         })),
       },
       {
-        title: {
-          text: "Across Wait for All and Wait for Ones",
-          fontSize: 11,
-        },
-        vconcat: vspecs.map((vspec) => ({
-          // height: 75,
+        vconcat: [
+          {
+            filter: 'datum.api == "async"',
+            xField: "numBlocks",
+            xScale: { domain: [0, 25] },
+            xTitle: "Average Number of Blocks",
+            yField: "eventtype",
+          },
+          {
+            filter: 'datum.api == "callback"',
+            xField: "numBlocks",
+            xScale: { domain: [0, 25] },
+            xTitle: "Average Number of Blocks",
+            yField: "eventtype",
+          },
+          {
+            filter: 'datum.api == "waitfor"',
+            xField: "numBlocks",
+            xScale: { domain: [0, 25] },
+            xTitle: "Average Number of Blocks",
+            yField: "eventtype",
+          },
+        ].map((vspec) => ({
+          // height: 60,
+          transform: [
+            {
+              filter: vspec.filter,
+            },
+          ],
           layer: [
             {
               mark: { type: "point", filled: true, color: "black" },
@@ -120,7 +144,7 @@ const main = (data) => {
                   scale: vspec.xScale,
                   title: vspec.xTitle,
                 },
-                y: { field: "eventtype", type: "ordinal", title: null },
+                y: { field: vspec.yField, type: "ordinal", title: null },
               },
             },
             {
@@ -135,7 +159,7 @@ const main = (data) => {
                   aggregate: "mean",
                   title: vspec.xTitle,
                 },
-                y: { field: "eventtype", type: "ordinal" },
+                y: { field: vspec.yField, type: "ordinal" },
               },
             },
           ],
