@@ -12,27 +12,34 @@ const tableau10 = {
 };
 
 const main = (data) => {
+  data = data.map((d) => ({
+    filename: d["filename"],
+    numBlocks: d["numBlocks"],
+    numFunctions: d["numFunctions"],
+    numVariables: d["numVariables"],
+    maxDepth: d["maxDepth"],
+  }));
   const vspecs = [
     {
       xField: "numBlocks",
       xScale: { domain: [0, 25] },
-      xTitle: "Number of Blocks",
+      xTitle: "Average Number of Blocks",
     },
     {
-      xField: "functions",
+      xField: "numFunctions",
       xScale: { domain: [-1, 5] },
-      xTitle: "Number of Functions",
+      xTitle: "Average Number of Functions",
     },
     {
       xField: "maxDepth",
       xScale: { domain: [-1, 5] },
-      xTitle: "Max Depth",
+      xTitle: "Average Max Depth",
     },
-    {
-      xField: "numVariables",
-      xScale: { domain: [-1, 5] },
-      xTitle: "Number of Variables",
-    },
+    // {
+    //   xField: "numVariables",
+    //   xScale: { domain: [-1, 5] },
+    //   xTitle: "Average Number of Variables",
+    // },
   ];
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
@@ -57,6 +64,10 @@ const main = (data) => {
     ],
     hconcat: [
       {
+        title: {
+          text: "Across Action-Event Compositions",
+          fontSize: 11,
+        },
         vconcat: vspecs.map((vspec) => ({
           height: 60,
           layer: [
@@ -92,6 +103,10 @@ const main = (data) => {
         })),
       },
       {
+        title: {
+          text: "Across Wait for All and Wait for Ones",
+          fontSize: 11,
+        },
         vconcat: vspecs.map((vspec) => ({
           // height: 75,
           layer: [
@@ -136,6 +151,5 @@ fetch("/dist/sysevaldata.json")
     return response.json();
   })
   .then((rawData) => {
-    console.log(rawData);
     main(rawData);
   });

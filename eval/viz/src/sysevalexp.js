@@ -12,6 +12,37 @@ const tableau10 = {
 };
 
 const main = (data) => {
+  data = {
+    numBlocks: data["numBlocks"],
+    numFunctions: data["numFunctions"],
+    numVariables: data["numVariables"],
+    maxDepth: data["maxDepth"],
+    robot_action_status: data["action_state"],
+    robot_last_event: data["last_detected_event"],
+    robot_say: data["say"],
+    robot_gesture: data["gesture"],
+    robot_display_button: data["display_button"],
+    robot_sleep: data["sleep"],
+    cci_when: data["when"],
+    cci_wait_for_all: data["wait_for_all"],
+    cci_wait_for_event: data["wait_for_event"],
+    cci_wait_for_one: data["wait_for_one"],
+    logic_boolean: data["logic_boolean"],
+    logic_negate: data["logic_negate"],
+    logic_operation: data["logic_operation"],
+    controls_if: data["controls_if"],
+    controls_while: data["controls_whileUntil_with_sleep"],
+    math_number: data["math_number"],
+    text: data["text"],
+    text_isEmpty: data["text_isEmpty"],
+    lists_create_with: data["lists_create_with"],
+    variables_get: data["variables_get"],
+    variables_set: data["variables_set"],
+    procedures_callnoreturn: data["procedures_callnoreturn"],
+    procedures_defnoreturn: data["procedures_defnoreturn"],
+    pass: data["pass"],
+    start_program: data["start_program"],
+  };
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
     data: {
@@ -69,6 +100,5 @@ fetch("/dist/sysevaldata.json")
     return response.json();
   })
   .then((rawData) => {
-    console.log(rawData);
     main(rawData);
   });

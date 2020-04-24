@@ -16,9 +16,7 @@ const countNumVariables = (progXMLStr) =>
 // Builds dictionary of <block type, # of block type> pairs
 const countBlockByType = (progXMLStr, { knownBlockTypes } = {}) => {
   const blocks = progXMLStr.match(/<block type="\w+"/g) || [];
-  const counts = {
-    variables: countNumVariables(progXMLStr),
-  };
+  const counts = {};
   for (let i = 0; i < blocks.length; i++) {
     let blockType = blocks[i].slice(13, blocks[i].length - 1);
     if (counts[blockType]) {
@@ -31,8 +29,9 @@ const countBlockByType = (progXMLStr, { knownBlockTypes } = {}) => {
   const countsOut = Object.assign(
     {
       numBlockTypes: Object.keys(counts).length - 1,
-      functions:
+      numFunctions:
         (counts["when"] || 0) + (counts["procedures_defnoreturn"] || 0),
+      numVariables: countNumVariables(progXMLStr),
     },
     !knownBlockTypes
       ? counts
