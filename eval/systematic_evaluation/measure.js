@@ -1,5 +1,5 @@
 if (process.argv.length <= 2) {
-  console.log("Usage: node evalScript.js path/to/directory");
+  console.log("Usage: node measure.js path/to/directory");
   process.exit(-1);
 }
 
@@ -123,11 +123,16 @@ const computeMeasures = (progXMLStr) => {
 const path = require("path");
 
 const programDirname = process.argv[2];
+const outputFormat = process.argv[3] || "csv";
 
-fs.readdirSync(programDirname).map((filename, index) => {
+const out = fs.readdirSync(programDirname).map((filename, index) => {
   const filepath = path.join(programDirname, filename);
   const progXMLStr = readProgXMLFile(filepath);
   const measures = Object.assign({ filename }, computeMeasures(progXMLStr));
+  if (outputFormat === "json") return measures;
   if (index === 0) console.log(Object.keys(measures).join(","));
   console.log(Object.values(measures).join(","));
 });
+
+if (outputFormat !== "json") return;
+console.log(JSON.stringify(out));

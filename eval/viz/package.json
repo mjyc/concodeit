@@ -2,10 +2,12 @@
   "private": true,
   "scripts": {
     "build": "node ./build_html.js",
-    "plot1": "npm run build -- plot1 && npx live-server --open=./dist/plot1.html"
+    "sysevaldata": "node ../systematic_evaluation/measure.js ../systematic_evaluation/data json > dist/sysevaldata.json",
+    "sysevalexp": "npm run build -- sysevalexp && npm run sysevaldata && npx live-server --open=./dist/sysevalexp.html",
+    "sysevalmain": "npm run build -- sysevalmain && npm run sysevaldata && npx live-server --open=./dist/sysevalmain.html",
+    "syseval2nd": "npm run build -- syseval2nd && npm run sysevaldata && npx live-server --open=./dist/syseval2nd.html"
   },
-  "dependencies": {
-    "vega": "5.10.1",
+  "dependencies": {    "vega": "5.10.1",
     "vega-embed": "6.6.0",
     "vega-lite": "4.11.0"
   },
