@@ -1,0 +1,164 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "description": "A scatterplot showing task name and number of blocks",
+  "data": {"values": [
+   {
+      "API":"Async",
+      "Task Name":"WA-AA",
+      "Total Blocks":"12",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Async",
+      "Task Name":"WA-AE",
+      "Total Blocks":"11",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Async",
+      "Task Name":"WA-EE",
+      "Total Blocks":"14",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Async",
+      "Task Name":"WO-AA",
+      "Total Blocks":"12",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Async",
+      "Task Name":"WO-AE",
+      "Total Blocks":"11",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Async",
+      "Task Name":"WO-EE",
+      "Total Blocks":"14",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Callback",
+      "Task Name":"WA-AA",
+      "Total Blocks":"27",
+      "Functions":"3",
+      "Max Depth":"3"
+   },
+   {
+      "API":"Callback",
+      "Task Name":"WA-AE",
+      "Total Blocks":"25",
+      "Functions":"3",
+      "Max Depth":"2"
+   },
+   {
+      "API":"Callback",
+      "Task Name":"WA-EE",
+      "Total Blocks":"27",
+      "Functions":"3",
+      "Max Depth":"2"
+   },
+   {
+      "API":"Callback",
+      "Task Name":"WO-AA",
+      "Total Blocks":"19",
+      "Functions":"3",
+      "Max Depth":"3"
+   },
+   {
+      "API":"Callback",
+      "Task Name":"WO-AE",
+      "Total Blocks":"25",
+      "Functions":"3",
+      "Max Depth":"2"
+   },
+   {
+      "API":"Callback",
+      "Task Name":"WO-EE",
+      "Total Blocks":"27",
+      "Functions":"3",
+      "Max Depth":"2"
+   },
+   {
+      "API":"Waitfor",
+      "Task Name":"WA-AA",
+      "Total Blocks":"9",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Waitfor",
+      "Task Name":"WA-AE",
+      "Total Blocks":"8",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Waitfor",
+      "Task Name":"WA-EE",
+      "Total Blocks":"10",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Waitfor",
+      "Task Name":"WO-AA",
+      "Total Blocks":"8",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Waitfor",
+      "Task Name":"WO-AE",
+      "Total Blocks":"8",
+      "Functions":"0",
+      "Max Depth":"1"
+   },
+   {
+      "API":"Waitfor",
+      "Task Name":"WO-EE",
+      "Total Blocks":"10",
+      "Functions":"0",
+      "Max Depth":"1"
+   }]
+  },
+  "layer":[
+    {
+      "mark": "point",
+      "encoding": {
+        "x": {"field": "Task Name", "type": "nominal"},
+        "y": {"field": "Functions", "type": "quantitative"},
+        "color": {"field": "API", "type": "nominal"}
+      }
+    },
+    {
+      "mark": {"type": "errorband", "extent": "stdev", "opacity": 0.2},
+      "encoding": {
+        "y": {
+          "field": "Functions",
+          "type": "quantitative",
+          "title": "Functions"
+        },
+        "color": {"field": "API", "type": "nominal"}
+      }
+    },
+    {
+      "mark": "rule",
+      "encoding": {
+        "y": {
+          "field": "Functions",
+          "type": "quantitative",
+          "aggregate": "mean"
+        },
+        "color": {"field": "API", "type": "nominal"}
+      }
+    }
+  ]
+}
