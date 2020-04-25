@@ -13,8 +13,11 @@ const countNumBlocks = (progXMLStr) =>
 const countNumVariables = (progXMLStr) =>
   (progXMLStr.match(/<variable type=""/g) || []).length;
 
+const countElseIfs = (progXMLStr) =>
+  (progXMLStr.match(/<mutation elseif=/g) || []).length;
+
 // Builds dictionary of <block type, # of block type> pairs
-const countBlockByType = (progXMLStr, { knownBlockTypes } = {}) => {
+const countBlocksByType = (progXMLStr, { knownBlockTypes } = {}) => {
   const blocks = progXMLStr.match(/<block type="\w+"/g) || [];
   const counts = {};
   for (let i = 0; i < blocks.length; i++) {
@@ -27,12 +30,6 @@ const countBlockByType = (progXMLStr, { knownBlockTypes } = {}) => {
   }
 
   const countsOut = Object.assign(
-    {
-      numBlockTypes: Object.keys(counts).length - 1,
-      numFunctions:
-        (counts["when"] || 0) + (counts["procedures_defnoreturn"] || 0),
-      numVariables: countNumVariables(progXMLStr),
-    },
     !knownBlockTypes
       ? counts
       : knownBlockTypes.reduce((prev, blockType) => {
@@ -83,38 +80,96 @@ const getMaxDepth = (progXMLStr) => {
 };
 
 const computeMeasures = (progXMLStr) => {
-  const numBlocks = countNumBlocks(progXMLStr);
-  const maxDepth = getMaxDepth(progXMLStr);
-  const numVariables = countNumVariables(progXMLStr);
   const knownBlockTypes = [
-    "start_program",
-    "say",
-    "text",
-    "gesture",
-    "controls_whileUntil_with_sleep",
-    "logic_operation",
     "action_state",
-    "sleep",
-    "math_number",
-    "text_isEmpty",
+    "controls_if",
+    "controls_repeat_ext_with_sleep",
+    "controls_whileUntil_with_sleep",
+    "display_button",
+    "display_text",
+    "gesture",
     "last_detected_event",
     "lists_create_with",
-    "display_button",
-    "pass",
-    "variables_set",
+    "lists_getIndex",
+    "lists_getSublist",
+    "lists_indexOf",
+    "lists_isEmpty",
+    "lists_length",
+    "lists_repeat",
+    "lists_setIndex",
+    "lists_sort",
+    "lists_split",
     "logic_boolean",
-    "when",
-    "procedures_callnoreturn",
-    "procedures_defnoreturn",
-    "controls_if",
+    "logic_compare",
     "logic_negate",
+    "logic_null",
+    "logic_operation",
+    "logic_ternary",
+    "math_arithmetic",
+    "math_constant",
+    "math_number",
+    "math_single",
+    "math_trig",
+    "pass",
+    "procedures_callnoreturn",
+    "procedures_callreturn",
+    "procedures_defnoreturn",
+    "procedures_defreturn",
+    "procedures_ifreturn",
+    "reset_event",
+    "say",
+    "sleep",
+    "start_program",
+    "stop_action",
+    "text",
+    "text_append",
+    "text_changeCase",
+    "text_charAt",
+    "text_getSubstring",
+    "text_indexOf",
+    "text_isEmpty",
+    "text_join",
+    "text_length",
+    "text_print",
+    "text_prompt_ext",
+    "text_trim",
     "variables_get",
+    "when",
     "wait_for_all",
     "wait_for_event",
     "wait_for_one",
   ];
-  const numBlocksByType = countBlockByType(progXMLStr, { knownBlockTypes });
-  return Object.assign({ numBlocks, maxDepth, numVariables }, numBlocksByType);
+  const numBlocksByType = countBlocksByType(progXMLStr, { knownBlockTypes });
+  const numFunctions =
+    numBlocksByType.procedures_defnoreturn +
+    numBlocksByType.procedures_defreturn +
+    numBlocksByType.when;
+  const numVariables = countNumVariables(progXMLStr);
+  const numElseIfs = countElseIfs(progXMLStr);
+  const numBranches =
+    numBlocksByType.controls_if + numBlocksByType.logic_ternary + numElseIfs;
+  const numLoops =
+    numBlocksByType.controls_repeat_ext_with_sleep +
+    numBlocksByType.controls_whileUntil_with_sleep;
+  const numConds =
+    numBlocksByType.logic_compare +
+    numBlocksByType.logic_operation +
+    numBlocksByType.logic_negate;
+  const numBlocks = countNumBlocks(progXMLStr);
+  const numTotalBlocks = numBlocks + numVariables + numElseIfs;
+  const maxDepth = getMaxDepth(progXMLStr);
+  return Object.assign(
+    {
+      numFunctions,
+      numVariables,
+      numBranches,
+      numLoops,
+      numConds,
+      numTotalBlocks,
+      maxDepth,
+    },
+    numBlocksByType
+  );
 };
 
 // main

@@ -14,12 +14,12 @@ const tableau10 = {
 const main = (data) => {
   data = data.map((d) => ({
     filename: d["filename"],
-    numBlocks: d["numBlocks"] + d["numVariables"],
+    numTotalBlocks: d["numTotalBlocks"],
     numFunctions: d["numFunctions"],
     numVariables: d["numVariables"],
-    logic_operation: d["logic_operation"],
-    controls_if: d["controls_if"],
-    controls_while: d["controls_whileUntil_with_sleep"],
+    numBranches: d["numBranches"],
+    numLoops: d["numLoops"],
+    numConds: d["numConds"],
   }));
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
@@ -37,7 +37,7 @@ const main = (data) => {
       {
         vconcat: [
           {
-            xField: "numBlocks",
+            xField: "numTotalBlocks",
             xScale: { domain: [0, 30] },
             xTitle: "Average Number of Blocks",
           },
@@ -87,19 +87,19 @@ const main = (data) => {
       {
         vconcat: [
           {
-            xField: "logic_operation",
+            xField: "numBranches",
             xScale: { domain: [-0.5, 3.5] },
-            xTitle: "Average Number of Logic Operators",
+            xTitle: "Average Number of Branches",
           },
           {
-            xField: "controls_if",
+            xField: "numLoops",
             xScale: { domain: [-0.5, 3.5] },
-            xTitle: "Average Number of If Statements",
+            xTitle: "Average Number of Loops",
           },
           {
-            xField: "controls_while",
+            xField: "numConds",
             xScale: { domain: [-0.5, 3.5] },
-            xTitle: "Average Number of While Statements",
+            xTitle: "Average Number of Conditions",
           },
         ].map((vspec) => ({
           layer: [

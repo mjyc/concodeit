@@ -14,12 +14,7 @@ const tableau10 = {
 const main = (data) => {
   data = data.map((d) => ({
     filename: d["filename"],
-    numBlocks: d["numBlocks"] + d["numVariables"],
-    numFunctions: d["numFunctions"],
-    numVariables: d["numVariables"],
-    logic_operation: d["logic_operation"],
-    controls_if: d["controls_if"],
-    controls_while: d["controls_whileUntil_with_sleep"],
+    numTotalBlocks: d["numTotalBlocks"],
   }));
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
@@ -50,15 +45,15 @@ const main = (data) => {
     mark: { type: "point", filled: true },
     encoding: {
       x: {
-        field: "numBlocks",
+        field: "numTotalBlocks",
         type: "quantitative",
         aggregate: "mean",
         scale: { domain: [0, 30] },
         title: null,
       },
       y: { field: "type", type: "nominal", title: null },
-      color: { field: "api" },
-      shape: { field: "api" },
+      color: { field: "api", legend: { title: null, orient: "right" } },
+      shape: { field: "api", legend: { title: null, orient: "right" } },
     },
   };
   vegaEmbed("#vis", vlSpec);
