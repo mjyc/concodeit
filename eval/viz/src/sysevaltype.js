@@ -14,10 +14,12 @@ const tableau10 = {
 const main = (data) => {
   data = data.map((d) => ({
     filename: d["filename"],
-    numBlocks: d["numBlocks"],
+    numBlocks: d["numBlocks"] + d["numVariables"],
     numFunctions: d["numFunctions"],
     numVariables: d["numVariables"],
-    maxDepth: d["maxDepth"],
+    logic_operation: d["logic_operation"],
+    controls_if: d["controls_if"],
+    controls_while: d["controls_whileUntil_with_sleep"],
   }));
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
@@ -39,133 +41,25 @@ const main = (data) => {
           "(indexof(datum.filename, 'AA') != -1) ? 'AA' : (indexof(datum.filename, 'AE') != -1) ? 'AE' : 'EE'",
         as: "eventtype",
       },
-    ],
-    hconcat: [
       {
-        vconcat: [
-          {
-            filter: 'datum.api == "async"',
-            xField: "numBlocks",
-            xScale: { domain: [0, 25] },
-            xTitle: "Average Number of Blocks",
-            yField: "cctype",
-          },
-          {
-            filter: 'datum.api == "callback"',
-            xField: "numBlocks",
-            xScale: { domain: [0, 25] },
-            xTitle: "Average Number of Blocks",
-            yField: "cctype",
-          },
-          {
-            filter: 'datum.api == "waitfor"',
-            xField: "numBlocks",
-            xScale: { domain: [0, 25] },
-            xTitle: "Average Number of Blocks",
-            yField: "cctype",
-          },
-        ].map((vspec) => ({
-          // height: 60,
-          transform: [
-            {
-              filter: vspec.filter,
-            },
-          ],
-          layer: [
-            {
-              mark: { type: "point", filled: true, color: "black" },
-              encoding: {
-                x: {
-                  field: vspec.xField,
-                  type: "quantitative",
-                  aggregate: "mean",
-                  scale: vspec.xScale,
-                  title: vspec.xTitle,
-                },
-                y: { field: vspec.yField, type: "ordinal", title: null },
-              },
-            },
-            {
-              mark: {
-                type: "errorbar",
-                extent: "stdev",
-              },
-              encoding: {
-                x: {
-                  field: vspec.xField,
-                  type: "quantitative",
-                  aggregate: "mean",
-                  title: vspec.xTitle,
-                },
-                y: { field: vspec.yField, type: "ordinal" },
-              },
-            },
-          ],
-        })),
-      },
-      {
-        vconcat: [
-          {
-            filter: 'datum.api == "async"',
-            xField: "numBlocks",
-            xScale: { domain: [0, 25] },
-            xTitle: "Average Number of Blocks",
-            yField: "eventtype",
-          },
-          {
-            filter: 'datum.api == "callback"',
-            xField: "numBlocks",
-            xScale: { domain: [0, 25] },
-            xTitle: "Average Number of Blocks",
-            yField: "eventtype",
-          },
-          {
-            filter: 'datum.api == "waitfor"',
-            xField: "numBlocks",
-            xScale: { domain: [0, 25] },
-            xTitle: "Average Number of Blocks",
-            yField: "eventtype",
-          },
-        ].map((vspec) => ({
-          // height: 60,
-          transform: [
-            {
-              filter: vspec.filter,
-            },
-          ],
-          layer: [
-            {
-              mark: { type: "point", filled: true, color: "black" },
-              encoding: {
-                x: {
-                  field: vspec.xField,
-                  type: "quantitative",
-                  aggregate: "mean",
-                  scale: vspec.xScale,
-                  title: vspec.xTitle,
-                },
-                y: { field: vspec.yField, type: "ordinal", title: null },
-              },
-            },
-            {
-              mark: {
-                type: "errorbar",
-                extent: "stdev",
-              },
-              encoding: {
-                x: {
-                  field: vspec.xField,
-                  type: "quantitative",
-                  aggregate: "mean",
-                  title: vspec.xTitle,
-                },
-                y: { field: vspec.yField, type: "ordinal" },
-              },
-            },
-          ],
-        })),
+        calculate:
+          "(indexof(datum.filename, 'WO-AA') != -1) ? 'WO-AA' : (indexof(datum.filename, 'WO-AE') != -1) ? 'WO-AE' : (indexof(datum.filename, 'WO-EE') != -1) ? 'WO-EE' : (indexof(datum.filename, 'WA-AA') != -1) ? 'WA-AA' : (indexof(datum.filename, 'WA-AE') != -1) ? 'WA-AE' : 'WA-EE'",
+        as: "type",
       },
     ],
+    mark: { type: "point", filled: true },
+    encoding: {
+      x: {
+        field: "numBlocks",
+        type: "quantitative",
+        aggregate: "mean",
+        scale: { domain: [0, 30] },
+        title: null,
+      },
+      y: { field: "type", type: "nominal", title: null },
+      color: { field: "api" },
+      shape: { field: "api" },
+    },
   };
   vegaEmbed("#vis", vlSpec);
 };
