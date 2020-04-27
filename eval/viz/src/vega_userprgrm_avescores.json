@@ -1,0 +1,40 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "description": "A scatterplot showing task name and number of blocks",
+  "data": {"values": [
+   {
+      "API":"Async",
+      "Average Number of Blocks":"12.333",
+      "Functions":"0",
+      "Max Depth":"1",
+      "Num Block Types":"9.5",
+      "Average API Score (%)":"59.91"
+   },
+   {
+      "API":"Callback",
+      "Average Number of Blocks":"25",
+      "Functions":"3",
+      "Max Depth":"2.333",
+      "Num Block Types":"13.3333",
+      "Average API Score (%)":"59.833"
+   },
+   {
+      "API":"Waitfor",
+      "Average Number of Blocks":"8.8333",
+      "Functions":"0",
+      "Max Depth":"1",
+      "Num Block Types":"6.8333",
+      "Average API Score (%)":"63.04"
+   }]
+  },
+  "layer":[
+    {
+      "mark": "point",
+      "encoding": {
+        "x": {"field": "Average API Score (%)", "type": "quantitative"},
+        "y": {"field": "Average Number of Blocks", "type": "quantitative"},
+        "color": {"field": "API", "type": "nominal"}
+      }
+    }
+  ]
+}
