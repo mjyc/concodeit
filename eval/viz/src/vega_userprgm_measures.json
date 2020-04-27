@@ -1,0 +1,200 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "description": "A scatterplot showing task name and number of functions",
+  "data": {"values": [
+   {
+      "API":"Async",
+      "Total Blocks":"25",
+      "Functions":"0",
+      "Max Depth":"2",
+      "Score":"5",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Async",
+      "Total Blocks":"64",
+      "Functions":"0",
+      "Max Depth":"10",
+      "Score":"15",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Async",
+      "Total Blocks":"107",
+      "Functions":"0",
+      "Max Depth":"5",
+      "Score":"24",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Async",
+      "Total Blocks":"41",
+      "Functions":"0",
+      "Max Depth":"8",
+      "Score":"5",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Async",
+      "Total Blocks":"62",
+      "Functions":"0",
+      "Max Depth":"2",
+      "Score":"8",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Async",
+      "Total Blocks":"97",
+      "Functions":"0",
+      "Max Depth":"6",
+      "Score":"23",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Async",
+      "Total Blocks":"64",
+      "Functions":"0",
+      "Max Depth":"3",
+      "Score":"15",
+      "Average Number of Blocks":"12.333"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"110",
+      "Functions":"7",
+      "Max Depth":"6",
+      "Score":"23.5",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"90",
+      "Functions":"5",
+      "Max Depth":"18",
+      "Score":"23",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"62",
+      "Functions":"6",
+      "Max Depth":"3",
+      "Score":"11",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"53",
+      "Functions":"3",
+      "Max Depth":"5",
+      "Score":"12",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"51",
+      "Functions":"3",
+      "Max Depth":"5",
+      "Score":"11",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"56",
+      "Functions":"6",
+      "Max Depth":"4",
+      "Score":"17",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Callback",
+      "Total Blocks":"30",
+      "Functions":"3",
+      "Max Depth":"5",
+      "Score":"3",
+      "Average Number of Blocks":"25"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"45",
+      "Functions":"0",
+      "Max Depth":"3",
+      "Score":"7",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"67",
+      "Functions":"0",
+      "Max Depth":"14",
+      "Score":"19",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"38",
+      "Functions":"0",
+      "Max Depth":"4",
+      "Score":"10",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"38",
+      "Functions":"0",
+      "Max Depth":"3",
+      "Score":"14",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"56",
+      "Functions":"0",
+      "Max Depth":"2",
+      "Score":"23",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"51",
+      "Functions":"0",
+      "Max Depth":"5",
+      "Score":"22",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"69",
+      "Functions":"0",
+      "Max Depth":"7",
+      "Score":"13",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"71",
+      "Functions":"1",
+      "Max Depth":"3",
+      "Score":"17",
+      "Average Number of Blocks":"8.8333"
+   },
+   {
+      "API":"Waitfor",
+      "Total Blocks":"59",
+      "Functions":"0",
+      "Max Depth":"3",
+      "Score":"19",
+      "Average Number of Blocks":"8.8333"
+   }]
+  },
+  "layer": [
+    {
+      "mark": "point",
+      "encoding": {
+        "x": {"field": "Total Blocks", "type": "quantitative"},
+        "y": {"field": "Score", "type": "quantitative"},
+        "color": {"field": "API", "type": "nominal"}
+      }
+    }
+  ]
+}
