@@ -12,33 +12,41 @@ const tableau10 = {
 };
 
 const main = (data) => {
-  data = data.map((d) => ({
-    filename: d["filename"],
-    numTotalBlocks: d["numTotalBlocks"],
-    numFunctions: d["numFunctions"],
-    numVariables: d["numVariables"],
-    numBranches: d["numBranches"],
-    numLoops: d["numLoops"],
-    numConds: d["numConds"],
-  }));
+  console.log(data);
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
     data: {
       values: data,
     },
-    mark: {
-      type: "point",
-    },
-    encoding: {
-      x: {
-        field: "total",
-        type: "quantitative",
+    transform: [
+      {
+        calculate:
+          "(substring(datum.id, 0, 1) == 'a') ? 'async' : (substring(datum.id, 0, 1) == 'c' ) ? 'callback' : 'waitfor'",
+        as: "api",
       },
-      y: {
-        field: "total",
-        type: "quantitative",
+    ],
+    layer: [
+      {
+        mark: {
+          type: "point",
+          filled: true,
+        },
+        encoding: {
+          x: {
+            field: "numTotalBlocks",
+            type: "quantitative",
+            axis: { title: "Number of Blocks" },
+          },
+          y: {
+            field: "total",
+            type: "quantitative",
+            axis: { title: "Score" },
+          },
+          color: { field: "api", legend: { title: null } },
+          shape: { field: "api", legend: { title: null } },
+        },
       },
-    },
+    ],
   };
   vegaEmbed("#vis", vlSpec);
 };

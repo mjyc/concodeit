@@ -9,7 +9,8 @@
     "sysevalexp2": "npm run sysevaldata && npm run build -- sysevalexp2 && npx live-server --open=./dist/sysevalexp2.html",
     "userstudydata": "node ../systematic_evaluation/measure.js ../user_study/data json > dist/userstudydata.json",
     "userstudyapi": "npm run userstudydata && npm run build -- userstudyapi && npx live-server --open=./dist/userstudyapi.html",
-    "userstudyscore": "cp ../user_study/responses.json dist/userstudyresp.json && npm run build -- userstudyscore && npx live-server --open=./dist/userstudyscore.html"
+    "userstudyscore": "cp ../user_study/responses.json dist/userstudyresp.json && npm run build -- userstudyscore && npx live-server --open=./dist/userstudyscore.html",
+    "userstudyscore2": "cp ../user_study/responses.json dist/userstudyresp.json && npm run build -- userstudyscore2 && npx live-server --open=./dist/userstudyscore2.html"
   },
   "dependencies": {    "vega": "5.10.1",
     "vega-embed": "6.6.0",
