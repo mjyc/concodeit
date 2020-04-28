@@ -3,10 +3,13 @@
   "scripts": {
     "build": "node ./build_html.js",
     "sysevaldata": "node ../systematic_evaluation/measure.js ../systematic_evaluation/data json > dist/sysevaldata.json",
-    "sysevalapi": "npm run build -- sysevalapi && npm run sysevaldata && npx live-server --open=./dist/sysevalapi.html",
-    "sysevaltype": "npm run build -- sysevaltype && npm run sysevaldata && npx live-server --open=./dist/sysevaltype.html",
-    "sysevalexp": "npm run build -- sysevalexp && npm run sysevaldata && npx live-server --open=./dist/sysevalexp.html",
-    "sysevalexp2": "npm run build -- sysevalexp2 && npm run sysevaldata && npx live-server --open=./dist/sysevalexp2.html"
+    "sysevalapi": "npm run sysevaldata && npm run build -- sysevalapi && npx live-server --open=./dist/sysevalapi.html",
+    "sysevaltype": "npm run sysevaldata && npm run build -- sysevaltype && npx live-server --open=./dist/sysevaltype.html",
+    "sysevalexp": "npm run sysevaldata && npm run build -- sysevalexp && npx live-server --open=./dist/sysevalexp.html",
+    "sysevalexp2": "npm run sysevaldata && npm run build -- sysevalexp2 && npx live-server --open=./dist/sysevalexp2.html",
+    "userstudydata": "node ../systematic_evaluation/measure.js ../user_study/data json > dist/userstudydata.json",
+    "userstudyapi": "npm run userstudydata && npm run build -- userstudyapi && npx live-server --open=./dist/userstudyapi.html",
+    "userstudyscore": "cp ../user_study/responses.json dist/userstudyresp.json && npm run build -- userstudyscore && npx live-server --open=./dist/userstudyscore.html"
   },
   "dependencies": {    "vega": "5.10.1",
     "vega-embed": "6.6.0",
