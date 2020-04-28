@@ -12,6 +12,10 @@ const tableau10 = {
 };
 
 const main = (data) => {
+  const isUserStudyData = true;
+
+  console.log(data);
+
   data = data.map((d) => ({
     filename: d["filename"],
     numTotalBlocks: d["numTotalBlocks"],
@@ -29,7 +33,7 @@ const main = (data) => {
     transform: [
       {
         calculate:
-          "(indexof(datum.filename, 'Async') != -1) ? 'async' : (indexof(datum.filename, 'Callback') != -1 ) ? 'callback' : 'waitfor'",
+          "(substring(datum.filename, 0, 1) == 'a') ? 'async' : (substring(datum.filename, 0, 1) == 'c' ) ? 'callback' : 'waitfor'",
         as: "api",
       },
     ],
@@ -38,17 +42,17 @@ const main = (data) => {
         vconcat: [
           {
             xField: "numTotalBlocks",
-            xScale: { domain: [0, 30] },
+            xScale: { domain: !isUserStudyData ? [0, 30] : [0, 120] },
             xTitle: "Average Number of Blocks",
           },
           {
             xField: "numFunctions",
-            xScale: { domain: [-0.5, 3.5] },
+            xScale: { domain: !isUserStudyData ? [-0.5, 3.5] : [-2, 12] },
             xTitle: "Average Number of Functions",
           },
           {
             xField: "numVariables",
-            xScale: { domain: [-0.5, 3.5] },
+            xScale: { domain: !isUserStudyData ? [-0.5, 3.5] : [-2, 12] },
             xTitle: "Average Number of Variables",
           },
         ].map((vspec) => ({
@@ -88,17 +92,17 @@ const main = (data) => {
         vconcat: [
           {
             xField: "numBranches",
-            xScale: { domain: [-0.5, 3.5] },
+            xScale: { domain: !isUserStudyData ? [-0.5, 3.5] : [-2, 12] },
             xTitle: "Average Number of Branches",
           },
           {
             xField: "numLoops",
-            xScale: { domain: [-0.5, 3.5] },
+            xScale: { domain: !isUserStudyData ? [-0.5, 3.5] : [-2, 12] },
             xTitle: "Average Number of Loops",
           },
           {
             xField: "numConds",
-            xScale: { domain: [-0.5, 3.5] },
+            xScale: { domain: !isUserStudyData ? [-0.5, 3.5] : [-2, 12] },
             xTitle: "Average Number of Conditions",
           },
         ].map((vspec) => ({
