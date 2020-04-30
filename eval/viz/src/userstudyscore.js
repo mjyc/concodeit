@@ -27,10 +27,7 @@ const main = (data) => {
     ],
     layer: [
       {
-        mark: {
-          type: "point",
-          filled: true,
-        },
+        mark: { type: "point" },
         encoding: {
           x: {
             field: "numTotalBlocks",
@@ -42,8 +39,14 @@ const main = (data) => {
             type: "quantitative",
             axis: { title: "Score" },
           },
-          color: { field: "api", legend: { title: null } },
-          shape: { field: "api", legend: { title: null } },
+          color: {
+            field: "api",
+            legend: { title: null }, //, orient: "none", legendX: 145, legendY: 20 },
+          },
+          shape: {
+            field: "api",
+            legend: { title: null }, //, orient: "none", legendX: 145, legendY: 20 },
+          },
         },
       },
     ],
