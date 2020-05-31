@@ -49,6 +49,96 @@ const main = (data) => {
           },
         },
       },
+      {
+        transform: [
+          {
+            filter: "(substring(datum.id, 0, 1) == 'a')",
+          },
+        ],
+        mark: { type: "rule", color: tableau10.blue },
+        encoding: {
+          x: {
+            aggregate: "average",
+            field: "numTotalBlocks",
+            type: "quantitative",
+          },
+        },
+      },
+      {
+        transform: [
+          {
+            filter: "(substring(datum.id, 0, 1) == 'c')",
+          },
+        ],
+        mark: { type: "rule", color: tableau10.orange },
+        encoding: {
+          x: {
+            aggregate: "average",
+            field: "numTotalBlocks",
+            type: "quantitative",
+          },
+        },
+      },
+      {
+        transform: [
+          {
+            filter: "(substring(datum.id, 0, 1) == 'w')",
+          },
+        ],
+        mark: { type: "rule", color: tableau10.red },
+        encoding: {
+          x: {
+            aggregate: "average",
+            field: "numTotalBlocks",
+            type: "quantitative",
+          },
+        },
+      },
+      {
+        transform: [
+          {
+            filter: "(substring(datum.id, 0, 1) == 'a')",
+          },
+        ],
+        mark: { type: "rule", color: tableau10.blue },
+        encoding: {
+          y: {
+            aggregate: "average",
+            field: "total",
+            type: "quantitative",
+          },
+        },
+      },
+      {
+        transform: [
+          {
+            filter: "(substring(datum.id, 0, 1) == 'c')",
+          },
+        ],
+        mark: { type: "rule", color: tableau10.orange },
+        encoding: {
+          y: {
+            aggregate: "average",
+            field: "total",
+            type: "quantitative",
+          },
+        },
+      },
+      {
+        transform: [
+          {
+            filter: "(substring(datum.id, 0, 1) == 'w')",
+          },
+        ],
+        mark: { type: "rule", color: tableau10.red },
+        encoding: {
+          y: {
+            aggregate: "average",
+            field: "total",
+            type: "quantitative",
+          },
+        },
+      },
     ],
   };
   vegaEmbed("#vis", vlSpec);

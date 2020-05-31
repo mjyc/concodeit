@@ -12,7 +12,8 @@
     "userstudyscore": "cp ../user_study/responses.json dist/userstudyresp.json && npm run build -- userstudyscore && npx live-server --open=./dist/userstudyscore.html",
     "userstudyscore2": "cp ../user_study/responses.json dist/userstudyresp.json && npm run build -- userstudyscore2 && npx live-server --open=./dist/userstudyscore2.html"
   },
-  "dependencies": {    "vega": "5.10.1",
+  "dependencies": {
+    "vega": "5.10.1",
     "vega-embed": "6.6.0",
     "vega-lite": "4.11.0"
   },
