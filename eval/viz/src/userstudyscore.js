@@ -20,6 +20,9 @@ const main = (data) => {
     },
     transform: [
       {
+        filter: "datum['skip?'] == 'FALSE'",
+      },
+      {
         calculate:
           "(substring(datum.id, 0, 1) == 'a') ? 'async' : (substring(datum.id, 0, 1) == 'c' ) ? 'callback' : 'waitfor'",
         as: "api",
@@ -35,7 +38,7 @@ const main = (data) => {
             axis: { title: "Number of Blocks" },
           },
           y: {
-            field: "total",
+            field: "main",
             type: "quantitative",
             axis: { title: "Score" },
           },
@@ -104,7 +107,7 @@ const main = (data) => {
         encoding: {
           y: {
             aggregate: "average",
-            field: "total",
+            field: "main",
             type: "quantitative",
           },
         },
@@ -119,7 +122,7 @@ const main = (data) => {
         encoding: {
           y: {
             aggregate: "average",
-            field: "total",
+            field: "main",
             type: "quantitative",
           },
         },
@@ -134,7 +137,7 @@ const main = (data) => {
         encoding: {
           y: {
             aggregate: "average",
-            field: "total",
+            field: "main",
             type: "quantitative",
           },
         },

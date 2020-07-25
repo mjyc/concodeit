@@ -20,6 +20,9 @@ const main = (data) => {
     },
     transform: [
       {
+        filter: "datum['skip?'] == 'FALSE'",
+      },
+      {
         calculate: "(indexof(datum.classes, 'CSE 332') != -1) ? 'yes' : 'no'",
         as: "tookCSE332",
       },
@@ -36,7 +39,7 @@ const main = (data) => {
             axis: { title: "Number of Blocks" },
           },
           y: {
-            field: "total",
+            field: "main",
             type: "quantitative",
             axis: { title: "Scores" },
           },
@@ -83,7 +86,7 @@ const main = (data) => {
         encoding: {
           y: {
             aggregate: "average",
-            field: "total",
+            field: "main",
             type: "quantitative",
           },
         },
@@ -98,7 +101,7 @@ const main = (data) => {
         encoding: {
           y: {
             aggregate: "average",
-            field: "total",
+            field: "main",
             type: "quantitative",
           },
         },
