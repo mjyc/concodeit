@@ -206,7 +206,7 @@
   {
     "id": "a04",
     "numTotalBlocks": 66,
-    "skip?": "FALSE",
+    "skip?": "TRUE",
     "Timestamp": "3/10/2020 12:12:35",
     "EXPERIMENTER USE ONLY; DO NOT MODIFY": "Async",
     "PhD": "TRUE",
@@ -682,7 +682,7 @@
   {
     "id": "c06",
     "numTotalBlocks": 118,
-    "skip?": "FALSE",
+    "skip?": "TRUE",
     "Timestamp": "3/17/2020 15:27:49",
     "EXPERIMENTER USE ONLY; DO NOT MODIFY": "Callback",
     "PhD": "TRUE",
