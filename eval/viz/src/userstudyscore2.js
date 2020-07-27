@@ -20,7 +20,7 @@ const main = (data) => {
     },
     transform: [
       {
-        filter: "datum['skip?'] == 'FALSE'",
+        filter: "datum['PhD'] == 'FALSE'",
       },
       {
         calculate: "(indexof(datum.classes, 'CSE 332') != -1) ? 'yes' : 'no'",
