@@ -12,15 +12,17 @@ const tableau10 = {
 };
 
 const main = (data) => {
-  data = data.map((d) => ({
-    filename: d["filename"],
-    numTotalBlocks: d["numTotalBlocks"],
-    numFunctions: d["numFunctions"],
-    numVariables: d["numVariables"],
-    numBranches: d["numBranches"],
-    numLoops: d["numLoops"],
-    numConds: d["numConds"],
-  }));
+  data = data
+    .filter((d) => d["filename"] !== "a04.xml" && d["filename"] !== "c06.xml")
+    .map((d) => ({
+      filename: d["filename"],
+      numTotalBlocks: d["numTotalBlocks"],
+      numFunctions: d["numFunctions"],
+      numVariables: d["numVariables"],
+      numBranches: d["numBranches"],
+      numLoops: d["numLoops"],
+      numConds: d["numConds"],
+    }));
   const vlSpec = {
     $schema: "https://vega.github.io/schema/vega-lite/v4.json",
     data: {
