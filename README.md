@@ -7,7 +7,7 @@ ConCodeIt! is built with [Blockly](https://developers.google.com/blockly/) and i
 
 ## Demo
 
-The three ConCodeIt interfaces discussed in ["ConCodeIt! A Comparison of Concurrency Interfaces in Block-based Visual Robot Programming"](https://www.researchgate.net/publication/342717357_ConCodeIt_A_Comparison_of_Concurrency_Interfaces_in_Block-Based_Visual_Robot_Programming):
+The three ConCodeIt interfaces discussed in ["ConCodeIt! A Comparison of Concurrency Interfaces in Block-based Visual Robot Programming"](https://www.researchgate.net/publication/342717357_ConCodeIt_A_Comparison_of_Concurrency_Interfaces_in_Block-Based_Visual_Robot_Programming) ([video](https://youtu.be/wnGNpzsvaK0), [slides](https://speakerdeck.com/mikechung/concodeit-a-comparison-of-concurrency-interfaces-in-block-based-visual-robot-programming)):
 
 1. [async](https://codesandbox.io/s/github/mjyc/concodeit/tree/master/pkgs/async)
 1. [callback](https://codesandbox.io/s/github/mjyc/concodeit/tree/master/pkgs/callback)
